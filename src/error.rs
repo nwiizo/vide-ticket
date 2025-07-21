@@ -84,6 +84,18 @@ pub enum VideTicketError {
     #[error("UUID error: {0}")]
     Uuid(#[from] uuid::Error),
 
+    /// Specification not found
+    #[error("Specification not found: {id}")]
+    SpecNotFound { id: String },
+
+    /// No active specification
+    #[error("No active specification. Use 'vide-ticket spec activate <id>' to set active spec")]
+    NoActiveSpec,
+
+    /// Invalid input
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+
     /// Generic error with custom message
     #[error("{0}")]
     Custom(String),
@@ -149,6 +161,14 @@ impl VideTicketError {
             Self::DuplicateTicket { slug } => vec![
                 format!("Use a different slug or check existing ticket '{}'", slug),
                 "Run 'vide-ticket list' to see all tickets".to_string(),
+            ],
+            Self::NoActiveSpec => vec![
+                "Run 'vide-ticket spec list' to see available specifications".to_string(),
+                "Run 'vide-ticket spec activate <id>' to set an active specification".to_string(),
+            ],
+            Self::SpecNotFound { id } => vec![
+                format!("Check if specification '{}' exists", id),
+                "Run 'vide-ticket spec list' to see all specifications".to_string(),
             ],
             _ => vec![],
         }

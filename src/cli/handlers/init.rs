@@ -46,6 +46,7 @@ pub fn handle_init(
     name: Option<String>,
     description: Option<String>,
     force: bool,
+    claude_md: bool,
     formatter: &OutputFormatter,
 ) -> Result<()> {
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -109,6 +110,14 @@ pub fn handle_init(
 
     progress.finish_with_message("Project initialized successfully");
 
+    // Generate CLAUDE.md if requested
+    if claude_md {
+        progress.set_message("Generating CLAUDE.md");
+        generate_claude_md_for_init(&current_dir, &project_name, description.as_deref())?;
+    }
+
+    progress.finish_with_message("Project initialized successfully");
+
     // Display success message
     formatter.success(&format!(
         "Initialized vide-ticket project '{}'",
@@ -122,11 +131,15 @@ pub fn handle_init(
             "project_path": current_dir,
             "config_path": config_path,
             "description": description,
+            "claude_md": claude_md,
         }))?;
     } else {
         formatter.info(&format!("Project directory: {}", current_dir.display()));
-        if let Some(desc) = description {
+        if let Some(desc) = &description {
             formatter.info(&format!("Description: {}", desc));
+        }
+        if claude_md {
+            formatter.info("Generated CLAUDE.md for AI assistance");
         }
         formatter.info("\nNext steps:");
         formatter.info("  1. Create your first ticket: vide-ticket new <slug>");
@@ -253,6 +266,147 @@ fn create_gitignore(project_dir: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Generate CLAUDE.md for a newly initialized project
+fn generate_claude_md_for_init(
+    project_dir: &Path,
+    project_name: &str,
+    description: Option<&str>,
+) -> Result<()> {
+    let claude_content = format!(r#"# vide-ticket Project: {}
+
+{}
+
+## Overview
+
+This project uses vide-ticket for ticket management. This document provides guidance for Claude Code when working with this codebase.
+
+## Common vide-ticket Commands
+
+### Getting Started
+```bash
+# Create your first ticket
+vide-ticket new fix-bug --title "Fix login issue" --priority high
+
+# List all tickets
+vide-ticket list
+
+# Start working on a ticket
+vide-ticket start fix-bug
+
+# Show current status
+vide-ticket check
+```
+
+### Working with Tickets
+```bash
+# Show ticket details
+vide-ticket show <ticket>
+
+# Update ticket
+vide-ticket edit <ticket> --status review
+
+# Add tasks to ticket
+vide-ticket task add "Write unit tests"
+vide-ticket task add "Update documentation"
+
+# Complete tasks
+vide-ticket task complete 1
+
+# Close ticket
+vide-ticket close <ticket> --message "Fixed the login issue"
+```
+
+### Search and Filter
+```bash
+# Search tickets
+vide-ticket search "login"
+
+# Filter by status
+vide-ticket list --status doing
+
+# Filter by priority
+vide-ticket list --priority high
+```
+
+### Configuration
+```bash
+# View configuration
+vide-ticket config show
+
+# Set configuration values
+vide-ticket config set project.default_priority medium
+vide-ticket config set git.auto_branch true
+
+# Generate this file
+vide-ticket config claude
+```
+
+## Project Configuration
+
+The project has been initialized with default settings. You can customize them using the config commands above.
+
+## Workflow Guidelines
+
+1. Create a ticket before starting any work
+2. Use descriptive ticket slugs (e.g., fix-login-bug, add-search-feature)
+3. Break down complex work into tasks within tickets
+4. Keep ticket status updated as work progresses
+5. Close tickets with meaningful completion messages
+
+## Best Practices for This Project
+
+- Follow the established ticket naming conventions
+- Use appropriate priority levels (low, medium, high, critical)
+- Tag tickets for better organization
+- Document decisions in ticket descriptions
+- Link related tickets when applicable
+
+## Tips for Claude Code
+
+When helping with this project:
+1. Always check for active tickets before suggesting new work
+2. Reference ticket IDs in commit messages
+3. Update ticket status as implementation progresses
+4. Use `vide-ticket check` to understand current context
+5. Generate new tickets for bugs or features discovered during development
+
+---
+Generated on: {}
+"#,
+        project_name,
+        description.unwrap_or("A vide-ticket managed project"),
+        chrono::Local::now().format("%Y-%m-%d")
+    );
+
+    let claude_path = project_dir.join("CLAUDE.md");
+    fs::write(&claude_path, &claude_content)?;
+    
+    // Also update the generated CLAUDE.md to mention the init command
+    let additional_content = format!(r#"
+
+## Project Initialization
+
+This project was initialized with:
+```bash
+vide-ticket init --claude-md
+```
+
+To regenerate or update this file:
+```bash
+# Regenerate with basic template
+vide-ticket config claude
+
+# Append with advanced features
+vide-ticket config claude --template advanced --append
+```
+"#);
+    
+    let full_content = format!("{}{}", claude_content, additional_content);
+    fs::write(&claude_path, full_content)?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -296,5 +450,24 @@ mod tests {
         let content = fs::read_to_string(&gitignore_path).unwrap();
         assert!(content.contains("# vide-ticket"));
         assert!(content.contains(".vide-ticket/backups/"));
+    }
+
+    #[test]
+    fn test_generate_claude_md_for_init() {
+        let temp_dir = TempDir::new().unwrap();
+        
+        generate_claude_md_for_init(
+            temp_dir.path(),
+            "Test Project",
+            Some("Test description"),
+        ).unwrap();
+        
+        let claude_path = temp_dir.path().join("CLAUDE.md");
+        assert!(claude_path.exists());
+        
+        let content = fs::read_to_string(&claude_path).unwrap();
+        assert!(content.contains("# vide-ticket Project: Test Project"));
+        assert!(content.contains("Test description"));
+        assert!(content.contains("## Common vide-ticket Commands"));
     }
 }

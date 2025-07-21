@@ -41,6 +41,10 @@ pub enum Commands {
         /// Force initialization even if already initialized
         #[arg(short, long)]
         force: bool,
+
+        /// Generate CLAUDE.md for AI assistance
+        #[arg(long = "claude-md", alias = "claude")]
+        claude_md: bool,
     },
 
     /// Create a new ticket
@@ -279,6 +283,12 @@ pub enum Commands {
         #[command(subcommand)]
         command: ConfigCommands,
     },
+
+    /// Manage specifications (spec-driven development)
+    Spec {
+        #[command(subcommand)]
+        command: SpecCommands,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -309,6 +319,21 @@ pub enum ConfigCommands {
         /// Confirm reset
         #[arg(long)]
         force: bool,
+    },
+
+    /// Generate or update CLAUDE.md for AI assistance
+    Claude {
+        /// Append to existing CLAUDE.md instead of overwriting
+        #[arg(short, long)]
+        append: bool,
+
+        /// Template to use (basic, advanced)
+        #[arg(short, long, default_value = "basic")]
+        template: String,
+
+        /// Output path for CLAUDE.md (defaults to project root)
+        #[arg(short, long)]
+        output: Option<String>,
     },
 }
 
@@ -371,5 +396,144 @@ pub enum TaskCommands {
         /// Force removal without confirmation
         #[arg(short, long)]
         force: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum SpecCommands {
+    /// Initialize a new specification
+    Init {
+        /// Specification title
+        title: String,
+
+        /// Specification description
+        #[arg(short, long)]
+        description: Option<String>,
+
+        /// Associated ticket ID
+        #[arg(short, long)]
+        ticket: Option<String>,
+
+        /// Initial tags (comma-separated)
+        #[arg(long)]
+        tags: Option<String>,
+    },
+
+    /// Create or update requirements document
+    Requirements {
+        /// Specification ID (defaults to active spec)
+        #[arg(short, long)]
+        spec: Option<String>,
+
+        /// Open in editor
+        #[arg(short, long)]
+        editor: bool,
+
+        /// Mark as complete
+        #[arg(long)]
+        complete: bool,
+    },
+
+    /// Create or update design document
+    Design {
+        /// Specification ID (defaults to active spec)
+        #[arg(short, long)]
+        spec: Option<String>,
+
+        /// Open in editor
+        #[arg(short, long)]
+        editor: bool,
+
+        /// Mark as complete
+        #[arg(long)]
+        complete: bool,
+    },
+
+    /// Create or update implementation tasks
+    Tasks {
+        /// Specification ID (defaults to active spec)
+        #[arg(short, long)]
+        spec: Option<String>,
+
+        /// Open in editor
+        #[arg(short, long)]
+        editor: bool,
+
+        /// Mark as complete
+        #[arg(long)]
+        complete: bool,
+
+        /// Export tasks to tickets
+        #[arg(long)]
+        export_tickets: bool,
+    },
+
+    /// Show specification status
+    Status {
+        /// Specification ID (defaults to active spec)
+        #[arg(short, long)]
+        spec: Option<String>,
+
+        /// Show detailed progress
+        #[arg(short, long)]
+        detailed: bool,
+    },
+
+    /// List all specifications
+    List {
+        /// Filter by status (draft, in_progress, completed, approved)
+        #[arg(short, long)]
+        status: Option<String>,
+
+        /// Filter by phase (requirements, design, tasks)
+        #[arg(long)]
+        phase: Option<String>,
+
+        /// Show archived specs
+        #[arg(long)]
+        archived: bool,
+    },
+
+    /// Show specification details
+    Show {
+        /// Specification ID
+        spec: String,
+
+        /// Show all documents
+        #[arg(short, long)]
+        all: bool,
+
+        /// Show in markdown format
+        #[arg(short, long)]
+        markdown: bool,
+    },
+
+    /// Delete a specification
+    Delete {
+        /// Specification ID
+        spec: String,
+
+        /// Force deletion without confirmation
+        #[arg(short, long)]
+        force: bool,
+    },
+
+    /// Approve a specification phase
+    Approve {
+        /// Specification ID
+        spec: String,
+
+        /// Phase to approve (requirements, design, tasks)
+        phase: String,
+
+        /// Approval message
+        #[arg(short, long)]
+        message: Option<String>,
+    },
+
+    /// Set active specification
+    Activate {
+        /// Specification ID
+        spec: String,
     },
 }
