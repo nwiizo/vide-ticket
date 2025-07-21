@@ -1,0 +1,19 @@
+# Code Owners for vide-ticket
+
+# Default owner for everything in the repo
+* @nwiizo
+
+# Core components
+/src/core/ @nwiizo
+/src/storage/ @nwiizo
+/src/cli/ @nwiizo
+
+# Configuration files
+/Cargo.toml @nwiizo
+/Cargo.lock @nwiizo
+/.github/ @nwiizo
+
+# Documentation
+/README.md @nwiizo
+/CLAUDE.md @nwiizo
+*.md @nwiizo
