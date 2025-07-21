@@ -20,6 +20,71 @@ pub enum Priority {
     Critical,
 }
 
+/// Visual and semantic properties for a priority
+struct PriorityProperties {
+    display: &'static str,
+    value: u8,
+    emoji: &'static str,
+    color: &'static str,
+}
+
+impl Priority {
+    /// Returns all properties for this priority
+    const fn properties(&self) -> PriorityProperties {
+        match self {
+            Self::Low => PriorityProperties {
+                display: "Low",
+                value: 1,
+                emoji: "🟢",
+                color: "green",
+            },
+            Self::Medium => PriorityProperties {
+                display: "Medium",
+                value: 2,
+                emoji: "🟡",
+                color: "yellow",
+            },
+            Self::High => PriorityProperties {
+                display: "High",
+                value: 3,
+                emoji: "🟠",
+                color: "magenta",
+            },
+            Self::Critical => PriorityProperties {
+                display: "Critical",
+                value: 4,
+                emoji: "🔴",
+                color: "red",
+            },
+        }
+    }
+
+    /// Returns all possible priority values
+    pub fn all() -> Vec<Self> {
+        vec![Self::Low, Self::Medium, Self::High, Self::Critical]
+    }
+
+    /// Returns the numeric value for sorting (higher = more urgent)
+    pub fn value(&self) -> u8 {
+        self.properties().value
+    }
+
+    /// Returns the emoji representation of the priority
+    pub fn emoji(&self) -> &'static str {
+        self.properties().emoji
+    }
+
+    /// Returns the color code for terminal output
+    pub fn color(&self) -> &'static str {
+        self.properties().color
+    }
+
+    /// Returns whether this priority requires immediate attention
+    pub fn is_urgent(&self) -> bool {
+        matches!(self, Self::High | Self::Critical)
+    }
+}
+
 impl Default for Priority {
     fn default() -> Self {
         Self::Medium
@@ -28,54 +93,7 @@ impl Default for Priority {
 
 impl fmt::Display for Priority {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Low => write!(f, "Low"),
-            Self::Medium => write!(f, "Medium"),
-            Self::High => write!(f, "High"),
-            Self::Critical => write!(f, "Critical"),
-        }
-    }
-}
-
-impl Priority {
-    /// Returns all possible priority values
-    pub fn all() -> Vec<Self> {
-        vec![Self::Low, Self::Medium, Self::High, Self::Critical]
-    }
-
-    /// Returns the numeric value for sorting (higher = more urgent)
-    pub fn value(&self) -> u8 {
-        match self {
-            Self::Low => 1,
-            Self::Medium => 2,
-            Self::High => 3,
-            Self::Critical => 4,
-        }
-    }
-
-    /// Returns the emoji representation of the priority
-    pub fn emoji(&self) -> &'static str {
-        match self {
-            Self::Low => "🟢",
-            Self::Medium => "🟡",
-            Self::High => "🟠",
-            Self::Critical => "🔴",
-        }
-    }
-
-    /// Returns the color code for terminal output
-    pub fn color(&self) -> &'static str {
-        match self {
-            Self::Low => "green",
-            Self::Medium => "yellow",
-            Self::High => "magenta",
-            Self::Critical => "red",
-        }
-    }
-
-    /// Returns whether this priority requires immediate attention
-    pub fn is_urgent(&self) -> bool {
-        matches!(self, Self::High | Self::Critical)
+        write!(f, "{}", self.properties().display)
     }
 }
 
@@ -130,6 +148,30 @@ mod tests {
     }
 
     #[test]
+    fn test_priority_display() {
+        assert_eq!(Priority::Low.to_string(), "Low");
+        assert_eq!(Priority::Medium.to_string(), "Medium");
+        assert_eq!(Priority::High.to_string(), "High");
+        assert_eq!(Priority::Critical.to_string(), "Critical");
+    }
+
+    #[test]
+    fn test_priority_emoji() {
+        assert_eq!(Priority::Low.emoji(), "🟢");
+        assert_eq!(Priority::Medium.emoji(), "🟡");
+        assert_eq!(Priority::High.emoji(), "🟠");
+        assert_eq!(Priority::Critical.emoji(), "🔴");
+    }
+
+    #[test]
+    fn test_priority_color() {
+        assert_eq!(Priority::Low.color(), "green");
+        assert_eq!(Priority::Medium.color(), "yellow");
+        assert_eq!(Priority::High.color(), "magenta");
+        assert_eq!(Priority::Critical.color(), "red");
+    }
+
+    #[test]
     fn test_priority_from_str() {
         assert_eq!(Priority::try_from("low").unwrap(), Priority::Low);
         assert_eq!(Priority::try_from("L").unwrap(), Priority::Low);
@@ -140,10 +182,30 @@ mod tests {
     }
 
     #[test]
+    fn test_priority_from_u8() {
+        assert_eq!(Priority::from(1), Priority::Low);
+        assert_eq!(Priority::from(2), Priority::Medium);
+        assert_eq!(Priority::from(3), Priority::High);
+        assert_eq!(Priority::from(4), Priority::Critical);
+        assert_eq!(Priority::from(5), Priority::Critical);
+        assert_eq!(Priority::from(0), Priority::Medium);
+    }
+
+    #[test]
     fn test_priority_urgency() {
         assert!(!Priority::Low.is_urgent());
         assert!(!Priority::Medium.is_urgent());
         assert!(Priority::High.is_urgent());
         assert!(Priority::Critical.is_urgent());
+    }
+
+    #[test]
+    fn test_all_priorities() {
+        let all = Priority::all();
+        assert_eq!(all.len(), 4);
+        assert_eq!(all[0], Priority::Low);
+        assert_eq!(all[1], Priority::Medium);
+        assert_eq!(all[2], Priority::High);
+        assert_eq!(all[3], Priority::Critical);
     }
 }

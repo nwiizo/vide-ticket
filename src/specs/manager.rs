@@ -5,7 +5,7 @@
 
 use super::{SpecDocumentType, SpecMetadata, SpecPhase, Specification};
 use crate::error::{Result, VideTicketError};
-use crate::specs::storage::{DocumentOperations, DocumentStore, FileSystemStore};
+use crate::specs::storage::{DocumentOperations, FileSystemStore};
 use std::path::PathBuf;
 
 /// Manages specifications in a project
