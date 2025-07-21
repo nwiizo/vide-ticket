@@ -46,7 +46,7 @@ tera = "1.20"
 uuid = { version = "1.10", features = ["v4", "serde"] }
 
 # Path utilities
-directories = "5.0"
+directories = "6.0"
 
 # Terminal output
 colored = "2.1"
