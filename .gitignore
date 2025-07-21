@@ -100,3 +100,7 @@ TODO.md
 *.bak
 *.backup
 *.old
+# vide-ticket
+.vide-ticket/backups/
+.vide-ticket/tmp/
+.vide-ticket/*.log

@@ -1,0 +1,16 @@
+id: 349af4ef-2031-42e6-b084-f361016d5c56
+slug: 202507192054-test-no-branch
+title: Test without branch
+description: ''
+priority: medium
+status: done
+tags: []
+created_at: 2025-07-19T11:54:10.578277Z
+started_at: null
+closed_at: 2025-07-19T11:58:25.763021Z
+assignee: null
+tasks: []
+metadata:
+  archived: true
+  close_message: Testing archive feature
+  archived_at: 2025-07-19T11:58:25.763608+00:00
