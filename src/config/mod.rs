@@ -115,6 +115,15 @@ pub struct GitConfig {
 
     /// Commit message template
     pub commit_template: Option<String>,
+
+    /// Enable Git worktree integration
+    pub worktree_enabled: bool,
+
+    /// Worktree directory prefix (use {project} as placeholder)
+    pub worktree_prefix: String,
+
+    /// Automatically cleanup worktree when closing ticket
+    pub worktree_cleanup_on_close: bool,
 }
 
 /// Plugin configuration
@@ -147,6 +156,9 @@ impl Default for Config {
                 branch_prefix: "ticket/".to_string(),
                 auto_branch: true,
                 commit_template: None,
+                worktree_enabled: true,
+                worktree_prefix: "../{project}-ticket-".to_string(),
+                worktree_cleanup_on_close: false,
             },
             plugins: PluginsConfig {
                 enabled: vec![],

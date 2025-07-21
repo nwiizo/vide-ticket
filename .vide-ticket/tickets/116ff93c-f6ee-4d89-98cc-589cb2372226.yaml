@@ -1,0 +1,15 @@
+id: 116ff93c-f6ee-4d89-98cc-589cb2372226
+slug: 202507212327-fix-doc-tests
+title: Fix failing documentation tests
+description: Several doc tests are failing due to incorrect imports and missing trait implementations. Need to fix these to ensure documentation examples work correctly.
+priority: medium
+status: todo
+tags:
+- documentation
+- testing
+created_at: 2025-07-21T14:27:25.498609Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

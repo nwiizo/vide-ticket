@@ -140,9 +140,17 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             ticket,
             branch,
             branch_name,
+            worktree,
         } => {
             use vide_ticket::cli::handlers::handle_start_command;
-            handle_start_command(ticket, branch, branch_name, cli.project, &formatter)
+            handle_start_command(
+                ticket,
+                branch,
+                branch_name,
+                worktree,
+                cli.project,
+                &formatter,
+            )
         },
 
         Commands::Close {

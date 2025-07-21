@@ -334,18 +334,24 @@ mod tests {
         // Test Japanese characters
         assert_eq!(truncate("こんにちは", 10), "こんにちは");
         assert_eq!(truncate("こんにちは世界", 5), "こん...");
-        
+
         // Test mixed ASCII and Unicode
         assert_eq!(truncate("Hello世界", 7), "Hello世界");
         assert_eq!(truncate("Hello世界", 6), "Hel...");
-        
+
         // Test emoji
         assert_eq!(truncate("🚀🎉🔥💻🎯", 3), "...");
         assert_eq!(truncate("🚀 Rocket", 5), "🚀 ...");
-        
+
         // Test the exact case that was causing the panic
-        assert_eq!(truncate("Specs管理システムの中核機能実装", 37), "Specs管理システムの中核機能実装");
-        assert_eq!(truncate("Specs管理システムの中核機能実装", 10), "Specs管理...");
+        assert_eq!(
+            truncate("Specs管理システムの中核機能実装", 37),
+            "Specs管理システムの中核機能実装"
+        );
+        assert_eq!(
+            truncate("Specs管理システムの中核機能実装", 10),
+            "Specs管理..."
+        );
     }
 
     #[test]

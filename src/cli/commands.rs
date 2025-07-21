@@ -128,6 +128,10 @@ pub enum Commands {
         /// Custom branch name (default: ticket-<slug>)
         #[arg(long)]
         branch_name: Option<String>,
+
+        /// Create a Git worktree instead of just a branch
+        #[arg(long)]
+        worktree: bool,
     },
 
     /// Show open tickets (alias for list --open)
@@ -307,6 +311,12 @@ pub enum Commands {
     Spec {
         #[command(subcommand)]
         command: SpecCommands,
+    },
+
+    /// Manage Git worktrees for tickets
+    Worktree {
+        #[command(subcommand)]
+        command: WorktreeCommands,
     },
 }
 
@@ -554,5 +564,52 @@ pub enum SpecCommands {
     Activate {
         /// Specification ID
         spec: String,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum WorktreeCommands {
+    /// List all worktrees for vide-ticket
+    List {
+        /// Show worktrees for all tickets
+        #[arg(short, long)]
+        all: bool,
+
+        /// Filter by status (active, stale, orphaned)
+        #[arg(short, long)]
+        status: Option<String>,
+
+        /// Show detailed information
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Remove a worktree
+    Remove {
+        /// Worktree path or ticket ID/slug
+        worktree: String,
+
+        /// Force removal even if there are uncommitted changes
+        #[arg(short, long)]
+        force: bool,
+
+        /// Keep the branch associated with the worktree
+        #[arg(long)]
+        keep_branch: bool,
+    },
+
+    /// Prune stale worktrees
+    Prune {
+        /// Remove worktrees without confirmation
+        #[arg(short, long)]
+        force: bool,
+
+        /// Dry run - show what would be removed
+        #[arg(short, long)]
+        dry_run: bool,
+
+        /// Remove branches for pruned worktrees
+        #[arg(long)]
+        remove_branches: bool,
     },
 }

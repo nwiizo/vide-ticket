@@ -1,0 +1,15 @@
+id: 50255baa-b071-4890-a405-5da476c0478c
+slug: 202507212336-consistent-command-syntax
+title: Improve command syntax consistency
+description: Make export command accept format as subcommand (export json) in addition to flag (--format json) for better UX. Apply this pattern consistently across all commands where it makes sense.
+priority: medium
+status: todo
+tags:
+- ux
+- cli-design
+created_at: 2025-07-21T14:36:10.049338Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}
