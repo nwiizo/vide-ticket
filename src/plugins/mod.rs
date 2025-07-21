@@ -1,4 +1,4 @@
-//! Plugin system for vide-ticket
+//! Plugin system for vibe-ticket
 //!
 //! This module provides an extensible plugin architecture that allows users to
 //! customize and extend the functionality of the ticket system.
@@ -16,15 +16,15 @@
 //!
 //! Plugins are discovered from:
 //! 1. Built-in plugins (compiled into the binary)
-//! 2. System plugin directory (`/usr/local/share/vide-ticket/plugins/`)
-//! 3. User plugin directory (`~/.config/vide-ticket/plugins/`)
-//! 4. Project plugin directory (`.vide-ticket/plugins/`)
+//! 2. System plugin directory (`/usr/local/share/vibe-ticket/plugins/`)
+//! 3. User plugin directory (`~/.config/vibe-ticket/plugins/`)
+//! 4. Project plugin directory (`.vibe-ticket/plugins/`)
 //!
 //! # Plugin API
 //!
 //! Plugins implement the `Plugin` trait:
 //! ```no_run
-//! use vide_ticket::plugins::{Plugin, PluginContext, PluginResult};
+//! use vibe_ticket::plugins::{Plugin, PluginContext, PluginResult};
 //!
 //! pub struct MyPlugin;
 //!

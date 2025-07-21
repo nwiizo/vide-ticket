@@ -1,12 +1,12 @@
 [package]
-name = "vide-ticket"
+name = "vibe-ticket"
 version = "0.1.1"
 edition = "2021"
 authors = ["nwiizo"]
-description = "A high-performance ticket management system for Vide Coding environment"
+description = "A high-performance ticket management system for Vibe Coding environment"
 license = "MIT"
-repository = "https://github.com/nwiizo/vide-ticket"
-keywords = ["cli", "ticket", "project-management", "vide-coding"]
+repository = "https://github.com/nwiizo/vibe-ticket"
+keywords = ["cli", "ticket", "project-management", "vibe-coding"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
@@ -72,7 +72,7 @@ mockall = "0.13"
 criterion = { version = "0.5", features = ["html_reports"] }
 
 [[bench]]
-name = "vide_ticket_benchmarks"
+name = "vibe_ticket_benchmarks"
 harness = false
 
 # Optional features

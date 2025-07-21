@@ -1,6 +1,6 @@
-# vide-ticket
+# vibe-ticket
 
-A high-performance ticket management system for Vide Coding environment, built with Rust for maximum speed and reliability.
+A high-performance ticket management system for Vibe Coding environment, built with Rust for maximum speed and reliability.
 
 ## Features
 
@@ -23,8 +23,8 @@ A high-performance ticket management system for Vide Coding environment, built w
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/vide-ticket.git
-cd vide-ticket
+git clone https://github.com/yourusername/vibe-ticket.git
+cd vibe-ticket
 
 # Build with cargo
 cargo build --release
@@ -36,7 +36,7 @@ cargo install --path .
 ### From crates.io (Coming Soon)
 
 ```bash
-cargo install vide-ticket
+cargo install vibe-ticket
 ```
 
 ### Prerequisites
@@ -48,22 +48,22 @@ cargo install vide-ticket
 
 ```bash
 # Initialize a new project
-vide-ticket init
+vibe-ticket init
 
 # Create a new ticket
-vide-ticket new "fix-login-bug" --title "Fix login authentication issue" --priority high
+vibe-ticket new "fix-login-bug" --title "Fix login authentication issue" --priority high
 
 # List all tickets
-vide-ticket list
+vibe-ticket list
 
 # Start working on a ticket (creates Git branch)
-vide-ticket start fix-login-bug
+vibe-ticket start fix-login-bug
 
 # Check current status
-vide-ticket check
+vibe-ticket check
 
 # Complete a ticket
-vide-ticket close fix-login-bug --message "Fixed authentication logic"
+vibe-ticket close fix-login-bug --message "Fixed authentication logic"
 ```
 
 ## Command Reference
@@ -71,10 +71,10 @@ vide-ticket close fix-login-bug --message "Fixed authentication logic"
 ### Project Management
 
 #### `init`
-Initialize a new vide-ticket project in the current directory.
+Initialize a new vibe-ticket project in the current directory.
 
 ```bash
-vide-ticket init [OPTIONS]
+vibe-ticket init [OPTIONS]
 
 Options:
   -n, --name <NAME>              Project name
@@ -88,7 +88,7 @@ Options:
 Create a new ticket with automatic timestamp prefix.
 
 ```bash
-vide-ticket new <SLUG> [OPTIONS]
+vibe-ticket new <SLUG> [OPTIONS]
 
 Arguments:
   <SLUG>                         Ticket identifier (will be prefixed with timestamp)
@@ -105,7 +105,7 @@ Note: Use -P or --priority for priority (not -p, which is for project path)
 
 Example:
 ```bash
-vide-ticket new "user-auth" --title "Implement user authentication" --priority high --tags "backend,security"
+vibe-ticket new "user-auth" --title "Implement user authentication" --priority high --tags "backend,security"
 # Creates: 202507201345-user-auth
 ```
 
@@ -113,7 +113,7 @@ vide-ticket new "user-auth" --title "Implement user authentication" --priority h
 List tickets with various filtering options.
 
 ```bash
-vide-ticket list [OPTIONS]
+vibe-ticket list [OPTIONS]
 
 Options:
   -s, --status <STATUS>         Filter by status [todo, doing, done, blocked, review]
@@ -132,7 +132,7 @@ Options:
 Start working on a ticket (sets status to "In Progress" and creates Git branch).
 
 ```bash
-vide-ticket start [TICKET] [OPTIONS]
+vibe-ticket start [TICKET] [OPTIONS]
 
 Arguments:
   [TICKET]                      Ticket ID or slug (defaults to active ticket)
@@ -146,7 +146,7 @@ Options:
 Complete a ticket and optionally archive it.
 
 ```bash
-vide-ticket close [TICKET] [OPTIONS]
+vibe-ticket close [TICKET] [OPTIONS]
 
 Arguments:
   [TICKET]                      Ticket ID or slug (defaults to active ticket)
@@ -161,7 +161,7 @@ Options:
 Edit ticket properties.
 
 ```bash
-vide-ticket edit [TICKET] [OPTIONS]
+vibe-ticket edit [TICKET] [OPTIONS]
 
 Arguments:
   [TICKET]                      Ticket ID or slug (defaults to active ticket)
@@ -180,7 +180,7 @@ Options:
 Show all open tickets (alias for `list --open`). This is a quick way to see tickets that need attention.
 
 ```bash
-vide-ticket open [OPTIONS]
+vibe-ticket open [OPTIONS]
 
 Options:
   --sort <FIELD>                Sort by field [created, updated, priority, status, slug]
@@ -191,17 +191,17 @@ Options:
 Example:
 ```bash
 # Show all open tickets sorted by update time
-vide-ticket open
+vibe-ticket open
 
 # Show high priority open tickets
-vide-ticket open --sort priority -r
+vibe-ticket open --sort priority -r
 ```
 
 #### `show`
 Display detailed information about a ticket.
 
 ```bash
-vide-ticket show [TICKET] [OPTIONS]
+vibe-ticket show [TICKET] [OPTIONS]
 
 Arguments:
   [TICKET]                      Ticket ID or slug (defaults to active ticket)
@@ -218,7 +218,7 @@ Options:
 Add a task to a ticket.
 
 ```bash
-vide-ticket task add <TITLE> [OPTIONS]
+vibe-ticket task add <TITLE> [OPTIONS]
 
 Arguments:
   <TITLE>                       Task title
@@ -231,7 +231,7 @@ Options:
 Mark a task as completed.
 
 ```bash
-vide-ticket task complete <TASK> [OPTIONS]
+vibe-ticket task complete <TASK> [OPTIONS]
 
 Arguments:
   <TASK>                        Task index (1-based)
@@ -244,7 +244,7 @@ Options:
 List tasks for a ticket.
 
 ```bash
-vide-ticket task list [OPTIONS]
+vibe-ticket task list [OPTIONS]
 
 Options:
   -t, --ticket <TICKET>         Target ticket (defaults to active)
@@ -258,7 +258,7 @@ Options:
 Search tickets by content.
 
 ```bash
-vide-ticket search <QUERY> [OPTIONS]
+vibe-ticket search <QUERY> [OPTIONS]
 
 Arguments:
   <QUERY>                       Search query
@@ -276,7 +276,7 @@ Options:
 Archive or unarchive tickets.
 
 ```bash
-vide-ticket archive <TICKET> [OPTIONS]
+vibe-ticket archive <TICKET> [OPTIONS]
 
 Arguments:
   <TICKET>                      Ticket ID or slug
@@ -289,7 +289,7 @@ Options:
 Export tickets to various formats.
 
 ```bash
-vide-ticket export <FORMAT> [OPTIONS]
+vibe-ticket export <FORMAT> [OPTIONS]
 
 Arguments:
   <FORMAT>                      Export format [json, yaml, csv, markdown]
@@ -303,7 +303,7 @@ Options:
 Import tickets from files.
 
 ```bash
-vide-ticket import <FILE> [OPTIONS]
+vibe-ticket import <FILE> [OPTIONS]
 
 Arguments:
   <FILE>                       Import file path
@@ -320,7 +320,7 @@ Options:
 Manage project configuration settings.
 
 ```bash
-vide-ticket config <SUBCOMMAND>
+vibe-ticket config <SUBCOMMAND>
 
 Subcommands:
   show                         Display current configuration
@@ -330,10 +330,10 @@ Subcommands:
   claude [OPTIONS]            Generate or update CLAUDE.md
 
 Examples:
-  vide-ticket config show
-  vide-ticket config set git.auto_branch true
-  vide-ticket config get project.default_priority
-  vide-ticket config claude --template advanced
+  vibe-ticket config show
+  vibe-ticket config set git.auto_branch true
+  vibe-ticket config get project.default_priority
+  vibe-ticket config claude --template advanced
 ```
 
 ### Utility Commands
@@ -342,7 +342,7 @@ Examples:
 Check project status and active ticket.
 
 ```bash
-vide-ticket check [OPTIONS]
+vibe-ticket check [OPTIONS]
 
 Options:
   -d, --detailed               Show detailed information
@@ -396,7 +396,7 @@ CSV exports include the following columns:
 
 ## Configuration
 
-Project configuration is stored in `.vide-ticket/config.yaml`:
+Project configuration is stored in `.vibe-ticket/config.yaml`:
 
 ```yaml
 project:
@@ -443,7 +443,7 @@ export:
 ## File Structure
 
 ```
-.vide-ticket/
+.vibe-ticket/
 ├── config.yaml          # Project configuration
 ├── state.yaml          # Project state and metadata
 ├── active_ticket       # Currently active ticket ID
@@ -496,11 +496,11 @@ RUST_LOG=debug cargo run -- list
 
 ## Claude Code Integration
 
-vide-ticket includes built-in support for [Claude Code](https://claude.ai/code) through automatic CLAUDE.md generation. This feature enhances AI-assisted development by providing project context to Claude.
+vibe-ticket includes built-in support for [Claude Code](https://claude.ai/code) through automatic CLAUDE.md generation. This feature enhances AI-assisted development by providing project context to Claude.
 
 ### Overview
 
-CLAUDE.md files help Claude Code understand your project structure, commands, and workflows. vide-ticket can automatically generate and maintain these files with project-specific information.
+CLAUDE.md files help Claude Code understand your project structure, commands, and workflows. vibe-ticket can automatically generate and maintain these files with project-specific information.
 
 ### Generating CLAUDE.md
 
@@ -510,15 +510,15 @@ The simplest way to get started is during project initialization:
 
 ```bash
 # Initialize project with CLAUDE.md
-vide-ticket init --claude-md
+vibe-ticket init --claude-md
 
 # Alternative syntax
-vide-ticket init --claude
+vibe-ticket init --claude
 ```
 
 This creates a comprehensive CLAUDE.md file that includes:
 - Project name and description
-- Common vide-ticket commands with examples
+- Common vibe-ticket commands with examples
 - Current project configuration
 - Workflow guidelines
 - Best practices for ticket management
@@ -530,19 +530,19 @@ Add CLAUDE.md to existing projects using the config command:
 
 ```bash
 # Generate basic CLAUDE.md
-vide-ticket config claude
+vibe-ticket config claude
 
 # Generate with advanced template
-vide-ticket config claude --template advanced
+vibe-ticket config claude --template advanced
 
 # Append to existing CLAUDE.md (preserves custom content)
-vide-ticket config claude --append
+vibe-ticket config claude --append
 
 # Custom output location
-vide-ticket config claude --output ./docs/CLAUDE.md
+vibe-ticket config claude --output ./docs/CLAUDE.md
 
 # Combine options
-vide-ticket config claude --template advanced --append --output ./CLAUDE.md
+vibe-ticket config claude --template advanced --append --output ./CLAUDE.md
 ```
 
 ### Template Options
@@ -551,7 +551,7 @@ vide-ticket config claude --template advanced --append --output ./CLAUDE.md
 
 The basic template includes:
 - **Project Overview**: Name, description, and purpose
-- **Essential Commands**: Common vide-ticket operations with examples
+- **Essential Commands**: Common vibe-ticket operations with examples
 - **Configuration**: Current project settings (Git integration, default priority, etc.)
 - **Statistics**: Real-time ticket counts (total, active, completed)
 - **Workflow Guidelines**: Standard ticket management practices
@@ -584,7 +584,7 @@ Generated CLAUDE.md files include dynamically populated information:
 ```bash
 # Create and initialize project
 mkdir my-project && cd my-project
-vide-ticket init --claude-md
+vibe-ticket init --claude-md
 
 # Open with Claude Code
 claude .
@@ -596,18 +596,18 @@ claude .
 
 ```bash
 # Generate initial CLAUDE.md
-vide-ticket config claude
+vibe-ticket config claude
 
 # Later, after configuration changes
-vide-ticket config set git.auto_branch true
-vide-ticket config claude --append  # Updates CLAUDE.md
+vibe-ticket config set git.auto_branch true
+vibe-ticket config claude --append  # Updates CLAUDE.md
 ```
 
 #### Team Onboarding
 
 ```bash
 # Generate comprehensive documentation
-vide-ticket config claude --template advanced
+vibe-ticket config claude --template advanced
 
 # Add team-specific instructions
 echo "## Team Conventions" >> CLAUDE.md
@@ -624,7 +624,7 @@ With a properly configured CLAUDE.md, Claude Code can:
    - Aware of current configuration and settings
 
 2. **Provide Better Assistance**
-   - Suggests appropriate vide-ticket commands
+   - Suggests appropriate vibe-ticket commands
    - Follows established workflows
    - Respects project-specific conventions
 
@@ -669,13 +669,13 @@ After generation, add custom sections for your team:
 on:
   push:
     paths:
-      - '.vide-ticket/config.yaml'
+      - '.vibe-ticket/config.yaml'
 jobs:
   update-claude:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: vide-ticket config claude --append
+      - run: vibe-ticket config claude --append
       - uses: EndBug/add-and-commit@v9
         with:
           message: 'chore: update CLAUDE.md'

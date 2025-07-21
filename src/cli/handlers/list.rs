@@ -1,6 +1,6 @@
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Priority, Status, Ticket};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
 use chrono::{DateTime, Duration, Local, NaiveDate, Utc};
 
@@ -21,10 +21,10 @@ pub fn handle_list_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Load all tickets
     let mut tickets = storage.load_all()?;
@@ -145,7 +145,7 @@ fn parse_date_filter(date_str: &str) -> Result<DateTime<Utc>> {
         return Ok(date.and_hms_opt(0, 0, 0).unwrap().and_utc());
     }
 
-    Err(VideTicketError::custom(format!(
+    Err(VibeTicketError::custom(format!(
         "Invalid date format: '{}'. Use formats like 'yesterday', '2 hours ago', '3 days ago', or 'YYYY-MM-DD'",
         date_str
     )))
@@ -167,14 +167,14 @@ fn filter_tickets(
     // Filter by status
     if let Some(status_str) = status {
         let status = Status::try_from(status_str.as_str())
-            .map_err(|_| VideTicketError::InvalidStatus { status: status_str })?;
+            .map_err(|_| VibeTicketError::InvalidStatus { status: status_str })?;
         filtered.retain(|t| t.status == status);
     }
 
     // Filter by priority
     if let Some(priority_str) = priority {
         let priority = Priority::try_from(priority_str.as_str()).map_err(|_| {
-            VideTicketError::InvalidPriority {
+            VibeTicketError::InvalidPriority {
                 priority: priority_str,
             }
         })?;

@@ -10,7 +10,7 @@ mod yaml;
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::Ticket;
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
 
 pub use self::csv::CsvExporter;
@@ -44,7 +44,7 @@ pub fn handle_export_command(
         "csv" => Box::new(CsvExporter),
         "markdown" | "md" => Box::new(MarkdownExporter),
         _ => {
-            return Err(VideTicketError::custom(format!(
+            return Err(VibeTicketError::custom(format!(
                 "Unsupported export format: {}. Supported formats: json, yaml, csv, markdown",
                 format
             )))
@@ -71,8 +71,8 @@ pub fn handle_export_command(
 /// Load tickets from storage
 fn load_tickets(project_dir: Option<String>, include_archived: bool) -> Result<Vec<Ticket>> {
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
+    let storage = FileStorage::new(&vibe_ticket_dir);
     
     let mut tickets = storage.load_all()?;
     
@@ -103,7 +103,7 @@ fn output_results(
 ) -> Result<()> {
     if let Some(path) = output_path {
         std::fs::write(&path, content)
-            .map_err(|e| VideTicketError::custom(format!("Failed to write to {}: {}", path, e)))?;
+            .map_err(|e| VibeTicketError::custom(format!("Failed to write to {}: {}", path, e)))?;
 
         output.success(&format!("Exported {} tickets to {}", ticket_count, path));
         output.info(&format!("Format: {}", format_name));

@@ -8,7 +8,7 @@
 //!
 //! # Architecture
 //!
-//! The specs are stored as Markdown files in `.vide-ticket/specs/` directory
+//! The specs are stored as Markdown files in `.vibe-ticket/specs/` directory
 //! with a `spec.json` file tracking the progress and metadata.
 //!
 //! # Workflow

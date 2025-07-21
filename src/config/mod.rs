@@ -1,4 +1,4 @@
-//! Configuration management for vide-ticket
+//! Configuration management for vibe-ticket
 //!
 //! This module handles application configuration from various sources including
 //! configuration files, environment variables, and command-line arguments.
@@ -8,8 +8,8 @@
 //! Configuration is loaded in the following priority order (highest to lowest):
 //! 1. Command-line arguments
 //! 2. Environment variables (prefixed with `VIDE_TICKET_`)
-//! 3. User configuration file (`~/.config/vide-ticket/config.toml`)
-//! 4. Project configuration file (`.vide-ticket.toml` in project root)
+//! 3. User configuration file (`~/.config/vibe-ticket/config.toml`)
+//! 4. Project configuration file (`.vibe-ticket.toml` in project root)
 //! 5. Default values
 //!
 //! # Configuration Structure
@@ -24,7 +24,7 @@
 //! # Example
 //!
 //! ```no_run
-//! use vide_ticket::config::Config;
+//! use vibe_ticket::config::Config;
 //!
 //! // Load configuration from all sources
 //! let config = Config::load()?;
@@ -53,7 +53,7 @@ use crate::error::{ErrorContext, Result};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-/// Main configuration structure for vide-ticket
+/// Main configuration structure for vibe-ticket
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     /// Project configuration
@@ -162,7 +162,7 @@ impl Default for Config {
             },
             plugins: PluginsConfig {
                 enabled: vec![],
-                directory: ".vide-ticket/plugins".to_string(),
+                directory: ".vibe-ticket/plugins".to_string(),
             },
         }
     }
@@ -171,9 +171,9 @@ impl Default for Config {
 impl Config {
     /// Load configuration from the default location
     ///
-    /// This loads configuration from `.vide-ticket/config.yaml` in the current directory.
+    /// This loads configuration from `.vibe-ticket/config.yaml` in the current directory.
     pub fn load() -> Result<Self> {
-        Self::load_from_path(".vide-ticket/config.yaml")
+        Self::load_from_path(".vibe-ticket/config.yaml")
     }
 
     /// Load configuration from a specific path
@@ -192,7 +192,7 @@ impl Config {
     pub fn load_or_default() -> Result<Self> {
         match Self::load() {
             Ok(config) => Ok(config),
-            Err(crate::error::VideTicketError::Io(e))
+            Err(crate::error::VibeTicketError::Io(e))
                 if e.kind() == std::io::ErrorKind::NotFound =>
             {
                 Ok(Self::default())
@@ -203,7 +203,7 @@ impl Config {
 
     /// Save configuration to the default location
     pub fn save(&self) -> Result<()> {
-        self.save_to_path(".vide-ticket/config.yaml")
+        self.save_to_path(".vibe-ticket/config.yaml")
     }
 
     /// Save configuration to a specific path

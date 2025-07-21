@@ -1,8 +1,8 @@
 use clap::{Parser, Subcommand};
 
-/// vide-ticket: A high-performance ticket management system for Vide Coding
+/// vibe-ticket: A high-performance ticket management system for Vide Coding
 #[derive(Parser, Debug)]
-#[command(name = "vide-ticket")]
+#[command(name = "vibe-ticket")]
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct Cli {
@@ -28,7 +28,7 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Initialize a new vide-ticket project
+    /// Initialize a new vibe-ticket project
     Init {
         /// Project name
         #[arg(short, long)]
@@ -569,7 +569,7 @@ pub enum SpecCommands {
 
 // #[derive(Subcommand, Debug)]
 // pub enum WorktreeCommands {
-//     /// List all worktrees for vide-ticket
+//     /// List all worktrees for vibe-ticket
 //     List {
 //         /// Show worktrees for all tickets
 //         #[arg(short, long)]

@@ -5,7 +5,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Status, TicketId};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 use chrono::Utc;
 
@@ -43,10 +43,10 @@ pub fn handle_start_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Resolve ticket ID from reference (ID or slug)
     let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
@@ -56,7 +56,7 @@ pub fn handle_start_command(
 
     // Check if ticket is already in progress
     if ticket.status == Status::Doing {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Ticket '{}' is already in progress",
             ticket.slug
         )));
@@ -143,7 +143,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
         }
     }
 
-    Err(VideTicketError::TicketNotFound {
+    Err(VibeTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
 }
@@ -163,10 +163,10 @@ fn create_git_branch(
         .arg("--git-dir")
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to run git command: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to run git command: {}", e)))?;
 
     if !status.status.success() {
-        return Err(VideTicketError::custom("Not in a Git repository"));
+        return Err(VibeTicketError::custom("Not in a Git repository"));
     }
 
     // Check if branch already exists
@@ -177,10 +177,10 @@ fn create_git_branch(
         .arg(format!("refs/heads/{}", branch_name))
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to check branch existence: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to check branch existence: {}", e)))?;
 
     if check_branch.status.success() {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Branch '{}' already exists",
             branch_name
         )));
@@ -193,11 +193,11 @@ fn create_git_branch(
         .arg(branch_name)
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to create branch: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to create branch: {}", e)))?;
 
     if !create_branch.status.success() {
         let error_msg = String::from_utf8_lossy(&create_branch.stderr);
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Failed to create branch: {}",
             error_msg
         )));
@@ -223,16 +223,16 @@ fn create_git_worktree(
         .arg("--git-dir")
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to run git command: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to run git command: {}", e)))?;
 
     if !status.status.success() {
-        return Err(VideTicketError::custom("Not in a Git repository"));
+        return Err(VibeTicketError::custom("Not in a Git repository"));
     }
 
     // Get the parent directory of the project root
     let parent_dir = project_root
         .parent()
-        .ok_or_else(|| VideTicketError::custom("Cannot find parent directory for worktree"))?;
+        .ok_or_else(|| VibeTicketError::custom("Cannot find parent directory for worktree"))?;
 
     // Construct the worktree path
     let worktree_dir_name = format!("project-ticket-{}", ticket_slug);
@@ -240,7 +240,7 @@ fn create_git_worktree(
 
     // Check if worktree directory already exists
     if worktree_path.exists() {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Worktree directory '{}' already exists",
             worktree_path.display()
         )));
@@ -254,10 +254,10 @@ fn create_git_worktree(
         .arg(format!("refs/heads/{}", branch_name))
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to check branch existence: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to check branch existence: {}", e)))?;
 
     if check_branch.status.success() {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Branch '{}' already exists",
             branch_name
         )));
@@ -272,11 +272,11 @@ fn create_git_worktree(
         .arg(branch_name)
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to create worktree: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to create worktree: {}", e)))?;
 
     if !create_worktree.status.success() {
         let error_msg = String::from_utf8_lossy(&create_worktree.stderr);
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Failed to create worktree: {}",
             error_msg
         )));

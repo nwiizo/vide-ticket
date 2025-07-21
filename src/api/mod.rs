@@ -1,4 +1,4 @@
-//! REST API layer for vide-ticket
+//! REST API layer for vibe-ticket
 //!
 //! This module provides a RESTful HTTP API for interacting with the ticket system.
 //! It is feature-gated and only compiled when the "api" feature is enabled.
@@ -8,7 +8,7 @@
 //! The API module is only available when the "api" feature is enabled:
 //! ```toml
 //! [dependencies]
-//! vide-ticket = { version = "0.1", features = ["api"] }
+//! vibe-ticket = { version = "0.1", features = ["api"] }
 //! ```
 //!
 //! # API Design
@@ -46,7 +46,7 @@
 //!
 //! ```no_run
 //! #[cfg(feature = "api")]
-//! use vide_ticket::api::Server;
+//! use vibe_ticket::api::Server;
 //!
 //! #[cfg(feature = "api")]
 //! #[tokio::main]

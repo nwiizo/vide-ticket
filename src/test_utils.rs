@@ -1,4 +1,4 @@
-//! Common test utilities for vide-ticket
+//! Common test utilities for vibe-ticket
 //!
 //! This module provides shared test helpers and fixtures to reduce duplication
 //! across test modules.
@@ -89,7 +89,7 @@ pub mod test {
     /// Creates a test project directory structure
     pub fn create_test_project() -> (TempDir, std::path::PathBuf) {
         let temp_dir = create_temp_dir();
-        let project_dir = temp_dir.path().join(".vide-ticket");
+        let project_dir = temp_dir.path().join(".vibe-ticket");
         std::fs::create_dir_all(&project_dir).expect("Failed to create project directory");
         (temp_dir, project_dir)
     }

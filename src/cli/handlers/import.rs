@@ -5,7 +5,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Priority, Status, Ticket, TicketId};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
 use std::collections::HashMap;
 
@@ -34,14 +34,14 @@ pub fn handle_import_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Read file content
     let content = std::fs::read_to_string(&file_path).map_err(|e| {
-        VideTicketError::custom(format!("Failed to read file {}: {}", file_path, e))
+        VibeTicketError::custom(format!("Failed to read file {}: {}", file_path, e))
     })?;
 
     // Detect format if not specified
@@ -57,7 +57,7 @@ pub fn handle_import_command(
         "yaml" => import_yaml(&content)?,
         "csv" => import_csv(&content)?,
         _ => {
-            return Err(VideTicketError::custom(format!(
+            return Err(VibeTicketError::custom(format!(
                 "Unsupported import format: {}. Supported formats: json, yaml, csv",
                 format
             )))
@@ -177,7 +177,7 @@ fn detect_format(file_path: &str, content: &str) -> Result<String> {
     } else if trimmed.lines().any(|line| line.contains(',')) {
         Ok("csv".to_string())
     } else {
-        Err(VideTicketError::custom(
+        Err(VibeTicketError::custom(
             "Unable to detect file format. Please specify format explicitly with --format",
         ))
     }
@@ -186,7 +186,7 @@ fn detect_format(file_path: &str, content: &str) -> Result<String> {
 /// Import tickets from JSON
 fn import_json(content: &str) -> Result<Vec<Ticket>> {
     let json: serde_json::Value = serde_json::from_str(content)
-        .map_err(|e| VideTicketError::custom(format!("Failed to parse JSON: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to parse JSON: {}", e)))?;
 
     // Handle both direct array and object with tickets field
     let tickets_value = if json.is_array() {
@@ -194,13 +194,13 @@ fn import_json(content: &str) -> Result<Vec<Ticket>> {
     } else if let Some(tickets) = json.get("tickets") {
         tickets
     } else {
-        return Err(VideTicketError::custom(
+        return Err(VibeTicketError::custom(
             "JSON must be an array of tickets or object with 'tickets' field",
         ));
     };
 
     let tickets: Vec<Ticket> = serde_json::from_value(tickets_value.clone())
-        .map_err(|e| VideTicketError::custom(format!("Failed to deserialize tickets: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to deserialize tickets: {}", e)))?;
 
     Ok(tickets)
 }
@@ -222,7 +222,7 @@ fn import_yaml(content: &str) -> Result<Vec<Ticket>> {
         return Ok(import.tickets);
     }
 
-    Err(VideTicketError::custom(
+    Err(VibeTicketError::custom(
         "Failed to parse YAML: expected array of tickets or object with 'tickets' field",
     ))
 }
@@ -234,21 +234,21 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
 
     for result in rdr.records() {
         let record = result
-            .map_err(|e| VideTicketError::custom(format!("Failed to read CSV record: {}", e)))?;
+            .map_err(|e| VibeTicketError::custom(format!("Failed to read CSV record: {}", e)))?;
 
         // Expected columns: ID, Slug, Title, Status, Priority, Assignee, Tags, Created At, Started At, Closed At, Tasks Total, Tasks Completed, Description
         if record.len() < 13 {
-            return Err(VideTicketError::custom("CSV must have at least 13 columns"));
+            return Err(VibeTicketError::custom("CSV must have at least 13 columns"));
         }
 
         let id = TicketId::parse_str(&record[0])
-            .map_err(|_| VideTicketError::custom(format!("Invalid ticket ID: {}", &record[0])))?;
+            .map_err(|_| VibeTicketError::custom(format!("Invalid ticket ID: {}", &record[0])))?;
 
         let status = Status::try_from(&record[3])
-            .map_err(|_| VideTicketError::custom(format!("Invalid status: {}", &record[3])))?;
+            .map_err(|_| VibeTicketError::custom(format!("Invalid status: {}", &record[3])))?;
 
         let priority = Priority::try_from(&record[4])
-            .map_err(|_| VideTicketError::custom(format!("Invalid priority: {}", &record[4])))?;
+            .map_err(|_| VibeTicketError::custom(format!("Invalid priority: {}", &record[4])))?;
 
         let assignee = if record[5].is_empty() {
             None
@@ -263,7 +263,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
         };
 
         let created_at = chrono::DateTime::parse_from_rfc3339(&record[7])
-            .map_err(|e| VideTicketError::custom(format!("Invalid created_at date: {}", e)))?
+            .map_err(|e| VibeTicketError::custom(format!("Invalid created_at date: {}", e)))?
             .with_timezone(&chrono::Utc);
 
         let started_at = if record[8].is_empty() {
@@ -272,7 +272,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
             Some(
                 chrono::DateTime::parse_from_rfc3339(&record[8])
                     .map_err(|e| {
-                        VideTicketError::custom(format!("Invalid started_at date: {}", e))
+                        VibeTicketError::custom(format!("Invalid started_at date: {}", e))
                     })?
                     .with_timezone(&chrono::Utc),
             )
@@ -283,7 +283,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
         } else {
             Some(
                 chrono::DateTime::parse_from_rfc3339(&record[9])
-                    .map_err(|e| VideTicketError::custom(format!("Invalid closed_at date: {}", e)))?
+                    .map_err(|e| VibeTicketError::custom(format!("Invalid closed_at date: {}", e)))?
                     .with_timezone(&chrono::Utc),
             )
         };
@@ -333,7 +333,7 @@ fn validate_tickets(tickets: &[Ticket], storage: &FileStorage) -> Result<()> {
     }
 
     if !errors.is_empty() {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Validation failed:\n{}",
             errors.join("\n")
         )));

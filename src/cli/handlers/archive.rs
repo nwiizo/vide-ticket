@@ -4,7 +4,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::TicketId;
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 /// Handler for the `archive` command
@@ -35,10 +35,10 @@ pub fn handle_archive_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Resolve ticket ID
     let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
@@ -56,7 +56,7 @@ pub fn handle_archive_command(
     if unarchive {
         // Unarchiving
         if !is_archived {
-            return Err(VideTicketError::custom("Ticket is not archived"));
+            return Err(VibeTicketError::custom("Ticket is not archived"));
         }
 
         // Remove archive metadata
@@ -86,13 +86,13 @@ pub fn handle_archive_command(
     } else {
         // Archiving
         if is_archived {
-            return Err(VideTicketError::custom("Ticket is already archived"));
+            return Err(VibeTicketError::custom("Ticket is already archived"));
         }
 
         // Check if ticket is the active ticket
         if let Ok(Some(active_id)) = storage.get_active() {
             if active_id == ticket.id {
-                return Err(VideTicketError::custom(
+                return Err(VibeTicketError::custom(
                     "Cannot archive the active ticket. Close or switch to another ticket first.",
                 ));
             }
@@ -163,7 +163,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
         }
     }
 
-    Err(VideTicketError::TicketNotFound {
+    Err(VibeTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
 }

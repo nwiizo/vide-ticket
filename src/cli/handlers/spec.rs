@@ -4,7 +4,7 @@
 //! supporting the three-phase spec-driven development workflow.
 
 use crate::cli::output::OutputFormatter;
-use crate::error::{ErrorContext, Result, VideTicketError};
+use crate::error::{ErrorContext, Result, VibeTicketError};
 use crate::specs::{
     SpecDocumentType, SpecManager, SpecPhase, SpecTemplate, Specification, TemplateEngine,
 };
@@ -29,10 +29,10 @@ pub fn handle_spec_init(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -76,9 +76,9 @@ pub fn handle_spec_init(
             formatter.info(&format!("Associated ticket: {}", ticket_id));
         }
         formatter.info("\nNext steps:");
-        formatter.info("  1. Define requirements: vide-ticket spec requirements");
-        formatter.info("  2. Create design: vide-ticket spec design");
-        formatter.info("  3. Plan tasks: vide-ticket spec tasks");
+        formatter.info("  1. Define requirements: vibe-ticket spec requirements");
+        formatter.info("  2. Create design: vibe-ticket spec design");
+        formatter.info("  3. Plan tasks: vibe-ticket spec tasks");
     }
 
     Ok(())
@@ -99,10 +99,10 @@ pub fn handle_spec_requirements(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -181,10 +181,10 @@ pub fn handle_spec_design(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -274,10 +274,10 @@ pub fn handle_spec_tasks(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -368,10 +368,10 @@ pub fn handle_spec_status(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -463,10 +463,10 @@ pub fn handle_spec_list(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -561,10 +561,10 @@ pub fn handle_spec_show(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -624,10 +624,10 @@ pub fn handle_spec_delete(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -664,10 +664,10 @@ pub fn handle_spec_approve(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     let spec_manager = SpecManager::new(project_dir.join("specs"));
@@ -679,7 +679,7 @@ pub fn handle_spec_approve(
         "design" => SpecPhase::Design,
         "tasks" => SpecPhase::Tasks,
         _ => {
-            return Err(VideTicketError::InvalidInput(
+            return Err(VibeTicketError::InvalidInput(
                 "Invalid phase. Must be one of: requirements, design, tasks".to_string(),
             ));
         },
@@ -725,10 +725,10 @@ pub fn handle_spec_activate(
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     if !project_dir.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     // Verify spec exists
@@ -752,7 +752,7 @@ fn get_active_spec(project_dir: &Path) -> Result<String> {
     let active_spec_path = project_dir.join(".active_spec");
 
     if !active_spec_path.exists() {
-        return Err(VideTicketError::NoActiveSpec);
+        return Err(VibeTicketError::NoActiveSpec);
     }
 
     fs::read_to_string(&active_spec_path)

@@ -1,4 +1,4 @@
-// vide-ticket library root
+// vibe-ticket library root
 // This file serves as the entry point for the library
 
 pub mod cli;
@@ -16,4 +16,4 @@ pub mod api;
 pub mod test_utils;
 
 // Re-export commonly used types
-pub use error::{Result, VideTicketError};
+pub use error::{Result, VibeTicketError};

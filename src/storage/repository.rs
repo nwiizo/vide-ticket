@@ -72,7 +72,7 @@ impl TicketRepository for FileStorage {
     fn exists(&self, id: &TicketId) -> Result<bool> {
         match self.load_ticket(id) {
             Ok(_) => Ok(true),
-            Err(crate::error::VideTicketError::TicketNotFound { .. }) => Ok(false),
+            Err(crate::error::VibeTicketError::TicketNotFound { .. }) => Ok(false),
             Err(e) => Err(e),
         }
     }

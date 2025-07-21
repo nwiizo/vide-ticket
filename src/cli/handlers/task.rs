@@ -5,7 +5,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Task, TaskId, TicketId};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 use chrono::Utc;
 
@@ -27,10 +27,10 @@ pub fn handle_task_add(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -39,7 +39,7 @@ pub fn handle_task_add(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -93,10 +93,10 @@ pub fn handle_task_complete(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -105,7 +105,7 @@ pub fn handle_task_complete(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -113,14 +113,14 @@ pub fn handle_task_complete(
 
     // Parse task ID
     let task_id = TaskId::parse_str(&task_id)
-        .map_err(|_| VideTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
+        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
 
     // Find and complete the task
     let mut task_found = false;
     for task in &mut ticket.tasks {
         if task.id == task_id {
             if task.completed {
-                return Err(VideTicketError::custom("Task is already completed"));
+                return Err(VibeTicketError::custom("Task is already completed"));
             }
             task.completed = true;
             task.completed_at = Some(Utc::now());
@@ -130,7 +130,7 @@ pub fn handle_task_complete(
     }
 
     if !task_found {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Task '{}' not found in ticket",
             task_id
         )));
@@ -189,10 +189,10 @@ pub fn handle_task_uncomplete(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -201,7 +201,7 @@ pub fn handle_task_uncomplete(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -209,14 +209,14 @@ pub fn handle_task_uncomplete(
 
     // Parse task ID
     let task_id = TaskId::parse_str(&task_id)
-        .map_err(|_| VideTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
+        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
 
     // Find and uncomplete the task
     let mut task_found = false;
     for task in &mut ticket.tasks {
         if task.id == task_id {
             if !task.completed {
-                return Err(VideTicketError::custom("Task is not completed"));
+                return Err(VibeTicketError::custom("Task is not completed"));
             }
             task.completed = false;
             task.completed_at = None;
@@ -226,7 +226,7 @@ pub fn handle_task_uncomplete(
     }
 
     if !task_found {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Task '{}' not found in ticket",
             task_id
         )));
@@ -286,10 +286,10 @@ pub fn handle_task_list(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -298,7 +298,7 @@ pub fn handle_task_list(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -384,10 +384,10 @@ pub fn handle_task_remove(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -396,7 +396,7 @@ pub fn handle_task_remove(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -404,7 +404,7 @@ pub fn handle_task_remove(
 
     // Parse task ID
     let task_id = TaskId::parse_str(&task_id)
-        .map_err(|_| VideTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
+        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
 
     // Find the task
     let task_index = ticket
@@ -412,7 +412,7 @@ pub fn handle_task_remove(
         .iter()
         .position(|t| t.id == task_id)
         .ok_or_else(|| {
-            VideTicketError::custom(format!("Task '{}' not found in ticket", task_id))
+            VibeTicketError::custom(format!("Task '{}' not found in ticket", task_id))
         })?;
 
     let task = &ticket.tasks[task_index];
@@ -473,7 +473,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
         }
     }
 
-    Err(VideTicketError::TicketNotFound {
+    Err(VibeTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
 }

@@ -2,7 +2,7 @@
 
 use super::Exporter;
 use crate::core::Ticket;
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use serde::Serialize;
 
 /// YAML exporter implementation
@@ -24,7 +24,7 @@ impl Exporter for YamlExporter {
         };
 
         serde_yaml::to_string(&export)
-            .map_err(|e| VideTicketError::custom(format!("Failed to serialize to YAML: {}", e)))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to serialize to YAML: {}", e)))
     }
     
     fn format_name(&self) -> &'static str {

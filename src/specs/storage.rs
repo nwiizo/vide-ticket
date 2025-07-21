@@ -202,7 +202,7 @@ mod tests {
                 .borrow()
                 .get(path)
                 .cloned()
-                .ok_or_else(|| crate::error::VideTicketError::custom("File not found"))
+                .ok_or_else(|| crate::error::VibeTicketError::custom("File not found"))
         }
         
         fn exists(&self, path: &Path) -> bool {

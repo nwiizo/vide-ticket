@@ -1,11 +1,11 @@
 //! Handler for the `init` command
 //!
-//! This module implements the initialization of a new vide-ticket project,
+//! This module implements the initialization of a new vibe-ticket project,
 //! creating the necessary directory structure and configuration files.
 
 use crate::cli::output::OutputFormatter;
 use crate::config::Config;
-use crate::error::{ErrorContext, Result, VideTicketError};
+use crate::error::{ErrorContext, Result, VibeTicketError};
 use crate::storage::{FileStorage, ProjectState};
 use std::env;
 use std::fs;
@@ -13,8 +13,8 @@ use std::path::Path;
 
 /// Handle the init command
 ///
-/// Initializes a new vide-ticket project in the current directory by:
-/// 1. Creating the `.vide-ticket` directory structure
+/// Initializes a new vibe-ticket project in the current directory by:
+/// 1. Creating the `.vibe-ticket` directory structure
 /// 2. Generating default configuration
 /// 3. Setting up the storage repository
 /// 4. Creating necessary subdirectories
@@ -36,8 +36,8 @@ use std::path::Path;
 /// # Example
 ///
 /// ```no_run
-/// use vide_ticket::cli::handlers::init::handle_init;
-/// use vide_ticket::cli::output::OutputFormatter;
+/// use vibe_ticket::cli::handlers::init::handle_init;
+/// use vibe_ticket::cli::output::OutputFormatter;
 ///
 /// let formatter = OutputFormatter::new(false, false);
 /// handle_init(Some("my-project".to_string()), None, false, &formatter)?;
@@ -50,11 +50,11 @@ pub fn handle_init(
     formatter: &OutputFormatter,
 ) -> Result<()> {
     let current_dir = env::current_dir().context("Failed to get current directory")?;
-    let project_dir = current_dir.join(".vide-ticket");
+    let project_dir = current_dir.join(".vibe-ticket");
 
     // Check if already initialized
     if project_dir.exists() && !force {
-        return Err(VideTicketError::ProjectAlreadyInitialized { path: project_dir });
+        return Err(VibeTicketError::ProjectAlreadyInitialized { path: project_dir });
     }
 
     // Determine project name
@@ -62,7 +62,7 @@ pub fn handle_init(
         current_dir
             .file_name()
             .and_then(|n| n.to_str())
-            .unwrap_or("vide-ticket-project")
+            .unwrap_or("vibe-ticket-project")
             .to_string()
     });
 
@@ -120,7 +120,7 @@ pub fn handle_init(
 
     // Display success message
     formatter.success(&format!(
-        "Initialized vide-ticket project '{}'",
+        "Initialized vibe-ticket project '{}'",
         project_name
     ));
 
@@ -142,22 +142,22 @@ pub fn handle_init(
             formatter.info("Generated CLAUDE.md for AI assistance");
         }
         formatter.info("\nNext steps:");
-        formatter.info("  1. Create your first ticket: vide-ticket new <slug>");
-        formatter.info("  2. List tickets: vide-ticket list");
-        formatter.info("  3. Start working: vide-ticket start <ticket>");
+        formatter.info("  1. Create your first ticket: vibe-ticket new <slug>");
+        formatter.info("  2. List tickets: vibe-ticket list");
+        formatter.info("  3. Start working: vibe-ticket start <ticket>");
     }
 
     Ok(())
 }
 
-/// Create the vide-ticket directory structure
+/// Create the vibe-ticket directory structure
 ///
 /// Creates all necessary subdirectories for the project:
-/// - `.vide-ticket/` - Main project directory
-/// - `.vide-ticket/tickets/` - Ticket storage
-/// - `.vide-ticket/templates/` - Custom templates
-/// - `.vide-ticket/plugins/` - Plugin directory
-/// - `.vide-ticket/backups/` - Backup directory
+/// - `.vibe-ticket/` - Main project directory
+/// - `.vibe-ticket/tickets/` - Ticket storage
+/// - `.vibe-ticket/templates/` - Custom templates
+/// - `.vibe-ticket/plugins/` - Plugin directory
+/// - `.vibe-ticket/backups/` - Backup directory
 fn create_directory_structure(project_dir: &Path) -> Result<()> {
     let directories = [
         project_dir,
@@ -231,14 +231,14 @@ Closes #{{ ticket_id }} - {{ ticket_title }}
 
 /// Create or update .gitignore file
 ///
-/// Adds vide-ticket specific entries to .gitignore
+/// Adds vibe-ticket specific entries to .gitignore
 fn create_gitignore(project_dir: &Path) -> Result<()> {
     let gitignore_path = project_dir.join(".gitignore");
-    let vide_entries = vec![
-        "# vide-ticket",
-        ".vide-ticket/backups/",
-        ".vide-ticket/tmp/",
-        ".vide-ticket/*.log",
+    let vibe_entries = vec![
+        "# vibe-ticket",
+        ".vibe-ticket/backups/",
+        ".vibe-ticket/tmp/",
+        ".vibe-ticket/*.log",
         "",
     ];
 
@@ -247,19 +247,19 @@ fn create_gitignore(project_dir: &Path) -> Result<()> {
         let mut content =
             fs::read_to_string(&gitignore_path).context("Failed to read .gitignore")?;
 
-        // Check if vide-ticket entries already exist
-        if !content.contains("# vide-ticket") {
+        // Check if vibe-ticket entries already exist
+        if !content.contains("# vibe-ticket") {
             // Append our entries
             if !content.ends_with('\n') {
                 content.push('\n');
             }
-            content.push_str(&vide_entries.join("\n"));
+            content.push_str(&vibe_entries.join("\n"));
 
             fs::write(&gitignore_path, content).context("Failed to update .gitignore")?;
         }
     } else {
         // Create new .gitignore
-        fs::write(&gitignore_path, vide_entries.join("\n"))
+        fs::write(&gitignore_path, vibe_entries.join("\n"))
             .context("Failed to create .gitignore")?;
     }
 
@@ -273,73 +273,73 @@ fn generate_claude_md_for_init(
     description: Option<&str>,
 ) -> Result<()> {
     let claude_content = format!(
-        r#"# vide-ticket Project: {}
+        r#"# vibe-ticket Project: {}
 
 {}
 
 ## Overview
 
-This project uses vide-ticket for ticket management. This document provides guidance for Claude Code when working with this codebase.
+This project uses vibe-ticket for ticket management. This document provides guidance for Claude Code when working with this codebase.
 
-## Common vide-ticket Commands
+## Common vibe-ticket Commands
 
 ### Getting Started
 ```bash
 # Create your first ticket
-vide-ticket new fix-bug --title "Fix login issue" --priority high
+vibe-ticket new fix-bug --title "Fix login issue" --priority high
 
 # List all tickets
-vide-ticket list
+vibe-ticket list
 
 # Start working on a ticket
-vide-ticket start fix-bug
+vibe-ticket start fix-bug
 
 # Show current status
-vide-ticket check
+vibe-ticket check
 ```
 
 ### Working with Tickets
 ```bash
 # Show ticket details
-vide-ticket show <ticket>
+vibe-ticket show <ticket>
 
 # Update ticket
-vide-ticket edit <ticket> --status review
+vibe-ticket edit <ticket> --status review
 
 # Add tasks to ticket
-vide-ticket task add "Write unit tests"
-vide-ticket task add "Update documentation"
+vibe-ticket task add "Write unit tests"
+vibe-ticket task add "Update documentation"
 
 # Complete tasks
-vide-ticket task complete 1
+vibe-ticket task complete 1
 
 # Close ticket
-vide-ticket close <ticket> --message "Fixed the login issue"
+vibe-ticket close <ticket> --message "Fixed the login issue"
 ```
 
 ### Search and Filter
 ```bash
 # Search tickets
-vide-ticket search "login"
+vibe-ticket search "login"
 
 # Filter by status
-vide-ticket list --status doing
+vibe-ticket list --status doing
 
 # Filter by priority
-vide-ticket list --priority high
+vibe-ticket list --priority high
 ```
 
 ### Configuration
 ```bash
 # View configuration
-vide-ticket config show
+vibe-ticket config show
 
 # Set configuration values
-vide-ticket config set project.default_priority medium
-vide-ticket config set git.auto_branch true
+vibe-ticket config set project.default_priority medium
+vibe-ticket config set git.auto_branch true
 
 # Generate this file
-vide-ticket config claude
+vibe-ticket config claude
 ```
 
 ## Project Configuration
@@ -368,14 +368,14 @@ When helping with this project:
 1. Always check for active tickets before suggesting new work
 2. Reference ticket IDs in commit messages
 3. Update ticket status as implementation progresses
-4. Use `vide-ticket check` to understand current context
+4. Use `vibe-ticket check` to understand current context
 5. Generate new tickets for bugs or features discovered during development
 
 ---
 Generated on: {}
 "#,
         project_name,
-        description.unwrap_or("A vide-ticket managed project"),
+        description.unwrap_or("A vibe-ticket managed project"),
         chrono::Local::now().format("%Y-%m-%d")
     );
 
@@ -390,16 +390,16 @@ Generated on: {}
 
 This project was initialized with:
 ```bash
-vide-ticket init --claude-md
+vibe-ticket init --claude-md
 ```
 
 To regenerate or update this file:
 ```bash
 # Regenerate with basic template
-vide-ticket config claude
+vibe-ticket config claude
 
 # Append with advanced features
-vide-ticket config claude --template advanced --append
+vibe-ticket config claude --template advanced --append
 ```
 "#
     );
@@ -418,7 +418,7 @@ mod tests {
     #[test]
     fn test_create_directory_structure() {
         let temp_dir = TempDir::new().unwrap();
-        let project_dir = temp_dir.path().join(".vide-ticket");
+        let project_dir = temp_dir.path().join(".vibe-ticket");
 
         create_directory_structure(&project_dir).unwrap();
 
@@ -432,7 +432,7 @@ mod tests {
     #[test]
     fn test_create_default_templates() {
         let temp_dir = TempDir::new().unwrap();
-        let project_dir = temp_dir.path().join(".vide-ticket");
+        let project_dir = temp_dir.path().join(".vibe-ticket");
         create_directory_structure(&project_dir).unwrap();
 
         create_default_templates(&project_dir).unwrap();
@@ -451,8 +451,8 @@ mod tests {
         assert!(gitignore_path.exists());
 
         let content = fs::read_to_string(&gitignore_path).unwrap();
-        assert!(content.contains("# vide-ticket"));
-        assert!(content.contains(".vide-ticket/backups/"));
+        assert!(content.contains("# vibe-ticket"));
+        assert!(content.contains(".vibe-ticket/backups/"));
     }
 
     #[test]
@@ -466,8 +466,8 @@ mod tests {
         assert!(claude_path.exists());
 
         let content = fs::read_to_string(&claude_path).unwrap();
-        assert!(content.contains("# vide-ticket Project: Test Project"));
+        assert!(content.contains("# vibe-ticket Project: Test Project"));
         assert!(content.contains("Test description"));
-        assert!(content.contains("## Common vide-ticket Commands"));
+        assert!(content.contains("## Common vibe-ticket Commands"));
     }
 }
