@@ -4,7 +4,7 @@ This guide helps existing users migrate from the incorrectly named `vide-ticket`
 
 ## Background
 
-The project was initially named `vide-ticket` but should have been `vibe-ticket` to match the Vibe Coding environment. This has been corrected in version 0.1.1.
+The project was initially named `vide-ticket` but should have been `vibe-ticket` to match the Vibe Coding environment. This has been corrected in version 0.2.0.
 
 ## Migration Steps
 
