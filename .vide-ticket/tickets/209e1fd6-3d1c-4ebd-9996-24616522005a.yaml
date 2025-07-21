@@ -1,0 +1,15 @@
+id: 209e1fd6-3d1c-4ebd-9996-24616522005a
+slug: 202507212336-batch-operations
+title: Implement batch operations for efficiency
+description: 'Add support for batch operations like: closing multiple tickets at once, bulk status updates, mass tagging, and archiving old tickets. Use glob patterns or ID lists for selection.'
+priority: medium
+status: todo
+tags:
+- productivity
+- feature
+created_at: 2025-07-21T14:36:36.016834Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

@@ -17,26 +17,29 @@ impl TemplateEngine {
     /// Create a new template engine
     pub fn new() -> Self {
         let mut variables = HashMap::new();
-        variables.insert("date".to_string(), Local::now().format("%Y-%m-%d").to_string());
-        
+        variables.insert(
+            "date".to_string(),
+            Local::now().format("%Y-%m-%d").to_string(),
+        );
+
         Self { variables }
     }
-    
+
     /// Set a template variable
     pub fn set_variable(&mut self, key: String, value: String) {
         self.variables.insert(key, value);
     }
-    
+
     /// Generate document from template
     pub fn generate(&self, template: &SpecTemplate) -> String {
         let mut content = template.content();
-        
+
         // Replace variables
         for (key, value) in &self.variables {
             let placeholder = format!("{{{{{}}}}}", key);
             content = content.replace(&placeholder, value);
         }
-        
+
         content
     }
 }
@@ -44,17 +47,14 @@ impl TemplateEngine {
 /// Specification document template
 pub enum SpecTemplate {
     /// Requirements definition template
-    Requirements {
-        title: String,
-        description: String,
-    },
-    
+    Requirements { title: String, description: String },
+
     /// Technical design template
     Design {
         title: String,
         requirements_summary: String,
     },
-    
+
     /// Implementation plan template
     Tasks {
         title: String,
@@ -84,13 +84,13 @@ impl SpecTemplate {
             },
         }
     }
-    
+
     /// Get template content
     pub fn content(&self) -> String {
         match self {
             Self::Requirements { title, description } => {
                 format!(
-r#"# 要件定義書 / Requirements Definition
+                    r#"# 要件定義書 / Requirements Definition
 
 **タイトル / Title**: {}
 **作成日 / Date**: {{{{date}}}}
@@ -166,11 +166,14 @@ r#"# 要件定義書 / Requirements Definition
 "#,
                     title, description
                 )
-            }
-            
-            Self::Design { title, requirements_summary } => {
+            },
+
+            Self::Design {
+                title,
+                requirements_summary,
+            } => {
                 format!(
-r#"# 技術設計書 / Technical Design Document
+                    r#"# 技術設計書 / Technical Design Document
 
 **タイトル / Title**: {}
 **作成日 / Date**: {{{{date}}}}
@@ -282,11 +285,14 @@ src/
 "#,
                     title, requirements_summary
                 )
-            }
-            
-            Self::Tasks { title, design_summary } => {
+            },
+
+            Self::Tasks {
+                title,
+                design_summary,
+            } => {
                 format!(
-r#"# 実装計画書 / Implementation Plan
+                    r#"# 実装計画書 / Implementation Plan
 
 **タイトル / Title**: {}
 **作成日 / Date**: {{{{date}}}}
@@ -394,7 +400,7 @@ r#"# 実装計画書 / Implementation Plan
 "#,
                     title, design_summary
                 )
-            }
+            },
         }
     }
 }
@@ -408,17 +414,17 @@ impl Default for TemplateEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_template_engine_variables() {
         let mut engine = TemplateEngine::new();
         engine.set_variable("project".to_string(), "TestProject".to_string());
-        
+
         let template = SpecTemplate::Requirements {
             title: "Test {{project}}".to_string(),
             description: "Description for {{project}}".to_string(),
         };
-        
+
         let content = engine.generate(&template);
         assert!(content.contains("Test TestProject"));
         assert!(content.contains("Description for TestProject"));

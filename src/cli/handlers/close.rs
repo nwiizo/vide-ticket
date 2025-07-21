@@ -264,8 +264,6 @@ fn create_pull_request(
 
 #[cfg(test)]
 mod tests {
-    
-    
 
     #[test]
     fn test_close_message_formatting() {

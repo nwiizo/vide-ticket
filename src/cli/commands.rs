@@ -103,6 +103,10 @@ pub enum Commands {
         #[arg(long)]
         archived: bool,
 
+        /// Show only open tickets (todo, doing)
+        #[arg(long)]
+        open: bool,
+
         /// Filter tickets created since (e.g., "yesterday", "2 days ago", "2025-07-18")
         #[arg(long)]
         since: Option<String>,
@@ -124,6 +128,25 @@ pub enum Commands {
         /// Custom branch name (default: ticket-<slug>)
         #[arg(long)]
         branch_name: Option<String>,
+
+        /// Create a Git worktree instead of just a branch
+        #[arg(long)]
+        worktree: bool,
+    },
+
+    /// Show open tickets (alias for list --open)
+    Open {
+        /// Sort by field (created, updated, priority, status, slug)
+        #[arg(long, default_value = "updated")]
+        sort: String,
+
+        /// Reverse sort order
+        #[arg(short, long)]
+        reverse: bool,
+
+        /// Limit number of results
+        #[arg(short, long)]
+        limit: Option<usize>,
     },
 
     /// Close the current ticket
@@ -289,6 +312,12 @@ pub enum Commands {
         #[command(subcommand)]
         command: SpecCommands,
     },
+
+    // /// Manage Git worktrees for tickets
+    // Worktree {
+    //     #[command(subcommand)]
+    //     command: WorktreeCommands,
+    // },
 }
 
 #[derive(Subcommand, Debug)]
@@ -537,3 +566,50 @@ pub enum SpecCommands {
         spec: String,
     },
 }
+
+// #[derive(Subcommand, Debug)]
+// pub enum WorktreeCommands {
+//     /// List all worktrees for vide-ticket
+//     List {
+//         /// Show worktrees for all tickets
+//         #[arg(short, long)]
+//         all: bool,
+
+//         /// Filter by status (active, stale, orphaned)
+//         #[arg(short, long)]
+//         status: Option<String>,
+
+//         /// Show detailed information
+//         #[arg(short, long)]
+//         verbose: bool,
+//     },
+
+//     /// Remove a worktree
+//     Remove {
+//         /// Worktree path or ticket ID/slug
+//         worktree: String,
+
+//         /// Force removal even if there are uncommitted changes
+//         #[arg(short, long)]
+//         force: bool,
+
+//         /// Keep the branch associated with the worktree
+//         #[arg(long)]
+//         keep_branch: bool,
+//     },
+
+//     /// Prune stale worktrees
+//     Prune {
+//         /// Remove worktrees without confirmation
+//         #[arg(short, long)]
+//         force: bool,
+
+//         /// Dry run - show what would be removed
+//         #[arg(short, long)]
+//         dry_run: bool,
+
+//         /// Remove branches for pruned worktrees
+//         #[arg(long)]
+//         remove_branches: bool,
+//     },
+// }

@@ -21,24 +21,24 @@ impl SpecManager {
             ops: DocumentOperations::new(FileSystemStore, specs_dir),
         }
     }
-    
+
     /// Initialize the specs directory structure
     pub fn initialize(&self) -> Result<()> {
         self.ops.initialize()
     }
-    
+
     /// Create a new specification
     pub fn create_spec(&self, title: String, description: String) -> Result<SpecMetadata> {
         self.initialize()?;
-        
+
         let metadata = SpecMetadata::new(title, description);
         
         // Save initial metadata
         self.save_metadata(&metadata)?;
-        
+
         Ok(metadata)
     }
-    
+
     /// Load a specification by ID
     pub fn load_spec(&self, spec_id: &str) -> Result<Specification> {
         let metadata = self.load_metadata(spec_id)?;
@@ -55,7 +55,7 @@ impl SpecManager {
             tasks,
         })
     }
-    
+
     /// Save a document for a specification
     pub fn save_document(
         &self,
@@ -72,22 +72,22 @@ impl SpecManager {
             SpecDocumentType::Requirements => {
                 metadata.progress.requirements_completed = true;
                 metadata.version.bump_patch();
-            }
+            },
             SpecDocumentType::Design => {
                 metadata.progress.design_completed = true;
                 metadata.version.bump_patch();
-            }
+            },
             SpecDocumentType::Tasks => {
                 metadata.progress.tasks_completed = true;
                 metadata.version.bump_patch();
-            }
+            },
         }
         metadata.update_phase();
         self.save_metadata(&metadata)?;
-        
+
         Ok(())
     }
-    
+
     /// List all specifications
     pub fn list_specs(&self) -> Result<Vec<SpecMetadata>> {
         let spec_dirs = self.ops.list_subdirs()?;
@@ -105,13 +105,13 @@ impl SpecManager {
                 }
             }
         }
-        
+
         // Sort by creation date (newest first)
         specs.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-        
+
         Ok(specs)
     }
-    
+
     /// Approve a document phase
     pub fn approve_phase(&self, spec_id: &str, phase: SpecPhase) -> Result<()> {
         let mut metadata = self.load_metadata(spec_id)?;
@@ -125,7 +125,7 @@ impl SpecManager {
                     ));
                 }
                 metadata.progress.requirements_approved = true;
-            }
+            },
             SpecPhase::Design => {
                 if !metadata.progress.design_completed {
                     return Err(VideTicketError::custom(
@@ -133,7 +133,7 @@ impl SpecManager {
                     ));
                 }
                 metadata.progress.design_approved = true;
-            }
+            },
             SpecPhase::Implementation => {
                 if !metadata.progress.tasks_completed {
                     return Err(VideTicketError::custom(
@@ -141,35 +141,33 @@ impl SpecManager {
                     ));
                 }
                 metadata.progress.tasks_approved = true;
-            }
+            },
             _ => {
-                return Err(VideTicketError::custom(
-                    "Invalid phase for approval",
-                ));
-            }
+                return Err(VideTicketError::custom("Invalid phase for approval"));
+            },
         }
-        
+
         metadata.update_phase();
         self.save_metadata(&metadata)?;
-        
+
         Ok(())
     }
-    
+
     /// Get the directory path for a spec
     fn get_spec_dir(&self, spec_id: &str) -> PathBuf {
         self.ops.get_subdir(spec_id)
     }
-    
+
     /// Load metadata for a spec
     fn load_metadata(&self, spec_id: &str) -> Result<SpecMetadata> {
         self.ops.load_from_subdir(spec_id, "spec.json")
     }
-    
+
     /// Save metadata for a spec
     fn save_metadata(&self, metadata: &SpecMetadata) -> Result<()> {
         self.ops.save_in_subdir(&metadata.id, "spec.json", metadata)
     }
-    
+
     /// Load a document from a spec directory
     fn load_document(
         &self,
@@ -178,21 +176,21 @@ impl SpecManager {
     ) -> Result<Option<String>> {
         self.ops.load_text_from_subdir(spec_id, doc_type.file_name())
     }
-    
+
     /// Find spec by title (partial match)
     pub fn find_spec_by_title(&self, query: &str) -> Result<Option<SpecMetadata>> {
         let specs = self.list_specs()?;
         let query_lower = query.to_lowercase();
-        
-        Ok(specs.into_iter().find(|spec| {
-            spec.title.to_lowercase().contains(&query_lower)
-        }))
+
+        Ok(specs
+            .into_iter()
+            .find(|spec| spec.title.to_lowercase().contains(&query_lower)))
     }
-    
+
     /// Delete a specification
     pub fn delete_spec(&self, spec_id: &str) -> Result<()> {
         let spec_dir = self.get_spec_dir(spec_id);
-        
+
         if !spec_dir.exists() {
             return Err(VideTicketError::custom(format!(
                 "Specification not found: {}",
@@ -268,7 +266,7 @@ impl SpecManager {
         if let Some(ref tasks) = spec.tasks {
             self.save_document(&spec.metadata.id, SpecDocumentType::Tasks, tasks)?;
         }
-        
+
         Ok(())
     }
     
@@ -350,7 +348,7 @@ mod tests {
         let (manager, _temp) = create_test_manager();
         assert!(manager.initialize().is_ok());
     }
-    
+
     #[test]
     fn test_create_and_load_spec() {
         let (manager, _temp) = create_test_manager();
@@ -364,7 +362,7 @@ mod tests {
         assert_eq!(loaded.metadata.title, "Test Spec");
         assert_eq!(loaded.metadata.description, "Test description");
     }
-    
+
     #[test]
     fn test_save_and_load_documents() {
         let (manager, _temp) = create_test_manager();

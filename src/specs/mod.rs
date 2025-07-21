@@ -35,28 +35,28 @@ pub use templates::{SpecTemplate, TemplateEngine};
 pub struct SpecMetadata {
     /// Unique spec ID
     pub id: String,
-    
+
     /// Spec title
     pub title: String,
-    
+
     /// Brief description
     pub description: String,
-    
+
     /// Associated ticket ID (if any)
     pub ticket_id: Option<String>,
-    
+
     /// Creation timestamp
     pub created_at: DateTime<Utc>,
-    
+
     /// Last update timestamp
     pub updated_at: DateTime<Utc>,
-    
+
     /// Progress tracking
     pub progress: SpecProgress,
-    
+
     /// Version information
     pub version: SpecVersion,
-    
+
     /// Tags for categorization
     pub tags: Vec<String>,
 }
@@ -66,25 +66,25 @@ pub struct SpecMetadata {
 pub struct SpecProgress {
     /// Requirements definition completed
     pub requirements_completed: bool,
-    
+
     /// Technical design completed
     pub design_completed: bool,
-    
+
     /// Implementation plan completed
     pub tasks_completed: bool,
-    
+
     /// Requirements approval status
     pub requirements_approved: bool,
-    
+
     /// Design approval status
     pub design_approved: bool,
-    
+
     /// Tasks approval status
     pub tasks_approved: bool,
-    
+
     /// Current phase
     pub current_phase: SpecPhase,
-    
+
     /// Approval status with additional metadata
     pub approval_status: Option<std::collections::HashMap<String, serde_json::Value>>,
 }
@@ -95,19 +95,19 @@ pub struct SpecProgress {
 pub enum SpecPhase {
     /// Initial phase - no documents created yet
     Initial,
-    
+
     /// Requirements definition phase
     Requirements,
-    
+
     /// Technical design phase
     Design,
-    
+
     /// Implementation planning phase
     Implementation,
-    
+
     /// Tasks phase (alias for Implementation)
     Tasks,
-    
+
     /// All phases completed
     Completed,
 }
@@ -117,10 +117,10 @@ pub enum SpecPhase {
 pub struct SpecVersion {
     /// Major version (breaking changes)
     pub major: u32,
-    
+
     /// Minor version (new features)
     pub minor: u32,
-    
+
     /// Patch version (bug fixes)
     pub patch: u32,
 }
@@ -130,27 +130,26 @@ pub struct SpecVersion {
 pub enum SpecDocumentType {
     /// Requirements definition document
     Requirements,
-    
+
     /// Technical design document
     Design,
-    
+
     /// Implementation plan/tasks document
     Tasks,
 }
-
 
 /// A complete specification with all documents
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Specification {
     /// Metadata
     pub metadata: SpecMetadata,
-    
+
     /// Requirements definition content
     pub requirements: Option<String>,
-    
+
     /// Technical design content
     pub design: Option<String>,
-    
+
     /// Implementation plan content
     pub tasks: Option<String>,
 }
@@ -166,7 +165,7 @@ impl Specification {
         let mut metadata = SpecMetadata::new(title, description);
         metadata.ticket_id = ticket_id;
         metadata.tags = tags;
-        
+
         Self {
             metadata,
             requirements: None,
@@ -191,7 +190,7 @@ impl SpecMetadata {
             tags: Vec::new(),
         }
     }
-    
+
     /// Update the current phase based on progress
     pub fn update_phase(&mut self) {
         self.progress.current_phase = match (
@@ -245,18 +244,18 @@ impl SpecVersion {
     pub fn to_string(&self) -> String {
         format!("{}.{}.{}", self.major, self.minor, self.patch)
     }
-    
+
     /// Increment patch version
     pub fn bump_patch(&mut self) {
         self.patch += 1;
     }
-    
+
     /// Increment minor version (resets patch)
     pub fn bump_minor(&mut self) {
         self.minor += 1;
         self.patch = 0;
     }
-    
+
     /// Increment major version (resets minor and patch)
     pub fn bump_major(&mut self) {
         self.major += 1;
@@ -274,7 +273,7 @@ impl SpecDocumentType {
             Self::Tasks => "tasks.md",
         }
     }
-    
+
     /// Get display name
     pub fn display_name(&self) -> &'static str {
         match self {

@@ -1,0 +1,15 @@
+id: c5f99918-a00c-4474-9b78-5f6ae3d3a551
+slug: 202507212336-error-resilient-list
+title: Make list command error-resilient for partial results
+description: When one ticket has invalid data (e.g., Unicode issues), the list command should still show other valid tickets instead of panicking. Display error information for problematic tickets inline.
+priority: high
+status: todo
+tags:
+- error-handling
+- reliability
+created_at: 2025-07-21T14:36:02.099666Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

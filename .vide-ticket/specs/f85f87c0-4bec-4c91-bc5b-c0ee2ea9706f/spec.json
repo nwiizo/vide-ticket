@@ -1,0 +1,27 @@
+{
+  "id": "f85f87c0-4bec-4c91-bc5b-c0ee2ea9706f",
+  "title": "Steering System Implementation",
+  "description": "Implement the project knowledge management system",
+  "ticket_id": "spec-steering",
+  "created_at": "2025-07-21T05:03:42.836617Z",
+  "updated_at": "2025-07-21T05:03:42.836700Z",
+  "progress": {
+    "requirements_completed": false,
+    "design_completed": false,
+    "tasks_completed": false,
+    "requirements_approved": false,
+    "design_approved": false,
+    "tasks_approved": false,
+    "current_phase": "initial",
+    "approval_status": null
+  },
+  "version": {
+    "major": 0,
+    "minor": 1,
+    "patch": 0
+  },
+  "tags": [
+    "steering",
+    "knowledge-management"
+  ]
+}

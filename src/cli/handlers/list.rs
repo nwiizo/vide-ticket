@@ -13,6 +13,7 @@ pub fn handle_list_command(
     reverse: bool,
     limit: Option<usize>,
     archived: bool,
+    open: bool,
     since: Option<String>,
     until: Option<String>,
     project_dir: Option<String>,
@@ -34,7 +35,7 @@ pub fn handle_list_command(
 
     // Apply filters
     tickets = filter_tickets(
-        tickets, status, priority, assignee, archived, since_date, until_date,
+        tickets, status, priority, assignee, archived, open, since_date, until_date,
     )?;
 
     // Sort tickets
@@ -157,6 +158,7 @@ fn filter_tickets(
     priority: Option<String>,
     assignee: Option<String>,
     archived: bool,
+    open: bool,
     since: Option<DateTime<Utc>>,
     until: Option<DateTime<Utc>>,
 ) -> Result<Vec<Ticket>> {
@@ -193,6 +195,11 @@ fn filter_tickets(
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false)
         });
+    }
+
+    // Filter by open status (todo, doing)
+    if open {
+        filtered.retain(|t| matches!(t.status, Status::Todo | Status::Doing));
     }
 
     // Filter by date range

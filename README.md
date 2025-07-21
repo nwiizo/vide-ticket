@@ -1,6 +1,8 @@
 # vide-ticket
 
-# Features
+A high-performance ticket management system for Vide Coding environment, built with Rust for maximum speed and reliability.
+
+## Features
 
 - **Fast Performance**: Built with Rust for maximum speed and reliability
 - **Git Integration**: Automatic branch creation and management
@@ -11,6 +13,9 @@
 - **Search & Filter**: Powerful search capabilities with regex support
 - **Archive System**: Keep completed tickets organized
 - **Timestamp-based Naming**: Automatic chronological ordering with YYYYMMDDHHMM prefixes
+- **Open Tickets View**: Quickly view all active tickets (todo/doing status)
+- **Spec-Driven Development**: Built-in support for specifications and requirements tracking
+- **AI Integration**: Claude Code integration with automatic CLAUDE.md generation
 
 ## Installation
 
@@ -26,6 +31,12 @@ cargo build --release
 
 # Install to PATH
 cargo install --path .
+```
+
+### From crates.io (Coming Soon)
+
+```bash
+cargo install vide-ticket
 ```
 
 ### Prerequisites
@@ -85,9 +96,11 @@ Arguments:
 Options:
   -t, --title <TITLE>           Ticket title
   -d, --description <DESC>      Detailed description
-  -p, --priority <PRIORITY>     Priority level [low, medium, high, critical]
+  -P, --priority <PRIORITY>     Priority level [low, medium, high, critical]
   --tags <TAGS>                 Comma-separated tags
   -s, --start                   Start working immediately
+
+Note: Use -P or --priority for priority (not -p, which is for project path)
 ```
 
 Example:
@@ -103,13 +116,14 @@ List tickets with various filtering options.
 vide-ticket list [OPTIONS]
 
 Options:
-  -s, --status <STATUS>         Filter by status [todo, progress, review, done]
-  -p, --priority <PRIORITY>     Filter by priority
+  -s, --status <STATUS>         Filter by status [todo, doing, done, blocked, review]
+  --priority <PRIORITY>         Filter by priority
   -a, --assignee <ASSIGNEE>     Filter by assignee
-  --sort <FIELD>                Sort by field [created, updated, priority, status]
+  --sort <FIELD>                Sort by field [created, updated, priority, status, slug]
   -r, --reverse                 Reverse sort order
   -l, --limit <N>               Limit number of results
   --archived                    Show archived tickets
+  --open                        Show only open tickets (todo, doing)
   --since <DATE>                Show tickets created since date
   --until <DATE>                Show tickets created until date
 ```
@@ -160,6 +174,27 @@ Options:
   --add-tags <TAGS>             Add tags (comma-separated)
   --remove-tags <TAGS>          Remove tags (comma-separated)
   -e, --editor                  Open in text editor
+```
+
+#### `open`
+Show all open tickets (alias for `list --open`). This is a quick way to see tickets that need attention.
+
+```bash
+vide-ticket open [OPTIONS]
+
+Options:
+  --sort <FIELD>                Sort by field [created, updated, priority, status, slug]
+  -r, --reverse                 Reverse sort order
+  -l, --limit <N>               Limit number of results
+```
+
+Example:
+```bash
+# Show all open tickets sorted by update time
+vide-ticket open
+
+# Show high priority open tickets
+vide-ticket open --sort priority -r
 ```
 
 #### `show`
@@ -279,6 +314,28 @@ Options:
   --dry-run                    Preview without importing
 ```
 
+### Configuration Management
+
+#### `config`
+Manage project configuration settings.
+
+```bash
+vide-ticket config <SUBCOMMAND>
+
+Subcommands:
+  show                         Display current configuration
+  set <KEY> <VALUE>           Set configuration value
+  get <KEY>                   Get specific configuration value
+  reset <KEY>                 Reset to default value
+  claude [OPTIONS]            Generate or update CLAUDE.md
+
+Examples:
+  vide-ticket config show
+  vide-ticket config set git.auto_branch true
+  vide-ticket config get project.default_priority
+  vide-ticket config claude --template advanced
+```
+
 ### Utility Commands
 
 #### `check`
@@ -342,23 +399,65 @@ CSV exports include the following columns:
 Project configuration is stored in `.vide-ticket/config.yaml`:
 
 ```yaml
-name: "My Project"
-description: "Project description"
-created_at: "2025-07-20T00:00:00Z"
-default_priority: "medium"
-auto_archive: true
-archive_after_days: 30
+project:
+  name: "My Project"
+  description: "Project description"
+  default_assignee: null
+  default_priority: "medium"
+
+git:
+  enabled: true
+  auto_branch: true
+  branch_prefix: "ticket/"
+  remote: "origin"
+
+ui:
+  theme: "auto"
+  emoji: true
+  page_size: 20
+  date_format: "%Y-%m-%d %H:%M"
+
+archive:
+  auto_archive: false
+  archive_after_days: 30
+
+export:
+  default_format: "json"
+  include_archived: false
 ```
+
+### Configuration Keys
+
+- `project.name`: Project name
+- `project.description`: Project description
+- `project.default_assignee`: Default assignee for new tickets
+- `project.default_priority`: Default priority (low, medium, high, critical)
+- `git.enabled`: Enable Git integration
+- `git.auto_branch`: Automatically create branches when starting tickets
+- `git.branch_prefix`: Prefix for Git branches
+- `ui.emoji`: Enable emoji in output
+- `ui.page_size`: Number of items per page in lists
+- `archive.auto_archive`: Automatically archive completed tickets
+- `archive.archive_after_days`: Days before auto-archiving
 
 ## File Structure
 
 ```
 .vide-ticket/
 ├── config.yaml          # Project configuration
-├── active              # Active ticket ID
-└── tickets/            # Ticket YAML files
-    ├── <ticket-id>.yaml
-    └── ...
+├── state.yaml          # Project state and metadata
+├── active_ticket       # Currently active ticket ID
+├── tickets/            # Ticket YAML files
+│   ├── <ticket-id>.yaml
+│   └── ...
+├── specs/              # Specification files
+│   ├── <spec-id>.yaml
+│   └── ...
+├── templates/          # Custom ticket templates
+│   ├── bug.yaml
+│   └── feature.yaml
+├── plugins/            # Plugin extensions
+└── backups/            # Backup files
 ```
 
 ## Tips and Best Practices
