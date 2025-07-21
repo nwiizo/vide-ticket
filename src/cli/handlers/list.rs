@@ -146,8 +146,7 @@ fn parse_date_filter(date_str: &str) -> Result<DateTime<Utc>> {
     }
 
     Err(VibeTicketError::custom(format!(
-        "Invalid date format: '{}'. Use formats like 'yesterday', '2 hours ago', '3 days ago', or 'YYYY-MM-DD'",
-        date_str
+        "Invalid date format: '{date_str}'. Use formats like 'yesterday', '2 hours ago', '3 days ago', or 'YYYY-MM-DD'"
     )))
 }
 
@@ -192,7 +191,7 @@ fn filter_tickets(
         filtered.retain(|t| {
             !t.metadata
                 .get("archived")
-                .and_then(|v| v.as_bool())
+                .and_then(serde_json::Value::as_bool)
                 .unwrap_or(false)
         });
     }

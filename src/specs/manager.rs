@@ -16,7 +16,7 @@ pub struct SpecManager {
 
 impl SpecManager {
     /// Create a new spec manager
-    pub fn new(specs_dir: PathBuf) -> Self {
+    pub const fn new(specs_dir: PathBuf) -> Self {
         Self {
             ops: DocumentOperations::new(FileSystemStore, specs_dir),
         }
@@ -32,7 +32,7 @@ impl SpecManager {
         self.initialize()?;
 
         let metadata = SpecMetadata::new(title, description);
-        
+
         // Save initial metadata
         self.save_metadata(&metadata)?;
 
@@ -42,12 +42,12 @@ impl SpecManager {
     /// Load a specification by ID
     pub fn load_spec(&self, spec_id: &str) -> Result<Specification> {
         let metadata = self.load_metadata(spec_id)?;
-        
+
         // Load document contents
         let requirements = self.load_document(spec_id, SpecDocumentType::Requirements)?;
         let design = self.load_document(spec_id, SpecDocumentType::Design)?;
         let tasks = self.load_document(spec_id, SpecDocumentType::Tasks)?;
-        
+
         Ok(Specification {
             metadata,
             requirements,
@@ -64,8 +64,9 @@ impl SpecManager {
         content: &str,
     ) -> Result<()> {
         // Save document
-        self.ops.save_text_in_subdir(spec_id, doc_type.file_name(), content)?;
-        
+        self.ops
+            .save_text_in_subdir(spec_id, doc_type.file_name(), content)?;
+
         // Update metadata
         let mut metadata = self.load_metadata(spec_id)?;
         match doc_type {
@@ -92,15 +93,15 @@ impl SpecManager {
     pub fn list_specs(&self) -> Result<Vec<SpecMetadata>> {
         let spec_dirs = self.ops.list_subdirs()?;
         let mut specs = Vec::new();
-        
+
         for spec_dir in spec_dirs {
             if let Some(dir_name) = spec_dir.file_name() {
                 if let Some(spec_id) = dir_name.to_str() {
                     match self.load_metadata(spec_id) {
                         Ok(metadata) => specs.push(metadata),
                         Err(e) => {
-                            eprintln!("Warning: Failed to load spec {}: {}", spec_id, e);
-                        }
+                            eprintln!("Warning: Failed to load spec {spec_id}: {e}");
+                        },
                     }
                 }
             }
@@ -115,7 +116,7 @@ impl SpecManager {
     /// Approve a document phase
     pub fn approve_phase(&self, spec_id: &str, phase: SpecPhase) -> Result<()> {
         let mut metadata = self.load_metadata(spec_id)?;
-        
+
         // Validate phase can be approved
         match phase {
             SpecPhase::Requirements => {
@@ -169,12 +170,9 @@ impl SpecManager {
     }
 
     /// Load a document from a spec directory
-    fn load_document(
-        &self,
-        spec_id: &str,
-        doc_type: SpecDocumentType,
-    ) -> Result<Option<String>> {
-        self.ops.load_text_from_subdir(spec_id, doc_type.file_name())
+    fn load_document(&self, spec_id: &str, doc_type: SpecDocumentType) -> Result<Option<String>> {
+        self.ops
+            .load_text_from_subdir(spec_id, doc_type.file_name())
     }
 
     /// Find spec by title (partial match)
@@ -193,54 +191,51 @@ impl SpecManager {
 
         if !spec_dir.exists() {
             return Err(VibeTicketError::custom(format!(
-                "Specification not found: {}",
-                spec_id
+                "Specification not found: {spec_id}"
             )));
         }
-        
-        std::fs::remove_dir_all(&spec_dir)
-            .map_err(|e| VibeTicketError::custom(format!(
-                "Failed to delete specification: {}",
-                e
-            )))?;
-        
+
+        std::fs::remove_dir_all(&spec_dir).map_err(|e| {
+            VibeTicketError::custom(format!("Failed to delete specification: {e}"))
+        })?;
+
         Ok(())
     }
-    
+
     /// Set active specification
     pub fn set_active_spec(&self, spec_id: &str) -> Result<()> {
         // Verify spec exists
         self.load_metadata(spec_id)?;
-        
-        let active_file = self.ops.base_dir().parent()
+
+        let active_file = self
+            .ops
+            .base_dir()
+            .parent()
             .ok_or_else(|| VibeTicketError::custom("Invalid specs directory structure"))?
             .join(".active_spec");
-        
+
         std::fs::write(&active_file, spec_id)
-            .map_err(|e| VibeTicketError::custom(format!(
-                "Failed to set active spec: {}",
-                e
-            )))?;
-        
+            .map_err(|e| VibeTicketError::custom(format!("Failed to set active spec: {e}")))?;
+
         Ok(())
     }
-    
+
     /// Get active specification ID
     pub fn get_active_spec(&self) -> Result<Option<String>> {
-        let active_file = self.ops.base_dir().parent()
+        let active_file = self
+            .ops
+            .base_dir()
+            .parent()
             .ok_or_else(|| VibeTicketError::custom("Invalid specs directory structure"))?
             .join(".active_spec");
-        
+
         if !active_file.exists() {
             return Ok(None);
         }
-        
+
         let content = std::fs::read_to_string(&active_file)
-            .map_err(|e| VibeTicketError::custom(format!(
-                "Failed to read active spec: {}",
-                e
-            )))?;
-        
+            .map_err(|e| VibeTicketError::custom(format!("Failed to read active spec: {e}")))?;
+
         let spec_id = content.trim();
         if spec_id.is_empty() {
             Ok(None)
@@ -248,17 +243,21 @@ impl SpecManager {
             Ok(Some(spec_id.to_string()))
         }
     }
-    
+
     // Compatibility methods
-    
+
     /// Save a complete specification
     pub fn save(&self, spec: &Specification) -> Result<()> {
         // Save metadata
         self.save_metadata(&spec.metadata)?;
-        
+
         // Save documents if present
         if let Some(ref requirements) = spec.requirements {
-            self.save_document(&spec.metadata.id, SpecDocumentType::Requirements, requirements)?;
+            self.save_document(
+                &spec.metadata.id,
+                SpecDocumentType::Requirements,
+                requirements,
+            )?;
         }
         if let Some(ref design) = spec.design {
             self.save_document(&spec.metadata.id, SpecDocumentType::Design, design)?;
@@ -269,22 +268,22 @@ impl SpecManager {
 
         Ok(())
     }
-    
-    /// Load a specification (alias for load_spec)
+
+    /// Load a specification (alias for `load_spec`)
     pub fn load(&self, spec_id: &str) -> Result<Specification> {
         self.load_spec(spec_id)
     }
-    
-    /// List specifications (alias for list_specs)
+
+    /// List specifications (alias for `list_specs`)
     pub fn list(&self) -> Result<Vec<SpecMetadata>> {
         self.list_specs()
     }
-    
-    /// Delete a specification (alias for delete_spec)
+
+    /// Delete a specification (alias for `delete_spec`)
     pub fn delete(&self, spec_id: &str) -> Result<()> {
         self.delete_spec(spec_id)
     }
-    
+
     /// Get document path
     pub fn get_document_path(&self, spec_id: &str, doc_type: SpecDocumentType) -> PathBuf {
         self.get_spec_dir(spec_id).join(doc_type.file_name())
@@ -335,14 +334,14 @@ pub fn get_document_path(
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     fn create_test_manager() -> (SpecManager, TempDir) {
         let temp_dir = TempDir::new().unwrap();
         let specs_dir = temp_dir.path().join("specs");
         let manager = SpecManager::new(specs_dir);
         (manager, temp_dir)
     }
-    
+
     #[test]
     fn test_spec_manager_creation() {
         let (manager, _temp) = create_test_manager();
@@ -352,12 +351,11 @@ mod tests {
     #[test]
     fn test_create_and_load_spec() {
         let (manager, _temp) = create_test_manager();
-        
-        let metadata = manager.create_spec(
-            "Test Spec".to_string(),
-            "Test description".to_string()
-        ).unwrap();
-        
+
+        let metadata = manager
+            .create_spec("Test Spec".to_string(), "Test description".to_string())
+            .unwrap();
+
         let loaded = manager.load_spec(&metadata.id).unwrap();
         assert_eq!(loaded.metadata.title, "Test Spec");
         assert_eq!(loaded.metadata.description, "Test description");
@@ -366,25 +364,24 @@ mod tests {
     #[test]
     fn test_save_and_load_documents() {
         let (manager, _temp) = create_test_manager();
-        
-        let metadata = manager.create_spec(
-            "Test Spec".to_string(),
-            "Test description".to_string()
-        ).unwrap();
-        
+
+        let metadata = manager
+            .create_spec("Test Spec".to_string(), "Test description".to_string())
+            .unwrap();
+
         // Save documents
-        manager.save_document(
-            &metadata.id,
-            SpecDocumentType::Requirements,
-            "Test requirements"
-        ).unwrap();
-        
-        manager.save_document(
-            &metadata.id,
-            SpecDocumentType::Design,
-            "Test design"
-        ).unwrap();
-        
+        manager
+            .save_document(
+                &metadata.id,
+                SpecDocumentType::Requirements,
+                "Test requirements",
+            )
+            .unwrap();
+
+        manager
+            .save_document(&metadata.id, SpecDocumentType::Design, "Test design")
+            .unwrap();
+
         // Load spec and verify documents
         let spec = manager.load_spec(&metadata.id).unwrap();
         assert_eq!(spec.requirements, Some("Test requirements".to_string()));

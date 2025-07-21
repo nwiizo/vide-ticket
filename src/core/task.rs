@@ -7,7 +7,7 @@ use super::TaskId;
 ///
 /// Tasks are smaller units of work that can be tracked
 /// independently within a ticket.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Task {
     /// Unique identifier for the task
     pub id: TaskId,

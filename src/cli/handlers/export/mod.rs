@@ -22,7 +22,7 @@ pub use self::yaml::YamlExporter;
 pub trait Exporter {
     /// Export tickets to the target format
     fn export(&self, tickets: &[Ticket]) -> Result<String>;
-    
+
     /// Get the format name for display
     fn format_name(&self) -> &'static str;
 }
@@ -45,18 +45,17 @@ pub fn handle_export_command(
         "markdown" | "md" => Box::new(MarkdownExporter),
         _ => {
             return Err(VibeTicketError::custom(format!(
-                "Unsupported export format: {}. Supported formats: json, yaml, csv, markdown",
-                format
+                "Unsupported export format: {format}. Supported formats: json, yaml, csv, markdown"
             )))
-        }
+        },
     };
 
     // Load and filter tickets
     let tickets = load_tickets(project_dir, include_archived)?;
-    
+
     // Export using the appropriate exporter
     let content = exporter.export(&tickets)?;
-    
+
     // Output results
     output_results(
         content,
@@ -73,22 +72,22 @@ fn load_tickets(project_dir: Option<String>, include_archived: bool) -> Result<V
     let project_root = find_project_root(project_dir.as_deref())?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
     let storage = FileStorage::new(&vibe_ticket_dir);
-    
+
     let mut tickets = storage.load_all()?;
-    
+
     // Filter out archived tickets if not included
     if !include_archived {
         tickets.retain(|t| {
             !t.metadata
                 .get("archived")
-                .and_then(|v| v.as_bool())
+                .and_then(serde_json::Value::as_bool)
                 .unwrap_or(false)
         });
     }
-    
+
     // Sort tickets by creation date
     tickets.sort_by(|a, b| a.created_at.cmp(&b.created_at));
-    
+
     Ok(tickets)
 }
 
@@ -103,10 +102,10 @@ fn output_results(
 ) -> Result<()> {
     if let Some(path) = output_path {
         std::fs::write(&path, content)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to write to {}: {}", path, e)))?;
+            .map_err(|e| VibeTicketError::custom(format!("Failed to write to {path}: {e}")))?;
 
-        output.success(&format!("Exported {} tickets to {}", ticket_count, path));
-        output.info(&format!("Format: {}", format_name));
+        output.success(&format!("Exported {ticket_count} tickets to {path}"));
+        output.info(&format!("Format: {format_name}"));
         if !include_archived {
             output.info(
                 "Note: Archived tickets were excluded. Use --include-archived to include them.",
@@ -114,9 +113,9 @@ fn output_results(
         }
     } else {
         // Output to stdout
-        println!("{}", content);
+        println!("{content}");
     }
-    
+
     Ok(())
 }
 

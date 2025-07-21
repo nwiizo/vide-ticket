@@ -39,6 +39,12 @@ pub mod test {
         ticket: Ticket,
     }
 
+    impl Default for TestTicketBuilder {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
     impl TestTicketBuilder {
         pub fn new() -> Self {
             Self {
@@ -67,7 +73,7 @@ pub mod test {
         }
 
         pub fn with_tags(mut self, tags: Vec<&str>) -> Self {
-            self.ticket.tags = tags.into_iter().map(|s| s.to_string()).collect();
+            self.ticket.tags = tags.into_iter().map(std::string::ToString::to_string).collect();
             self
         }
 

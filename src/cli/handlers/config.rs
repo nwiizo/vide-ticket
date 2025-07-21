@@ -79,10 +79,10 @@ fn handle_show(
             output.info("[project]");
             output.info(&format!("  name: {}", config.project.name));
             if let Some(desc) = &config.project.description {
-                output.info(&format!("  description: {}", desc));
+                output.info(&format!("  description: {desc}"));
             }
             if let Some(assignee) = &config.project.default_assignee {
-                output.info(&format!("  default_assignee: {}", assignee));
+                output.info(&format!("  default_assignee: {assignee}"));
             }
             output.info(&format!(
                 "  default_priority: {}",
@@ -104,7 +104,7 @@ fn handle_show(
             output.info(&format!("  branch_prefix: {}", config.git.branch_prefix));
             output.info(&format!("  auto_branch: {}", config.git.auto_branch));
             if let Some(template) = &config.git.commit_template {
-                output.info(&format!("  commit_template: {}", template));
+                output.info(&format!("  commit_template: {template}"));
             }
             output.info("");
 
@@ -140,7 +140,7 @@ fn handle_set(
             "value": value,
         }))?;
     } else {
-        output.success(&format!("Set {} = {}", key, value));
+        output.success(&format!("Set {key} = {value}"));
     }
 
     Ok(())
@@ -204,8 +204,7 @@ fn get_config_value(config: &Config, key: &str) -> Result<serde_json::Value> {
             Some(value) => current = value,
             None => {
                 return Err(VibeTicketError::custom(format!(
-                    "Configuration key '{}' not found",
-                    key
+                    "Configuration key '{key}' not found"
                 )))
             },
         }
@@ -264,8 +263,7 @@ fn set_config_value(config: &mut Config, key: &str, value: &str) -> Result<()> {
         "plugins.directory" => config.plugins.directory = value.to_string(),
         _ => {
             return Err(VibeTicketError::custom(format!(
-                "Configuration key '{}' cannot be set or doesn't exist",
-                key
+                "Configuration key '{key}' cannot be set or doesn't exist"
             )))
         },
     }
@@ -301,8 +299,7 @@ fn handle_claude(
         "advanced" => generate_advanced_claude_md(&config, project_root)?,
         _ => {
             return Err(VibeTicketError::custom(format!(
-                "Unknown template '{}'. Available templates: basic, advanced",
-                template
+                "Unknown template '{template}'. Available templates: basic, advanced"
             )))
         },
     };
@@ -310,7 +307,7 @@ fn handle_claude(
     // Write or append content
     if append && claude_path.exists() {
         let existing = fs::read_to_string(&claude_path)?;
-        let combined = format!("{}\n\n{}", existing, content);
+        let combined = format!("{existing}\n\n{content}");
         fs::write(&claude_path, combined)?;
 
         if output.is_json() {
@@ -346,7 +343,7 @@ fn handle_claude(
 fn generate_basic_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
     use crate::storage::{FileStorage, TicketRepository};
 
-    let storage = FileStorage::new(&project_root.join(".vibe-ticket"));
+    let storage = FileStorage::new(project_root.join(".vibe-ticket"));
     let tickets = storage.load_all().unwrap_or_default();
     let active_tickets = tickets
         .iter()
@@ -453,8 +450,7 @@ Generated on: {}
 fn generate_advanced_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
     let basic = generate_basic_claude_md(config, project_root)?;
 
-    let advanced_section = format!(
-        r#"
+    let advanced_section = r#"
 ## Advanced Features
 
 ### Git Worktree Support
@@ -527,10 +523,9 @@ vibe-ticket --verbose <command>
 # Check project status
 vibe-ticket check --detailed
 ```
-"#
-    );
+"#.to_string();
 
-    Ok(format!("{}\n{}", basic, advanced_section))
+    Ok(format!("{basic}\n{advanced_section}"))
 }
 
 /// Format a JSON value for display
@@ -540,7 +535,7 @@ fn format_value(value: &serde_json::Value) -> String {
         serde_json::Value::Bool(b) => b.to_string(),
         serde_json::Value::Number(n) => n.to_string(),
         serde_json::Value::Array(arr) => {
-            let items: Vec<String> = arr.iter().map(|v| format_value(v)).collect();
+            let items: Vec<String> = arr.iter().map(format_value).collect();
             format!("[{}]", items.join(", "))
         },
         serde_json::Value::Null => "null".to_string(),

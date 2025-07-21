@@ -14,7 +14,7 @@ use chrono::Utc;
 /// This function performs the following operations:
 /// 1. Loads the specified ticket (or active ticket if none specified)
 /// 2. Updates the ticket status to "done"
-/// 3. Sets the closed_at timestamp
+/// 3. Sets the `closed_at` timestamp
 /// 4. Clears the active ticket if it was the one being closed
 /// 5. Optionally archives the ticket
 /// 6. Optionally creates a pull request
@@ -134,7 +134,7 @@ pub fn handle_close_command(
         output.info(&format!("Status: {} → {}", previous_status, Status::Done));
 
         if let Some(msg) = message {
-            output.info(&format!("Close message: {}", msg));
+            output.info(&format!("Close message: {msg}"));
         }
 
         if archive {
@@ -151,7 +151,7 @@ pub fn handle_close_command(
                 let duration = closed_at - started_at;
                 let hours = duration.num_hours();
                 let minutes = duration.num_minutes() % 60;
-                output.info(&format!("\nTime spent: {}h {}m", hours, minutes));
+                output.info(&format!("\nTime spent: {hours}h {minutes}m"));
             }
         }
     }
@@ -197,7 +197,7 @@ fn create_pull_request(
         .arg("HEAD")
         .current_dir(project_root)
         .output()
-        .map_err(|e| VibeTicketError::custom(format!("Failed to get current branch: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to get current branch: {e}")))?;
 
     if !current_branch.status.success() {
         return Err(VibeTicketError::custom("Failed to get current branch name"));
@@ -215,8 +215,7 @@ fn create_pull_request(
             "GitHub CLI (gh) not found. Please install it to create pull requests automatically.",
         );
         output.info(&format!(
-            "You can create a pull request manually for branch: {}",
-            branch_name
+            "You can create a pull request manually for branch: {branch_name}"
         ));
         return Ok(());
     }
@@ -246,16 +245,16 @@ fn create_pull_request(
         .arg(&branch_name)
         .current_dir(project_root)
         .output()
-        .map_err(|e| VibeTicketError::custom(format!("Failed to create PR: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to create PR: {e}")))?;
 
     if create_pr.status.success() {
         let pr_url = String::from_utf8_lossy(&create_pr.stdout)
             .trim()
             .to_string();
-        output.success(&format!("Created pull request: {}", pr_url));
+        output.success(&format!("Created pull request: {pr_url}"));
     } else {
         let error_msg = String::from_utf8_lossy(&create_pr.stderr);
-        output.warning(&format!("Failed to create pull request: {}", error_msg));
+        output.warning(&format!("Failed to create pull request: {error_msg}"));
         output.info("You can create the pull request manually");
     }
 
@@ -268,6 +267,6 @@ mod tests {
     #[test]
     fn test_close_message_formatting() {
         let message = "Fixed the login bug and added tests";
-        assert!(message.len() > 0);
+        assert!(!message.is_empty());
     }
 }

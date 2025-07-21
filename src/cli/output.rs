@@ -1,6 +1,6 @@
-use colored::*;
+use colored::{ColoredString, Colorize};
 use serde::Serialize;
-use std::io::Write;
+use std::io::Write as IoWrite;
 
 use crate::core::{Priority, Status, Ticket};
 use crate::error::Result;
@@ -22,7 +22,7 @@ impl OutputFormatter {
     }
 
     /// Check if JSON output is enabled
-    pub fn is_json(&self) -> bool {
+    pub const fn is_json(&self) -> bool {
         self.json
     }
 
@@ -106,7 +106,7 @@ impl OutputFormatter {
     /// Prints data as JSON
     pub fn print_json<T: Serialize + ?Sized>(&self, data: &T) -> Result<()> {
         let json = serde_json::to_string_pretty(data)?;
-        println!("{}", json);
+        println!("{json}");
         Ok(())
     }
 
@@ -259,7 +259,7 @@ fn truncate(s: &str, max_len: usize) -> String {
         s.to_string()
     } else {
         let truncated: String = s.chars().take(max_len - 3).collect();
-        format!("{}...", truncated)
+        format!("{truncated}...")
     }
 }
 

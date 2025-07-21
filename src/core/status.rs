@@ -75,27 +75,27 @@ impl Status {
     }
 
     /// Returns whether the status represents active work
-    pub fn is_active(&self) -> bool {
+    pub const fn is_active(&self) -> bool {
         matches!(self, Self::Doing | Self::Review)
     }
 
     /// Returns whether the status represents completed work
-    pub fn is_completed(&self) -> bool {
+    pub const fn is_completed(&self) -> bool {
         matches!(self, Self::Done)
     }
 
     /// Returns whether the status allows starting work
-    pub fn can_start(&self) -> bool {
+    pub const fn can_start(&self) -> bool {
         matches!(self, Self::Todo | Self::Blocked)
     }
 
     /// Returns the emoji representation of the status
-    pub fn emoji(&self) -> &'static str {
+    pub const fn emoji(&self) -> &'static str {
         self.visual().emoji
     }
 
     /// Returns the color code for terminal output
-    pub fn color(&self) -> &'static str {
+    pub const fn color(&self) -> &'static str {
         self.visual().color
     }
 }
@@ -122,7 +122,7 @@ impl TryFrom<&str> for Status {
             "done" | "completed" | "closed" => Ok(Self::Done),
             "blocked" => Ok(Self::Blocked),
             "review" | "reviewing" => Ok(Self::Review),
-            _ => Err(format!("Invalid status: {}", value)),
+            _ => Err(format!("Invalid status: {value}")),
         }
     }
 }

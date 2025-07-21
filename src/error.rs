@@ -111,7 +111,7 @@ impl VibeTicketError {
     }
 
     /// Returns true if this error is recoverable
-    pub fn is_recoverable(&self) -> bool {
+    pub const fn is_recoverable(&self) -> bool {
         matches!(
             self,
             Self::TicketNotFound { .. }
@@ -122,7 +122,7 @@ impl VibeTicketError {
     }
 
     /// Returns true if this error is a configuration issue
-    pub fn is_config_error(&self) -> bool {
+    pub const fn is_config_error(&self) -> bool {
         matches!(
             self,
             Self::Config(_) | Self::ProjectNotInitialized | Self::ProjectAlreadyInitialized { .. }
@@ -193,7 +193,7 @@ where
     fn context(self, msg: &str) -> Result<T> {
         self.map_err(|e| {
             let base_error = e.into();
-            VibeTicketError::Custom(format!("{}: {}", msg, base_error))
+            VibeTicketError::Custom(format!("{msg}: {base_error}"))
         })
     }
 

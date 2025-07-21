@@ -32,11 +32,11 @@ pub fn handle_new_command(
     validate_slug(base_slug)?;
 
     // Combine timestamp and slug
-    let slug = format!("{}-{}", timestamp_prefix, base_slug);
+    let slug = format!("{timestamp_prefix}-{base_slug}");
 
     // Check if a ticket with this slug already exists
     if storage.ticket_exists_with_slug(&slug)? {
-        return Err(VibeTicketError::DuplicateTicket { slug: slug.clone() });
+        return Err(VibeTicketError::DuplicateTicket { slug });
     }
 
     // Parse priority

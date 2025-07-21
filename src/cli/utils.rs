@@ -11,7 +11,7 @@ pub fn find_project_root(start_dir: Option<&str>) -> Result<PathBuf> {
     let start = if let Some(dir) = start_dir {
         PathBuf::from(dir)
     } else {
-        env::current_dir().map_err(|e| VibeTicketError::Io(e))?
+        env::current_dir().map_err(VibeTicketError::Io)?
     };
 
     let mut current = start.as_path();
@@ -97,9 +97,9 @@ pub fn get_editor() -> String {
 pub fn parse_tags(tags_str: &str) -> Vec<String> {
     tags_str
         .split(',')
-        .map(|s| s.trim())
+        .map(str::trim)
         .filter(|s| !s.is_empty())
-        .map(|s| s.to_string())
+        .map(std::string::ToString::to_string)
         .collect()
 }
 
@@ -110,11 +110,11 @@ pub fn format_duration(duration: chrono::Duration) -> String {
     let minutes = duration.num_minutes() % 60;
 
     if days > 0 {
-        format!("{}d {}h", days, hours)
+        format!("{days}d {hours}h")
     } else if hours > 0 {
-        format!("{}h {}m", hours, minutes)
+        format!("{hours}h {minutes}m")
     } else {
-        format!("{}m", minutes)
+        format!("{minutes}m")
     }
 }
 

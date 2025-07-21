@@ -20,12 +20,12 @@ macro_rules! define_id_type {
             }
 
             /// Creates an ID from a UUID
-            pub fn from_uuid(uuid: Uuid) -> Self {
+            pub const fn from_uuid(uuid: Uuid) -> Self {
                 Self(uuid)
             }
 
             /// Returns the inner UUID
-            pub fn as_uuid(&self) -> &Uuid {
+            pub const fn as_uuid(&self) -> &Uuid {
                 &self.0
             }
 

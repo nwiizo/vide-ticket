@@ -101,7 +101,7 @@ pub fn handle_check_command(
         // Display project information
         output.info(&format!("Project: {}", project_state.name));
         if let Some(desc) = &project_state.description {
-            output.info(&format!("Description: {}", desc));
+            output.info(&format!("Description: {desc}"));
         }
         output.info(&format!("Path: {}", project_root.display()));
         output.info(&format!(
@@ -111,7 +111,7 @@ pub fn handle_check_command(
 
         // Display Git branch
         if let Some(branch) = &current_branch {
-            output.info(&format!("Git branch: {}", branch));
+            output.info(&format!("Git branch: {branch}"));
         }
 
         output.info("");
@@ -129,7 +129,7 @@ pub fn handle_check_command(
                 let duration = Utc::now() - started_at;
                 let hours = duration.num_hours();
                 let minutes = duration.num_minutes() % 60;
-                output.info(&format!("  Time spent: {}h {}m", hours, minutes));
+                output.info(&format!("  Time spent: {hours}h {minutes}m"));
             }
 
             if !ticket.tasks.is_empty() {
@@ -285,6 +285,6 @@ mod tests {
     fn test_format_datetime() {
         let dt = Utc::now();
         let formatted = format_datetime(dt);
-        assert!(formatted.len() > 0);
+        assert!(!formatted.is_empty());
     }
 }

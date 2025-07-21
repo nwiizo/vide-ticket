@@ -24,9 +24,9 @@ impl Exporter for YamlExporter {
         };
 
         serde_yaml::to_string(&export)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to serialize to YAML: {}", e)))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to serialize to YAML: {e}")))
     }
-    
+
     fn format_name(&self) -> &'static str {
         "YAML"
     }

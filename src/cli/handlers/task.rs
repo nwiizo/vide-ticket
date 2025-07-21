@@ -46,7 +46,7 @@ pub fn handle_task_add(
     let mut ticket = storage.load(&ticket_id)?;
 
     // Create new task
-    let task = Task::new(title.clone());
+    let task = Task::new(title);
     ticket.tasks.push(task.clone());
 
     // Save the updated ticket
@@ -113,7 +113,7 @@ pub fn handle_task_complete(
 
     // Parse task ID
     let task_id = TaskId::parse_str(&task_id)
-        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
+        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {task_id}")))?;
 
     // Find and complete the task
     let mut task_found = false;
@@ -131,8 +131,7 @@ pub fn handle_task_complete(
 
     if !task_found {
         return Err(VibeTicketError::custom(format!(
-            "Task '{}' not found in ticket",
-            task_id
+            "Task '{task_id}' not found in ticket"
         )));
     }
 
@@ -159,8 +158,7 @@ pub fn handle_task_complete(
     } else {
         output.success(&format!("Completed task in ticket '{}'", ticket.slug));
         output.info(&format!(
-            "Progress: {}/{} tasks completed",
-            completed_count, total_count
+            "Progress: {completed_count}/{total_count} tasks completed"
         ));
 
         if completed_count == total_count && total_count > 0 {
@@ -209,7 +207,7 @@ pub fn handle_task_uncomplete(
 
     // Parse task ID
     let task_id = TaskId::parse_str(&task_id)
-        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
+        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {task_id}")))?;
 
     // Find and uncomplete the task
     let mut task_found = false;
@@ -227,8 +225,7 @@ pub fn handle_task_uncomplete(
 
     if !task_found {
         return Err(VibeTicketError::custom(format!(
-            "Task '{}' not found in ticket",
-            task_id
+            "Task '{task_id}' not found in ticket"
         )));
     }
 
@@ -258,8 +255,7 @@ pub fn handle_task_uncomplete(
             ticket.slug
         ));
         output.info(&format!(
-            "Progress: {}/{} tasks completed",
-            completed_count, total_count
+            "Progress: {completed_count}/{total_count} tasks completed"
         ));
     }
 
@@ -339,8 +335,7 @@ pub fn handle_task_list(
         output.info(&format!("Tasks for ticket: {}", ticket.slug));
         output.info(&format!("Title: {}", ticket.title));
         output.info(&format!(
-            "Progress: {}/{} completed",
-            completed_count, total_count
+            "Progress: {completed_count}/{total_count} completed"
         ));
 
         if tasks.is_empty() {
@@ -404,7 +399,7 @@ pub fn handle_task_remove(
 
     // Parse task ID
     let task_id = TaskId::parse_str(&task_id)
-        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {}", task_id)))?;
+        .map_err(|_| VibeTicketError::custom(format!("Invalid task ID: {task_id}")))?;
 
     // Find the task
     let task_index = ticket
@@ -412,7 +407,7 @@ pub fn handle_task_remove(
         .iter()
         .position(|t| t.id == task_id)
         .ok_or_else(|| {
-            VibeTicketError::custom(format!("Task '{}' not found in ticket", task_id))
+            VibeTicketError::custom(format!("Task '{task_id}' not found in ticket"))
         })?;
 
     let task = &ticket.tasks[task_index];

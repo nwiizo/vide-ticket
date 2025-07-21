@@ -14,7 +14,7 @@ pub struct FileStorage {
 }
 
 impl FileStorage {
-    /// Creates a new FileStorage instance
+    /// Creates a new `FileStorage` instance
     pub fn new(base_dir: impl Into<PathBuf>) -> Self {
         Self {
             base_dir: base_dir.into(),
@@ -28,7 +28,7 @@ impl FileStorage {
 
     /// Returns the path to a specific ticket file
     fn ticket_path(&self, id: &TicketId) -> PathBuf {
-        self.tickets_dir().join(format!("{}.yaml", id))
+        self.tickets_dir().join(format!("{id}.yaml"))
     }
 
     /// Returns the path to the active ticket file
@@ -48,7 +48,7 @@ impl FileStorage {
 
     /// Ensures the storage directories exist
     pub fn ensure_directories(&self) -> Result<()> {
-        fs::create_dir_all(&self.tickets_dir()).context("Failed to create tickets directory")?;
+        fs::create_dir_all(self.tickets_dir()).context("Failed to create tickets directory")?;
         Ok(())
     }
 
@@ -59,7 +59,7 @@ impl FileStorage {
         let path = self.ticket_path(&ticket.id);
         let yaml = serde_yaml::to_string(ticket).context("Failed to serialize ticket")?;
 
-        fs::write(&path, yaml).with_context(|| format!("Failed to write ticket to {:?}", path))?;
+        fs::write(&path, yaml).with_context(|| format!("Failed to write ticket to {path:?}"))?;
 
         Ok(())
     }
@@ -73,7 +73,7 @@ impl FileStorage {
         }
 
         let yaml = fs::read_to_string(&path)
-            .with_context(|| format!("Failed to read ticket from {:?}", path))?;
+            .with_context(|| format!("Failed to read ticket from {path:?}"))?;
 
         let ticket: Ticket = serde_yaml::from_str(&yaml).context("Failed to deserialize ticket")?;
 
@@ -96,13 +96,13 @@ impl FileStorage {
 
             if path.extension().and_then(|s| s.to_str()) == Some("yaml") {
                 let yaml = fs::read_to_string(&path)
-                    .with_context(|| format!("Failed to read {:?}", path))?;
+                    .with_context(|| format!("Failed to read {path:?}"))?;
 
                 match serde_yaml::from_str::<Ticket>(&yaml) {
                     Ok(ticket) => tickets.push(ticket),
                     Err(e) => {
                         // Log error but continue loading other tickets
-                        eprintln!("Warning: Failed to load ticket from {:?}: {}", path, e);
+                        eprintln!("Warning: Failed to load ticket from {path:?}: {e}");
                     },
                 }
             }
@@ -119,7 +119,7 @@ impl FileStorage {
             return Err(VibeTicketError::TicketNotFound { id: id.to_string() });
         }
 
-        fs::remove_file(&path).with_context(|| format!("Failed to delete ticket at {:?}", path))?;
+        fs::remove_file(&path).with_context(|| format!("Failed to delete ticket at {path:?}"))?;
 
         Ok(())
     }

@@ -85,7 +85,7 @@ pub fn handle_init(
     let config_content =
         serde_yaml::to_string(&config).context("Failed to serialize configuration")?;
     fs::write(&config_path, config_content)
-        .with_context(|| format!("Failed to write config to {:?}", config_path))?;
+        .with_context(|| format!("Failed to write config to {config_path:?}"))?;
 
     progress.set_message("Initializing repository");
 
@@ -120,8 +120,7 @@ pub fn handle_init(
 
     // Display success message
     formatter.success(&format!(
-        "Initialized vibe-ticket project '{}'",
-        project_name
+        "Initialized vibe-ticket project '{project_name}'"
     ));
 
     if formatter.is_json() {
@@ -136,7 +135,7 @@ pub fn handle_init(
     } else {
         formatter.info(&format!("Project directory: {}", current_dir.display()));
         if let Some(desc) = &description {
-            formatter.info(&format!("Description: {}", desc));
+            formatter.info(&format!("Description: {desc}"));
         }
         if claude_md {
             formatter.info("Generated CLAUDE.md for AI assistance");
@@ -168,7 +167,7 @@ fn create_directory_structure(project_dir: &Path) -> Result<()> {
     ];
 
     for dir in directories {
-        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory {:?}", dir))?;
+        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory {dir:?}"))?;
     }
 
     Ok(())
@@ -181,7 +180,7 @@ fn create_default_templates(project_dir: &Path) -> Result<()> {
     let templates_dir = project_dir.join("templates");
 
     // Default ticket template
-    let ticket_template = r#"# {{ title }}
+    let ticket_template = r"# {{ title }}
 
 ## Description
 {{ description }}
@@ -199,13 +198,13 @@ fn create_default_templates(project_dir: &Path) -> Result<()> {
 Created: {{ created_at }}
 Status: {{ status }}
 Priority: {{ priority }}
-"#;
+";
 
     fs::write(templates_dir.join("ticket.md"), ticket_template)
         .context("Failed to create ticket template")?;
 
     // Default PR template
-    let pr_template = r#"## Summary
+    let pr_template = r"## Summary
 {{ summary }}
 
 ## Related Ticket
@@ -221,7 +220,7 @@ Closes #{{ ticket_id }} - {{ ticket_title }}
 
 ## Screenshots (if applicable)
 
-"#;
+";
 
     fs::write(templates_dir.join("pull_request.md"), pr_template)
         .context("Failed to create PR template")?;
@@ -234,13 +233,11 @@ Closes #{{ ticket_id }} - {{ ticket_title }}
 /// Adds vibe-ticket specific entries to .gitignore
 fn create_gitignore(project_dir: &Path) -> Result<()> {
     let gitignore_path = project_dir.join(".gitignore");
-    let vibe_entries = vec![
-        "# vibe-ticket",
+    let vibe_entries = ["# vibe-ticket",
         ".vibe-ticket/backups/",
         ".vibe-ticket/tmp/",
         ".vibe-ticket/*.log",
-        "",
-    ];
+        ""];
 
     if gitignore_path.exists() {
         // Read existing content
@@ -383,8 +380,7 @@ Generated on: {}
     fs::write(&claude_path, &claude_content)?;
 
     // Also update the generated CLAUDE.md to mention the init command
-    let additional_content = format!(
-        r#"
+    let additional_content = r"
 
 ## Project Initialization
 
@@ -401,10 +397,9 @@ vibe-ticket config claude
 # Append with advanced features
 vibe-ticket config claude --template advanced --append
 ```
-"#
-    );
+".to_string();
 
-    let full_content = format!("{}{}", claude_content, additional_content);
+    let full_content = format!("{claude_content}{additional_content}");
     fs::write(&claude_path, full_content)?;
 
     Ok(())

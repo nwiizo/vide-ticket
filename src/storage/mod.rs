@@ -7,8 +7,8 @@
 //!
 //! The storage module supports various backends:
 //! - File-based (YAML files for simple use cases)
-//! - SQLite (for local storage) - feature gated
-//! - PostgreSQL (for production deployments) - feature gated
+//! - `SQLite` (for local storage) - feature gated
+//! - `PostgreSQL` (for production deployments) - feature gated
 //! - In-memory (for testing)
 //!
 //! # Architecture

@@ -128,7 +128,7 @@ fn output_plain(
 
     // Assignee
     if let Some(assignee) = &ticket.assignee {
-        output.info(&format!("Assignee: {}", assignee));
+        output.info(&format!("Assignee: {assignee}"));
     }
 
     // Tags
@@ -152,7 +152,7 @@ fn output_plain(
         let duration = end_time - started_at;
         let hours = duration.num_hours();
         let minutes = duration.num_minutes() % 60;
-        output.info(&format!("  Time spent: {}h {}m", hours, minutes));
+        output.info(&format!("  Time spent: {hours}h {minutes}m"));
     }
 
     if let Some(closed_at) = ticket.closed_at {
@@ -163,7 +163,7 @@ fn output_plain(
     output.info("");
     output.info("Description:");
     for line in ticket.description.lines() {
-        output.info(&format!("  {}", line));
+        output.info(&format!("  {line}"));
     }
 
     // Tasks
@@ -195,7 +195,7 @@ fn output_plain(
         for (key, value) in &ticket.metadata {
             if key == "close_message" {
                 if let Some(msg) = value.as_str() {
-                    output.info(&format!("  Close message: {}", msg));
+                    output.info(&format!("  Close message: {msg}"));
                 }
             } else if key == "archived" {
                 if let Some(archived) = value.as_bool() {
@@ -203,7 +203,7 @@ fn output_plain(
                         output.info("  Status: Archived");
                         if let Some(archived_at) = ticket.metadata.get("archived_at") {
                             if let Some(date_str) = archived_at.as_str() {
-                                output.info(&format!("  Archived at: {}", date_str));
+                                output.info(&format!("  Archived at: {date_str}"));
                             }
                         }
                     }
@@ -231,7 +231,7 @@ fn output_markdown(ticket: &crate::core::Ticket, show_tasks: bool, _output: &Out
     println!("**Priority**: {}", ticket.priority);
 
     if let Some(assignee) = &ticket.assignee {
-        println!("**Assignee**: {}", assignee);
+        println!("**Assignee**: {assignee}");
     }
 
     if !ticket.tags.is_empty() {
@@ -240,7 +240,7 @@ fn output_markdown(ticket: &crate::core::Ticket, show_tasks: bool, _output: &Out
             ticket
                 .tags
                 .iter()
-                .map(|t| format!("`{}`", t))
+                .map(|t| format!("`{t}`"))
                 .collect::<Vec<_>>()
                 .join(", ")
         );
@@ -260,7 +260,7 @@ fn output_markdown(ticket: &crate::core::Ticket, show_tasks: bool, _output: &Out
         let duration = end_time - started_at;
         let hours = duration.num_hours();
         let minutes = duration.num_minutes() % 60;
-        println!("- **Time spent**: {}h {}m", hours, minutes);
+        println!("- **Time spent**: {hours}h {minutes}m");
     }
 
     if let Some(closed_at) = ticket.closed_at {
@@ -306,7 +306,7 @@ mod tests {
     fn test_format_datetime() {
         let dt = Utc::now();
         let formatted = format_datetime(dt);
-        assert!(formatted.len() > 0);
+        assert!(!formatted.is_empty());
         assert!(formatted.contains('-'));
         assert!(formatted.contains(':'));
     }

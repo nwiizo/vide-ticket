@@ -49,7 +49,7 @@ pub fn handle_search_command(
     // Compile regex if needed
     let regex = if use_regex {
         Some(Regex::new(&query).map_err(|e| {
-            crate::error::VibeTicketError::custom(format!("Invalid regex pattern: {}", e))
+            crate::error::VibeTicketError::custom(format!("Invalid regex pattern: {e}"))
         })?)
     } else {
         None
@@ -155,7 +155,7 @@ pub fn handle_search_command(
             "total": matches.len(),
         }))?;
     } else if matches.is_empty() {
-        output.info(&format!("No tickets found matching '{}'", query));
+        output.info(&format!("No tickets found matching '{query}'"));
     } else {
         output.success(&format!(
             "Found {} ticket{} matching '{}'",
@@ -190,7 +190,7 @@ pub fn handle_search_command(
                 let excerpt =
                     get_match_excerpt(&ticket.description, &query, use_regex, regex.as_ref());
                 if let Some(excerpt) = excerpt {
-                    output.info(&format!("   Description: ...{}...", excerpt));
+                    output.info(&format!("   Description: ...{excerpt}..."));
                 }
             }
 

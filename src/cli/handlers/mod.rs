@@ -215,7 +215,7 @@ mod tests {
     #[test]
     fn test_parse_tags() {
         assert_eq!(parse_tags(None), Vec::<String>::new());
-        assert_eq!(parse_tags(Some("".to_string())), Vec::<String>::new());
+        assert_eq!(parse_tags(Some(String::new())), Vec::<String>::new());
         assert_eq!(
             parse_tags(Some("bug, ui, urgent".to_string())),
             vec!["bug", "ui", "urgent"]

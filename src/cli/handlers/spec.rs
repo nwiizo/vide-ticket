@@ -25,7 +25,7 @@ pub fn handle_spec_init(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -70,10 +70,10 @@ pub fn handle_spec_init(
     } else {
         formatter.info(&format!("Specification ID: {}", spec.metadata.id));
         if let Some(desc) = description {
-            formatter.info(&format!("Description: {}", desc));
+            formatter.info(&format!("Description: {desc}"));
         }
         if let Some(ticket_id) = &spec.metadata.ticket_id {
-            formatter.info(&format!("Associated ticket: {}", ticket_id));
+            formatter.info(&format!("Associated ticket: {ticket_id}"));
         }
         formatter.info("\nNext steps:");
         formatter.info("  1. Define requirements: vibe-ticket spec requirements");
@@ -95,7 +95,7 @@ pub fn handle_spec_requirements(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -135,12 +135,12 @@ pub fn handle_spec_requirements(
     if !doc_path.exists() {
         // Create from template
         let mut engine = TemplateEngine::new();
-        engine.set_variable("spec_id".to_string(), spec_id.clone());
+        engine.set_variable("spec_id".to_string(), spec_id);
 
         let template = SpecTemplate::for_document_type(
             SpecDocumentType::Requirements,
             specification.metadata.title.clone(),
-            Some(specification.metadata.description.clone()),
+            Some(specification.metadata.description),
         );
 
         let content = engine.generate(&template);
@@ -177,7 +177,7 @@ pub fn handle_spec_design(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -231,11 +231,11 @@ pub fn handle_spec_design(
         };
 
         let mut engine = TemplateEngine::new();
-        engine.set_variable("spec_id".to_string(), spec_id.clone());
+        engine.set_variable("spec_id".to_string(), spec_id);
 
         let template = SpecTemplate::for_document_type(
             SpecDocumentType::Design,
-            specification.metadata.title.clone(),
+            specification.metadata.title,
             Some(requirements_summary.to_string()),
         );
 
@@ -270,7 +270,7 @@ pub fn handle_spec_tasks(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -322,11 +322,11 @@ pub fn handle_spec_tasks(
         };
 
         let mut engine = TemplateEngine::new();
-        engine.set_variable("spec_id".to_string(), spec_id.clone());
+        engine.set_variable("spec_id".to_string(), spec_id);
 
         let template = SpecTemplate::for_document_type(
             SpecDocumentType::Tasks,
-            specification.metadata.title.clone(),
+            specification.metadata.title,
             Some(design_summary.to_string()),
         );
 
@@ -364,7 +364,7 @@ pub fn handle_spec_status(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -437,7 +437,7 @@ pub fn handle_spec_status(
             formatter.info(&format!("\nCreated: {}", specification.metadata.created_at));
             formatter.info(&format!("Updated: {}", specification.metadata.updated_at));
             if let Some(ticket_id) = &specification.metadata.ticket_id {
-                formatter.info(&format!("Ticket: {}", ticket_id));
+                formatter.info(&format!("Ticket: {ticket_id}"));
             }
             if !specification.metadata.tags.is_empty() {
                 formatter.info(&format!("Tags: {}", specification.metadata.tags.join(", ")));
@@ -459,7 +459,7 @@ pub fn handle_spec_list(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -557,7 +557,7 @@ pub fn handle_spec_show(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -598,7 +598,7 @@ pub fn handle_spec_show(
             for doc_type in &doc_types {
                 let doc_path = spec_manager.get_document_path(&spec, *doc_type);
                 if doc_path.exists() {
-                    formatter.info(&format!("\n## {:?} Document\n", doc_type));
+                    formatter.info(&format!("\n## {doc_type:?} Document\n"));
                     let content =
                         fs::read_to_string(&doc_path).context("Failed to read document")?;
                     formatter.info(&content);
@@ -620,7 +620,7 @@ pub fn handle_spec_delete(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -635,8 +635,7 @@ pub fn handle_spec_delete(
     if !force {
         // Confirm deletion
         formatter.warning(&format!(
-            "Are you sure you want to delete specification '{}'?",
-            spec
+            "Are you sure you want to delete specification '{spec}'?"
         ));
         formatter.warning("This will delete all associated documents and cannot be undone.");
         formatter.info("Use --force to skip this confirmation.");
@@ -644,7 +643,7 @@ pub fn handle_spec_delete(
     }
 
     spec_manager.delete(&spec)?;
-    formatter.success(&format!("Deleted specification '{}'", spec));
+    formatter.success(&format!("Deleted specification '{spec}'"));
 
     Ok(())
 }
@@ -660,7 +659,7 @@ pub fn handle_spec_approve(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -692,7 +691,7 @@ pub fn handle_spec_approve(
 
     if let Some(ref mut approvals) = specification.metadata.progress.approval_status {
         approvals.insert(
-            format!("{:?}", phase_enum),
+            format!("{phase_enum:?}"),
             serde_json::json!({
                 "approved": true,
                 "approved_at": Utc::now(),
@@ -721,7 +720,7 @@ pub fn handle_spec_activate(
     // Change to project directory if specified
     if let Some(project_path) = project {
         std::env::set_current_dir(&project_path)
-            .with_context(|| format!("Failed to change to project directory: {}", project_path))?;
+            .with_context(|| format!("Failed to change to project directory: {project_path}"))?;
     }
 
     let current_dir = env::current_dir().context("Failed to get current directory")?;
@@ -767,7 +766,7 @@ fn open_in_editor(path: &Path) -> Result<()> {
     std::process::Command::new(&editor)
         .arg(path)
         .status()
-        .with_context(|| format!("Failed to open editor: {}", editor))?;
+        .with_context(|| format!("Failed to open editor: {editor}"))?;
 
     Ok(())
 }

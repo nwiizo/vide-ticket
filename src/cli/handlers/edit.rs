@@ -83,7 +83,7 @@ pub fn handle_edit_command(
     if let Some(new_title) = title {
         let old_title = ticket.title.clone();
         ticket.title = new_title.clone();
-        changes.push(format!("Title: {} → {}", old_title, new_title));
+        changes.push(format!("Title: {old_title} → {new_title}"));
     }
 
     // Update description if provided
@@ -101,7 +101,7 @@ pub fn handle_edit_command(
         })?;
         let old_priority = ticket.priority;
         ticket.priority = new_priority;
-        changes.push(format!("Priority: {} → {}", old_priority, new_priority));
+        changes.push(format!("Priority: {old_priority} → {new_priority}"));
     }
 
     // Update status if provided
@@ -110,7 +110,7 @@ pub fn handle_edit_command(
             .map_err(|_| VibeTicketError::InvalidStatus { status: status_str })?;
         let old_status = ticket.status;
         ticket.status = new_status;
-        changes.push(format!("Status: {} → {}", old_status, new_status));
+        changes.push(format!("Status: {old_status} → {new_status}"));
 
         // Update timestamps based on status changes
         match (old_status, new_status) {
@@ -179,7 +179,7 @@ pub fn handle_edit_command(
     } else {
         output.success(&format!("Updated ticket: {}", ticket.slug));
         for change in &changes {
-            output.info(&format!("  • {}", change));
+            output.info(&format!("  • {change}"));
         }
 
         // Show current state
@@ -225,7 +225,7 @@ fn edit_in_editor(
     storage: &FileStorage,
     output: &OutputFormatter,
 ) -> Result<()> {
-    use std::io::Write;
+    use std::io::Write as IoWrite;
     use std::process::Command;
 
     // Create a temporary file with the ticket content
@@ -234,13 +234,13 @@ fn edit_in_editor(
 
     // Serialize ticket to YAML
     let yaml_content = serde_yaml::to_string(&ticket)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to serialize ticket: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to serialize ticket: {e}")))?;
 
     // Write to temporary file
     let mut file = std::fs::File::create(&temp_file)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to create temp file: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to create temp file: {e}")))?;
     file.write_all(yaml_content.as_bytes())
-        .map_err(|e| VibeTicketError::custom(format!("Failed to write temp file: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to write temp file: {e}")))?;
 
     // Get editor from environment
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
@@ -249,7 +249,7 @@ fn edit_in_editor(
     let status = Command::new(&editor)
         .arg(&temp_file)
         .status()
-        .map_err(|e| VibeTicketError::custom(format!("Failed to launch editor: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to launch editor: {e}")))?;
 
     if !status.success() {
         return Err(VibeTicketError::custom("Editor exited with error"));
@@ -257,11 +257,11 @@ fn edit_in_editor(
 
     // Read the edited content
     let edited_content = std::fs::read_to_string(&temp_file)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to read edited file: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to read edited file: {e}")))?;
 
     // Parse the edited ticket
     let edited_ticket: crate::core::Ticket = serde_yaml::from_str(&edited_content)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to parse edited ticket: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to parse edited ticket: {e}")))?;
 
     // Update the original ticket
     *ticket = edited_ticket;

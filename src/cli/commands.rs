@@ -312,7 +312,6 @@ pub enum Commands {
         #[command(subcommand)]
         command: SpecCommands,
     },
-
     // /// Manage Git worktrees for tickets
     // Worktree {
     //     #[command(subcommand)]
@@ -510,7 +509,7 @@ pub enum SpecCommands {
 
     /// List all specifications
     List {
-        /// Filter by status (draft, in_progress, completed, approved)
+        /// Filter by status (draft, `in_progress`, completed, approved)
         #[arg(short, long)]
         status: Option<String>,
 

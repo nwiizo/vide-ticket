@@ -36,7 +36,7 @@ impl TemplateEngine {
 
         // Replace variables
         for (key, value) in &self.variables {
-            let placeholder = format!("{{{{{}}}}}", key);
+            let placeholder = format!("{{{{{key}}}}}");
             content = content.replace(&placeholder, value);
         }
 
@@ -90,15 +90,15 @@ impl SpecTemplate {
         match self {
             Self::Requirements { title, description } => {
                 format!(
-                    r#"# 要件定義書 / Requirements Definition
+                    r"# 要件定義書 / Requirements Definition
 
-**タイトル / Title**: {}
+**タイトル / Title**: {title}
 **作成日 / Date**: {{{{date}}}}
 **バージョン / Version**: 0.1.0
 
 ## 1. 概要 / Overview
 
-{}
+{description}
 
 ## 2. 背景と目的 / Background and Purpose
 
@@ -163,8 +163,7 @@ impl SpecTemplate {
 
 ## 10. 参考資料 / References
 <!-- 参考にした資料やドキュメントのリンク -->
-"#,
-                    title, description
+"
                 )
             },
 
@@ -173,16 +172,16 @@ impl SpecTemplate {
                 requirements_summary,
             } => {
                 format!(
-                    r#"# 技術設計書 / Technical Design Document
+                    r"# 技術設計書 / Technical Design Document
 
-**タイトル / Title**: {}
+**タイトル / Title**: {title}
 **作成日 / Date**: {{{{date}}}}
 **バージョン / Version**: 0.1.0
 
 ## 1. 概要 / Overview
 
 ### 1.1 要件サマリー / Requirements Summary
-{}
+{requirements_summary}
 
 ### 1.2 設計方針 / Design Principles
 <!-- この設計で重視する原則や方針 -->
@@ -282,8 +281,7 @@ src/
 
 ### 10.2 トレードオフ / Trade-offs
 <!-- 設計上のトレードオフと判断理由 -->
-"#,
-                    title, requirements_summary
+"
                 )
             },
 
@@ -292,16 +290,16 @@ src/
                 design_summary,
             } => {
                 format!(
-                    r#"# 実装計画書 / Implementation Plan
+                    r"# 実装計画書 / Implementation Plan
 
-**タイトル / Title**: {}
+**タイトル / Title**: {title}
 **作成日 / Date**: {{{{date}}}}
 **バージョン / Version**: 0.1.0
 
 ## 1. 概要 / Overview
 
 ### 1.1 設計サマリー / Design Summary
-{}
+{design_summary}
 
 ### 1.2 実装方針 / Implementation Strategy
 <!-- 実装の進め方と優先順位 -->
@@ -397,8 +395,7 @@ src/
 
 ## 8. 備考 / Notes
 <!-- その他の注意事項や申し送り事項 -->
-"#,
-                    title, design_summary
+"
                 )
             },
         }

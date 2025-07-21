@@ -50,7 +50,7 @@ pub fn handle_archive_command(
     let is_archived = ticket
         .metadata
         .get("archived")
-        .and_then(|v| v.as_bool())
+        .and_then(serde_json::Value::as_bool)
         .unwrap_or(false);
 
     if unarchive {
@@ -180,7 +180,7 @@ mod tests {
 
         let is_archived = metadata
             .get("archived")
-            .and_then(|v| v.as_bool())
+            .and_then(serde_json::Value::as_bool)
             .unwrap_or(false);
 
         assert!(is_archived);

@@ -13,7 +13,7 @@ impl Exporter for CsvExporter {
         let mut wtr = Writer::from_writer(vec![]);
 
         // Write header
-        wtr.write_record(&[
+        wtr.write_record([
             "ID",
             "Slug",
             "Title",
@@ -28,7 +28,7 @@ impl Exporter for CsvExporter {
             "Tasks Completed",
             "Description",
         ])
-        .map_err(|e| VibeTicketError::custom(format!("Failed to write CSV header: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to write CSV header: {e}")))?;
 
         // Write ticket records
         for ticket in tickets {
@@ -38,12 +38,12 @@ impl Exporter for CsvExporter {
         // Convert to string
         let data = wtr
             .into_inner()
-            .map_err(|e| VibeTicketError::custom(format!("Failed to finalize CSV: {}", e)))?;
+            .map_err(|e| VibeTicketError::custom(format!("Failed to finalize CSV: {e}")))?;
 
         String::from_utf8(data)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to convert CSV to string: {}", e)))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to convert CSV to string: {e}")))
     }
-    
+
     fn format_name(&self) -> &'static str {
         "CSV"
     }
@@ -75,7 +75,7 @@ fn write_ticket_record<W: std::io::Write>(wtr: &mut Writer<W>, ticket: &Ticket) 
         tasks_completed.to_string(),
         ticket.description.replace('\n', " "),
     ])
-    .map_err(|e| VibeTicketError::custom(format!("Failed to write CSV record: {}", e)))
+    .map_err(|e| VibeTicketError::custom(format!("Failed to write CSV record: {e}")))
 }
 
 #[cfg(test)]

@@ -41,7 +41,7 @@ pub fn handle_import_command(
 
     // Read file content
     let content = std::fs::read_to_string(&file_path).map_err(|e| {
-        VibeTicketError::custom(format!("Failed to read file {}: {}", file_path, e))
+        VibeTicketError::custom(format!("Failed to read file {file_path}: {e}"))
     })?;
 
     // Detect format if not specified
@@ -58,8 +58,7 @@ pub fn handle_import_command(
         "csv" => import_csv(&content)?,
         _ => {
             return Err(VibeTicketError::custom(format!(
-                "Unsupported import format: {}. Supported formats: json, yaml, csv",
-                format
+                "Unsupported import format: {format}. Supported formats: json, yaml, csv"
             )))
         },
     };
@@ -84,8 +83,8 @@ pub fn handle_import_command(
             })).collect::<Vec<_>>(),
         }))?;
     } else {
-        output.info(&format!("Import from: {}", file_path));
-        output.info(&format!("Format: {}", format));
+        output.info(&format!("Import from: {file_path}"));
+        output.info(&format!("Format: {format}"));
         output.info(&format!("Tickets to import: {}", tickets.len()));
 
         if dry_run {
@@ -122,7 +121,7 @@ pub fn handle_import_command(
 
             // Save the ticket
             match storage.save(&ticket) {
-                Ok(_) => imported += 1,
+                Ok(()) => imported += 1,
                 Err(e) => {
                     errors.push(format!("Failed to import '{}': {}", ticket.slug, e));
                 },
@@ -140,14 +139,13 @@ pub fn handle_import_command(
         } else {
             output.info("");
             output.success(&format!(
-                "Import completed: {} imported, {} skipped",
-                imported, skipped
+                "Import completed: {imported} imported, {skipped} skipped"
             ));
 
             if !errors.is_empty() {
                 output.error("Errors occurred during import:");
                 for error in errors {
-                    output.error(&format!("  • {}", error));
+                    output.error(&format!("  • {error}"));
                 }
             }
         }
@@ -159,7 +157,7 @@ pub fn handle_import_command(
 /// Detect format from file extension or content
 fn detect_format(file_path: &str, content: &str) -> Result<String> {
     // Try to detect from file extension
-    if let Some(extension) = file_path.split('.').last() {
+    if let Some(extension) = file_path.split('.').next_back() {
         match extension.to_lowercase().as_str() {
             "json" => return Ok("json".to_string()),
             "yaml" | "yml" => return Ok("yaml".to_string()),
@@ -186,7 +184,7 @@ fn detect_format(file_path: &str, content: &str) -> Result<String> {
 /// Import tickets from JSON
 fn import_json(content: &str) -> Result<Vec<Ticket>> {
     let json: serde_json::Value = serde_json::from_str(content)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to parse JSON: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to parse JSON: {e}")))?;
 
     // Handle both direct array and object with tickets field
     let tickets_value = if json.is_array() {
@@ -200,7 +198,7 @@ fn import_json(content: &str) -> Result<Vec<Ticket>> {
     };
 
     let tickets: Vec<Ticket> = serde_json::from_value(tickets_value.clone())
-        .map_err(|e| VibeTicketError::custom(format!("Failed to deserialize tickets: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to deserialize tickets: {e}")))?;
 
     Ok(tickets)
 }
@@ -234,7 +232,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
 
     for result in rdr.records() {
         let record = result
-            .map_err(|e| VibeTicketError::custom(format!("Failed to read CSV record: {}", e)))?;
+            .map_err(|e| VibeTicketError::custom(format!("Failed to read CSV record: {e}")))?;
 
         // Expected columns: ID, Slug, Title, Status, Priority, Assignee, Tags, Created At, Started At, Closed At, Tasks Total, Tasks Completed, Description
         if record.len() < 13 {
@@ -259,11 +257,11 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
         let tags: Vec<String> = if record[6].is_empty() {
             Vec::new()
         } else {
-            record[6].split(", ").map(|s| s.to_string()).collect()
+            record[6].split(", ").map(std::string::ToString::to_string).collect()
         };
 
         let created_at = chrono::DateTime::parse_from_rfc3339(&record[7])
-            .map_err(|e| VibeTicketError::custom(format!("Invalid created_at date: {}", e)))?
+            .map_err(|e| VibeTicketError::custom(format!("Invalid created_at date: {e}")))?
             .with_timezone(&chrono::Utc);
 
         let started_at = if record[8].is_empty() {
@@ -272,7 +270,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
             Some(
                 chrono::DateTime::parse_from_rfc3339(&record[8])
                     .map_err(|e| {
-                        VibeTicketError::custom(format!("Invalid started_at date: {}", e))
+                        VibeTicketError::custom(format!("Invalid started_at date: {e}"))
                     })?
                     .with_timezone(&chrono::Utc),
             )
@@ -283,7 +281,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
         } else {
             Some(
                 chrono::DateTime::parse_from_rfc3339(&record[9])
-                    .map_err(|e| VibeTicketError::custom(format!("Invalid closed_at date: {}", e)))?
+                    .map_err(|e| VibeTicketError::custom(format!("Invalid closed_at date: {e}")))?
                     .with_timezone(&chrono::Utc),
             )
         };

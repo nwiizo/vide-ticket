@@ -27,7 +27,7 @@ pub mod manager;
 pub mod storage;
 pub mod templates;
 
-pub use manager::{SpecManager, save, load, list, delete, get_document_path};
+pub use manager::{delete, get_document_path, list, load, save, SpecManager};
 pub use templates::{SpecTemplate, TemplateEngine};
 
 /// Specification metadata and progress tracking
@@ -209,7 +209,7 @@ impl SpecMetadata {
 
 impl SpecProgress {
     /// Get the current phase
-    pub fn current_phase(&self) -> SpecPhase {
+    pub const fn current_phase(&self) -> SpecPhase {
         self.current_phase
     }
 }
@@ -266,7 +266,7 @@ impl SpecVersion {
 
 impl SpecDocumentType {
     /// Get file name for this document type
-    pub fn file_name(&self) -> &'static str {
+    pub const fn file_name(&self) -> &'static str {
         match self {
             Self::Requirements => "requirements.md",
             Self::Design => "design.md",
@@ -275,7 +275,7 @@ impl SpecDocumentType {
     }
 
     /// Get display name
-    pub fn display_name(&self) -> &'static str {
+    pub const fn display_name(&self) -> &'static str {
         match self {
             Self::Requirements => "Requirements Definition",
             Self::Design => "Technical Design",

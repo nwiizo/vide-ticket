@@ -8,7 +8,7 @@ use super::{Priority, Status, Task, TaskId, TicketId};
 ///
 /// A ticket encapsulates a unit of work with associated metadata,
 /// tasks, and lifecycle information.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Ticket {
     /// Unique identifier for the ticket
     pub id: TicketId,
@@ -117,7 +117,7 @@ impl Ticket {
         self.tasks
             .iter_mut()
             .find(|task| &task.id == task_id)
-            .ok_or_else(|| format!("Task with ID {} not found", task_id))?
+            .ok_or_else(|| format!("Task with ID {task_id} not found"))?
             .complete();
         Ok(())
     }

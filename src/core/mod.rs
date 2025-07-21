@@ -7,7 +7,7 @@
 //!
 //! The core module follows Domain-Driven Design principles:
 //! - Domain entities (Ticket, Project, User, etc.)
-//! - Value objects (TicketId, Status, Priority, etc.)
+//! - Value objects (`TicketId`, Status, Priority, etc.)
 //! - Domain services and business rules
 //! - Repository traits (interfaces for storage)
 //!
