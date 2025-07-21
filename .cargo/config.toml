@@ -1,0 +1,140 @@
+# Cargo configuration file
+# See: https://doc.rust-lang.org/cargo/reference/config.html
+
+[build]
+# Number of parallel jobs, defaults to # of CPUs
+# jobs = 4
+
+# Incremental compilation
+incremental = true
+
+# Target directory for all builds
+# target-dir = "target"
+
+# Default target platform
+# target = "x86_64-unknown-linux-gnu"
+
+# Rustflags to apply to all builds
+rustflags = [
+    "-D", "warnings",           # Deny all warnings
+    "-D", "rust-2018-idioms",   # Deny Rust 2018 idioms
+    "-D", "clippy::all",        # Deny all clippy lints
+    "-W", "clippy::pedantic",   # Warn on pedantic clippy lints
+    "-W", "clippy::nursery",    # Warn on nursery clippy lints
+    "-A", "clippy::module_name_repetitions",  # Allow module name repetitions
+    "-A", "clippy::must_use_candidate",       # Allow functions without must_use
+    "-A", "clippy::missing_errors_doc",       # Allow missing error documentation
+]
+
+# Environment variables to set for all builds
+[env]
+# RUST_BACKTRACE = "1"
+
+# Profile configuration
+[profile.dev]
+opt-level = 0
+debug = true
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = "unwind"
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.release]
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = "unwind"
+incremental = false
+codegen-units = 1
+rpath = false
+strip = true
+
+[profile.test]
+opt-level = 0
+debug = true
+debug-assertions = true
+overflow-checks = true
+lto = false
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.bench]
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = true
+incremental = false
+codegen-units = 1
+rpath = false
+
+# Custom profile for debugging with optimizations
+[profile.dev-opt]
+inherits = "dev"
+opt-level = 2
+
+# Custom profile for release with debug info
+[profile.release-debug]
+inherits = "release"
+debug = true
+strip = false
+
+# Aliases for common commands
+[alias]
+b = "build"
+c = "check"
+t = "test"
+r = "run"
+rr = "run --release"
+br = "build --release"
+tr = "test --release"
+fmt-check = "fmt -- --check"
+clippy-all = "clippy --all-targets --all-features -- -D warnings"
+test-all = "test --all-features"
+doc-open = "doc --no-deps --open"
+outdated = "outdated -R"
+audit = "audit"
+coverage = "tarpaulin --out Html"
+bench-all = "bench --all-features"
+
+# Registry configuration
+[registries.crates-io]
+protocol = "sparse"
+
+# Network configuration
+[net]
+retry = 3
+offline = false
+
+# Term configuration
+[term]
+color = "auto"
+progress.when = "auto"
+progress.width = 80
+
+# Future incompat report
+[future-incompat-report]
+frequency = "always"
+
+# Install configuration
+[install]
+root = "/Users/nwiizo/.cargo"
+
+# Patch dependencies (if needed)
+# [patch.crates-io]
+# package-name = { path = "../path/to/local/package" }
+
+# Target specific configuration
+# [target.x86_64-unknown-linux-gnu]
+# linker = "clang"
+# rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+# [target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# runner = "arm-none-eabi-gdb -q -x openocd.gdb"
+# rustflags = ["-C", "link-arg=-Tlink.x"]

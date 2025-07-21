@@ -1,0 +1,46 @@
+//! Storage layer for vide-ticket
+//!
+//! This module provides implementations for persisting and retrieving ticket data.
+//! It supports multiple storage backends through a common trait interface.
+//!
+//! # Storage Backends
+//!
+//! The storage module supports various backends:
+//! - File-based (YAML files for simple use cases)
+//! - SQLite (for local storage) - feature gated
+//! - PostgreSQL (for production deployments) - feature gated
+//! - In-memory (for testing)
+//!
+//! # Architecture
+//!
+//! The storage layer implements the repository pattern:
+//! - Repository traits define the interface
+//! - Concrete implementations for each storage backend
+//! - Migration support for schema management
+//! - Connection pooling and transaction management
+//!
+//! # Example
+//!
+//! ```no_run
+//! use vide_ticket::storage::{FileStorage, Repository};
+//!
+//! // Initialize storage backend
+//! let storage = FileStorage::new(".vide-ticket");
+//! 
+//! // Use storage through repository traits
+//! let tickets = storage.load_all()?;
+//! ```
+//!
+//! # Error Handling
+//!
+//! All storage operations return `Result<T, VideTicketError>` to handle:
+//! - I/O errors
+//! - Serialization/deserialization errors
+//! - Not found errors
+//! - Permission errors
+
+mod file;
+mod repository;
+
+pub use file::{FileStorage, ProjectState};
+pub use repository::{ActiveTicketRepository, Repository, TicketRepository};

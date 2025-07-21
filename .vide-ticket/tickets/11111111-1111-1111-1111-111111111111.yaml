@@ -1,0 +1,15 @@
+id: 11111111-1111-1111-1111-111111111111
+slug: 202507201345-test-import-feature
+title: Test Import Feature
+description: This ticket was imported from JSON
+priority: high
+status: todo
+tags:
+- imported
+- test
+created_at: 2025-07-20T04:45:00Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}
