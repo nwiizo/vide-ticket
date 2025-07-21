@@ -2,7 +2,7 @@
 
 use super::Exporter;
 use crate::core::Ticket;
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use serde_json::json;
 
 /// JSON exporter implementation
@@ -17,7 +17,7 @@ impl Exporter for JsonExporter {
         });
 
         serde_json::to_string_pretty(&json)
-            .map_err(|e| VideTicketError::custom(format!("Failed to serialize to JSON: {}", e)))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to serialize to JSON: {}", e)))
     }
     
     fn format_name(&self) -> &'static str {

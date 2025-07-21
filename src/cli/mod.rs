@@ -1,4 +1,4 @@
-//! CLI module for vide-ticket
+//! CLI module for vibe-ticket
 //!
 //! This module provides the command-line interface implementation for the ticket management system.
 //! It handles command parsing, user interaction, and presentation of data to the terminal.
@@ -14,7 +14,7 @@
 //! # Example
 //!
 //! ```no_run
-//! use vide_ticket::cli::{Cli, Commands};
+//! use vibe_ticket::cli::{Cli, Commands};
 //! use clap::Parser;
 //!
 //! let cli = Cli::parse();

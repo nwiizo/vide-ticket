@@ -5,7 +5,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Priority, Status, TicketId};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 /// Handler for the `edit` command
@@ -52,10 +52,10 @@ pub fn handle_edit_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -64,7 +64,7 @@ pub fn handle_edit_command(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -95,7 +95,7 @@ pub fn handle_edit_command(
     // Update priority if provided
     if let Some(priority_str) = priority {
         let new_priority = Priority::try_from(priority_str.as_str()).map_err(|_| {
-            VideTicketError::InvalidPriority {
+            VibeTicketError::InvalidPriority {
                 priority: priority_str,
             }
         })?;
@@ -107,7 +107,7 @@ pub fn handle_edit_command(
     // Update status if provided
     if let Some(status_str) = status {
         let new_status = Status::try_from(status_str.as_str())
-            .map_err(|_| VideTicketError::InvalidStatus { status: status_str })?;
+            .map_err(|_| VibeTicketError::InvalidStatus { status: status_str })?;
         let old_status = ticket.status;
         ticket.status = new_status;
         changes.push(format!("Status: {} → {}", old_status, new_status));
@@ -214,7 +214,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
         }
     }
 
-    Err(VideTicketError::TicketNotFound {
+    Err(VibeTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
 }
@@ -230,17 +230,17 @@ fn edit_in_editor(
 
     // Create a temporary file with the ticket content
     let temp_dir = std::env::temp_dir();
-    let temp_file = temp_dir.join(format!("vide-ticket-{}.yaml", ticket.id));
+    let temp_file = temp_dir.join(format!("vibe-ticket-{}.yaml", ticket.id));
 
     // Serialize ticket to YAML
     let yaml_content = serde_yaml::to_string(&ticket)
-        .map_err(|e| VideTicketError::custom(format!("Failed to serialize ticket: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to serialize ticket: {}", e)))?;
 
     // Write to temporary file
     let mut file = std::fs::File::create(&temp_file)
-        .map_err(|e| VideTicketError::custom(format!("Failed to create temp file: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to create temp file: {}", e)))?;
     file.write_all(yaml_content.as_bytes())
-        .map_err(|e| VideTicketError::custom(format!("Failed to write temp file: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to write temp file: {}", e)))?;
 
     // Get editor from environment
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
@@ -249,19 +249,19 @@ fn edit_in_editor(
     let status = Command::new(&editor)
         .arg(&temp_file)
         .status()
-        .map_err(|e| VideTicketError::custom(format!("Failed to launch editor: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to launch editor: {}", e)))?;
 
     if !status.success() {
-        return Err(VideTicketError::custom("Editor exited with error"));
+        return Err(VibeTicketError::custom("Editor exited with error"));
     }
 
     // Read the edited content
     let edited_content = std::fs::read_to_string(&temp_file)
-        .map_err(|e| VideTicketError::custom(format!("Failed to read edited file: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to read edited file: {}", e)))?;
 
     // Parse the edited ticket
     let edited_ticket: crate::core::Ticket = serde_yaml::from_str(&edited_content)
-        .map_err(|e| VideTicketError::custom(format!("Failed to parse edited ticket: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to parse edited ticket: {}", e)))?;
 
     // Update the original ticket
     *ticket = edited_ticket;

@@ -38,10 +38,10 @@ pub fn handle_search_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Load all tickets
     let tickets = storage.load_all()?;
@@ -49,7 +49,7 @@ pub fn handle_search_command(
     // Compile regex if needed
     let regex = if use_regex {
         Some(Regex::new(&query).map_err(|e| {
-            crate::error::VideTicketError::custom(format!("Invalid regex pattern: {}", e))
+            crate::error::VibeTicketError::custom(format!("Invalid regex pattern: {}", e))
         })?)
     } else {
         None

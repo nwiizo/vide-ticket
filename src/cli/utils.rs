@@ -1,24 +1,24 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 
 /// Gets the project root directory
 ///
-/// This function searches for a .vide-ticket directory in the current directory
+/// This function searches for a .vibe-ticket directory in the current directory
 /// and its parents, similar to how Git finds the repository root.
 pub fn find_project_root(start_dir: Option<&str>) -> Result<PathBuf> {
     let start = if let Some(dir) = start_dir {
         PathBuf::from(dir)
     } else {
-        env::current_dir().map_err(|e| VideTicketError::Io(e))?
+        env::current_dir().map_err(|e| VibeTicketError::Io(e))?
     };
 
     let mut current = start.as_path();
 
     loop {
-        let vide_ticket_dir = current.join(".vide-ticket");
-        if vide_ticket_dir.exists() && vide_ticket_dir.is_dir() {
+        let vibe_ticket_dir = current.join(".vibe-ticket");
+        if vibe_ticket_dir.exists() && vibe_ticket_dir.is_dir() {
             return Ok(current.to_path_buf());
         }
 
@@ -28,12 +28,12 @@ pub fn find_project_root(start_dir: Option<&str>) -> Result<PathBuf> {
         }
     }
 
-    Err(VideTicketError::ProjectNotInitialized)
+    Err(VibeTicketError::ProjectNotInitialized)
 }
 
-/// Gets the .vide-ticket directory path
-pub fn get_vide_ticket_dir(project_root: &Path) -> PathBuf {
-    project_root.join(".vide-ticket")
+/// Gets the .vibe-ticket directory path
+pub fn get_vibe_ticket_dir(project_root: &Path) -> PathBuf {
+    project_root.join(".vibe-ticket")
 }
 
 /// Validates a ticket slug
@@ -41,7 +41,7 @@ pub fn get_vide_ticket_dir(project_root: &Path) -> PathBuf {
 /// Slugs must be lowercase alphanumeric with hyphens
 pub fn validate_slug(slug: &str) -> Result<()> {
     if slug.is_empty() {
-        return Err(VideTicketError::InvalidSlug {
+        return Err(VibeTicketError::InvalidSlug {
             slug: slug.to_string(),
         });
     }
@@ -51,7 +51,7 @@ pub fn validate_slug(slug: &str) -> Result<()> {
         .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
 
     if !valid || slug.starts_with('-') || slug.ends_with('-') || slug.contains("--") {
-        return Err(VideTicketError::InvalidSlug {
+        return Err(VibeTicketError::InvalidSlug {
             slug: slug.to_string(),
         });
     }
@@ -125,7 +125,7 @@ pub fn open_url(url: &str) -> Result<()> {
         std::process::Command::new("open")
             .arg(url)
             .spawn()
-            .map_err(VideTicketError::Io)?;
+            .map_err(VibeTicketError::Io)?;
     }
 
     #[cfg(target_os = "linux")]
@@ -133,7 +133,7 @@ pub fn open_url(url: &str) -> Result<()> {
         std::process::Command::new("xdg-open")
             .arg(url)
             .spawn()
-            .map_err(VideTicketError::Io)?;
+            .map_err(VibeTicketError::Io)?;
     }
 
     #[cfg(target_os = "windows")]
@@ -141,7 +141,7 @@ pub fn open_url(url: &str) -> Result<()> {
         std::process::Command::new("cmd")
             .args(&["/C", "start", url])
             .spawn()
-            .map_err(VideTicketError::Io)?;
+            .map_err(VibeTicketError::Io)?;
     }
 
     Ok(())

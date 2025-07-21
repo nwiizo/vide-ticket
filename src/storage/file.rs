@@ -2,12 +2,12 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::core::{Ticket, TicketId};
-use crate::error::{ErrorContext, Result, VideTicketError};
+use crate::error::{ErrorContext, Result, VibeTicketError};
 
 /// File-based storage implementation for tickets
 ///
 /// This implementation stores tickets as YAML files in a directory structure
-/// within the project's .vide-ticket directory.
+/// within the project's .vibe-ticket directory.
 pub struct FileStorage {
     /// Base directory for storing ticket data
     base_dir: PathBuf,
@@ -69,7 +69,7 @@ impl FileStorage {
         let path = self.ticket_path(id);
 
         if !path.exists() {
-            return Err(VideTicketError::TicketNotFound { id: id.to_string() });
+            return Err(VibeTicketError::TicketNotFound { id: id.to_string() });
         }
 
         let yaml = fs::read_to_string(&path)
@@ -116,7 +116,7 @@ impl FileStorage {
         let path = self.ticket_path(id);
 
         if !path.exists() {
-            return Err(VideTicketError::TicketNotFound { id: id.to_string() });
+            return Err(VibeTicketError::TicketNotFound { id: id.to_string() });
         }
 
         fs::remove_file(&path).with_context(|| format!("Failed to delete ticket at {:?}", path))?;
@@ -170,7 +170,7 @@ impl FileStorage {
     }
 }
 
-/// Project state stored in the .vide-ticket directory
+/// Project state stored in the .vibe-ticket directory
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ProjectState {
     /// Project name
@@ -205,7 +205,7 @@ impl FileStorage {
         let path = self.state_path();
 
         if !path.exists() {
-            return Err(VideTicketError::ProjectNotInitialized);
+            return Err(VibeTicketError::ProjectNotInitialized);
         }
 
         let yaml = fs::read_to_string(&path).context("Failed to read project state")?;

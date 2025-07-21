@@ -1,0 +1,15 @@
+id: fbc8d53e-9e7b-4d4a-b6e9-4f216c6d3170
+slug: 202507212350-add-version-command
+title: Add version command to show detailed version info
+description: Add a 'vide-ticket version' command that shows version, build date, git commit, and feature flags. This helps with debugging and support.
+priority: high
+status: todo
+tags:
+- feature
+- cli
+created_at: 2025-07-21T14:50:41.796396Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

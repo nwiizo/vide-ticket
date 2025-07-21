@@ -1,17 +1,17 @@
-//! vide-ticket - High-performance ticket management system
+//! vibe-ticket - High-performance ticket management system
 //!
-//! This is the main entry point for the vide-ticket CLI application.
+//! This is the main entry point for the vibe-ticket CLI application.
 //! It handles command-line argument parsing and dispatches to the appropriate
 //! command handlers.
 
 use clap::Parser;
 use std::process;
-use vide_ticket::cli::{
+use vibe_ticket::cli::{
     handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands,
 };
-use vide_ticket::error::Result;
+use vibe_ticket::error::Result;
 
-/// Main entry point for the vide-ticket CLI
+/// Main entry point for the vibe-ticket CLI
 ///
 /// Parses command-line arguments and executes the requested command.
 /// Handles errors gracefully and provides helpful error messages to users.
@@ -51,7 +51,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
     // Change to project directory if specified
     if let Some(project_path) = &cli.project {
         std::env::set_current_dir(project_path)
-            .map_err(|e| vide_ticket::error::VideTicketError::Io(e))?;
+            .map_err(|e| vibe_ticket::error::VibeTicketError::Io(e))?;
     }
 
     // Dispatch to command handler
@@ -71,7 +71,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             tags,
             start,
         } => {
-            use vide_ticket::cli::handlers::handle_new_command;
+            use vibe_ticket::cli::handlers::handle_new_command;
             handle_new_command(
                 slug,
                 title,
@@ -96,7 +96,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             since,
             until,
         } => {
-            use vide_ticket::cli::handlers::handle_list_command;
+            use vibe_ticket::cli::handlers::handle_list_command;
             handle_list_command(
                 status,
                 priority,
@@ -118,7 +118,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             reverse,
             limit,
         } => {
-            use vide_ticket::cli::handlers::handle_list_command;
+            use vibe_ticket::cli::handlers::handle_list_command;
             // Call list handler with open filter set to true
             handle_list_command(
                 None, // status
@@ -142,7 +142,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             branch_name,
             worktree,
         } => {
-            use vide_ticket::cli::handlers::handle_start_command;
+            use vibe_ticket::cli::handlers::handle_start_command;
             handle_start_command(
                 ticket,
                 branch,
@@ -159,12 +159,12 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             archive,
             pr,
         } => {
-            use vide_ticket::cli::handlers::handle_close_command;
+            use vibe_ticket::cli::handlers::handle_close_command;
             handle_close_command(ticket, message, archive, pr, cli.project, &formatter)
         },
 
         Commands::Check { detailed, stats } => {
-            use vide_ticket::cli::handlers::handle_check_command;
+            use vibe_ticket::cli::handlers::handle_check_command;
             handle_check_command(detailed, stats, cli.project, &formatter)
         },
 
@@ -178,7 +178,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             remove_tags,
             editor,
         } => {
-            use vide_ticket::cli::handlers::handle_edit_command;
+            use vibe_ticket::cli::handlers::handle_edit_command;
             handle_edit_command(
                 ticket,
                 title,
@@ -199,21 +199,21 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             history,
             markdown,
         } => {
-            use vide_ticket::cli::handlers::handle_show_command;
+            use vibe_ticket::cli::handlers::handle_show_command;
             handle_show_command(ticket, tasks, history, markdown, cli.project, &formatter)
         },
 
         Commands::Task { command } => match command {
             TaskCommands::Add { title, ticket } => {
-                use vide_ticket::cli::handlers::handle_task_add;
+                use vibe_ticket::cli::handlers::handle_task_add;
                 handle_task_add(title, ticket, cli.project, &formatter)
             },
             TaskCommands::Complete { task, ticket } => {
-                use vide_ticket::cli::handlers::handle_task_complete;
+                use vibe_ticket::cli::handlers::handle_task_complete;
                 handle_task_complete(task, ticket, cli.project, &formatter)
             },
             TaskCommands::Uncomplete { task, ticket } => {
-                use vide_ticket::cli::handlers::handle_task_uncomplete;
+                use vibe_ticket::cli::handlers::handle_task_uncomplete;
                 handle_task_uncomplete(task, ticket, cli.project, &formatter)
             },
             TaskCommands::List {
@@ -221,7 +221,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 completed,
                 incomplete,
             } => {
-                use vide_ticket::cli::handlers::handle_task_list;
+                use vibe_ticket::cli::handlers::handle_task_list;
                 handle_task_list(ticket, completed, incomplete, cli.project, &formatter)
             },
             TaskCommands::Remove {
@@ -229,13 +229,13 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 ticket,
                 force,
             } => {
-                use vide_ticket::cli::handlers::handle_task_remove;
+                use vibe_ticket::cli::handlers::handle_task_remove;
                 handle_task_remove(task, ticket, force, cli.project, &formatter)
             },
         },
 
         Commands::Archive { ticket, unarchive } => {
-            use vide_ticket::cli::handlers::handle_archive_command;
+            use vibe_ticket::cli::handlers::handle_archive_command;
             handle_archive_command(ticket, unarchive, cli.project, &formatter)
         },
 
@@ -246,7 +246,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             tags,
             regex,
         } => {
-            use vide_ticket::cli::handlers::handle_search_command;
+            use vibe_ticket::cli::handlers::handle_search_command;
             handle_search_command(
                 query,
                 title,
@@ -263,7 +263,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             output,
             include_archived,
         } => {
-            use vide_ticket::cli::handlers::handle_export_command;
+            use vibe_ticket::cli::handlers::handle_export_command;
             handle_export_command(format, output, include_archived, cli.project, &formatter)
         },
 
@@ -273,7 +273,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             skip_validation,
             dry_run,
         } => {
-            use vide_ticket::cli::handlers::handle_import_command;
+            use vibe_ticket::cli::handlers::handle_import_command;
             handle_import_command(
                 file,
                 format,
@@ -285,7 +285,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
         },
 
         Commands::Config { command } => {
-            use vide_ticket::cli::handlers::handle_config_command;
+            use vibe_ticket::cli::handlers::handle_config_command;
             handle_config_command(command, cli.project, &formatter)
         },
 
@@ -296,7 +296,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 ticket,
                 tags,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_init;
+                use vibe_ticket::cli::handlers::handle_spec_init;
                 handle_spec_init(title, description, ticket, tags, cli.project, &formatter)
             },
             SpecCommands::Requirements {
@@ -304,7 +304,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 editor,
                 complete,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_requirements;
+                use vibe_ticket::cli::handlers::handle_spec_requirements;
                 handle_spec_requirements(spec, editor, complete, cli.project, &formatter)
             },
             SpecCommands::Design {
@@ -312,7 +312,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 editor,
                 complete,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_design;
+                use vibe_ticket::cli::handlers::handle_spec_design;
                 handle_spec_design(spec, editor, complete, cli.project, &formatter)
             },
             SpecCommands::Tasks {
@@ -321,7 +321,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 complete,
                 export_tickets,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_tasks;
+                use vibe_ticket::cli::handlers::handle_spec_tasks;
                 handle_spec_tasks(
                     spec,
                     editor,
@@ -332,7 +332,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 )
             },
             SpecCommands::Status { spec, detailed } => {
-                use vide_ticket::cli::handlers::handle_spec_status;
+                use vibe_ticket::cli::handlers::handle_spec_status;
                 handle_spec_status(spec, detailed, cli.project, &formatter)
             },
             SpecCommands::List {
@@ -340,7 +340,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 phase,
                 archived,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_list;
+                use vibe_ticket::cli::handlers::handle_spec_list;
                 handle_spec_list(status, phase, archived, cli.project, &formatter)
             },
             SpecCommands::Show {
@@ -348,11 +348,11 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 all,
                 markdown,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_show;
+                use vibe_ticket::cli::handlers::handle_spec_show;
                 handle_spec_show(spec, all, markdown, cli.project, &formatter)
             },
             SpecCommands::Delete { spec, force } => {
-                use vide_ticket::cli::handlers::handle_spec_delete;
+                use vibe_ticket::cli::handlers::handle_spec_delete;
                 handle_spec_delete(spec, force, cli.project, &formatter)
             },
             SpecCommands::Approve {
@@ -360,11 +360,11 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 phase,
                 message,
             } => {
-                use vide_ticket::cli::handlers::handle_spec_approve;
+                use vibe_ticket::cli::handlers::handle_spec_approve;
                 handle_spec_approve(spec, phase, message, cli.project, &formatter)
             },
             SpecCommands::Activate { spec } => {
-                use vide_ticket::cli::handlers::handle_spec_activate;
+                use vibe_ticket::cli::handlers::handle_spec_activate;
                 handle_spec_activate(spec, cli.project, &formatter)
             },
         },
@@ -382,7 +382,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
 ///
 /// * `error` - The error to handle
 /// * `formatter` - Output formatter for displaying the error
-fn handle_error(error: vide_ticket::error::VideTicketError, formatter: &OutputFormatter) {
+fn handle_error(error: vibe_ticket::error::VibeTicketError, formatter: &OutputFormatter) {
     // Display the main error message
     formatter.error(&error.user_message());
 
@@ -421,8 +421,8 @@ mod tests {
     #[test]
     fn test_cli_parsing() {
         // Test that the CLI can be parsed with various commands
-        let _cli = Cli::parse_from(&["vide-ticket", "init"]);
-        let _cli = Cli::parse_from(&["vide-ticket", "list"]);
-        let _cli = Cli::parse_from(&["vide-ticket", "new", "test-ticket"]);
+        let _cli = Cli::parse_from(&["vibe-ticket", "init"]);
+        let _cli = Cli::parse_from(&["vibe-ticket", "list"]);
+        let _cli = Cli::parse_from(&["vibe-ticket", "new", "test-ticket"]);
     }
 }

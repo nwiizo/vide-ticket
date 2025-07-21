@@ -1,0 +1,15 @@
+id: ee731276-9478-441b-ac49-f95798bf046e
+slug: 202507212356-add-tasks-on-create
+title: Add --task flag to new command for inline task creation
+description: 'Allow creating tasks when creating a new ticket. Example: vide-ticket new fix-bug --title ''Fix bug'' --task ''Investigate issue'' --task ''Write test'' --task ''Fix code'''
+priority: medium
+status: todo
+tags:
+- ux
+- feature
+created_at: 2025-07-21T14:56:14.418069Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

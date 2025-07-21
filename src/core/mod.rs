@@ -1,4 +1,4 @@
-//! Core business logic for vide-ticket
+//! Core business logic for vibe-ticket
 //!
 //! This module contains the fundamental business logic and domain models for the ticket
 //! management system. It is independent of any specific storage or presentation layer.
@@ -14,7 +14,7 @@
 //! # Example
 //!
 //! ```no_run
-//! use vide_ticket::core::{Ticket, Status, Priority};
+//! use vibe_ticket::core::{Ticket, Status, Priority};
 //!
 //! let mut ticket = Ticket::new("fix-login-bug", "Fix login bug");
 //! ticket.description = "Users cannot login with special characters".to_string();

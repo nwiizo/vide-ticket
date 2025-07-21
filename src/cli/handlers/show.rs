@@ -5,7 +5,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::TicketId;
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
 use chrono::{DateTime, Local, Utc};
 
@@ -45,10 +45,10 @@ pub fn handle_show_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Resolve ticket ID
     let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
@@ -107,7 +107,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
         }
     }
 
-    Err(VideTicketError::TicketNotFound {
+    Err(VibeTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
 }

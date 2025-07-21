@@ -22,7 +22,7 @@ jobs:
         # Check if PR title or body contains ticket reference
         if ! echo "$PR_TITLE $PR_BODY" | grep -qE "(ticket|fix|close|resolve)[s]?\s*#?[0-9a-f-]+"; then
           echo "::warning::No ticket reference found in PR title or description"
-          echo "Consider linking this PR to a vide-ticket"
+          echo "Consider linking this PR to a vibe-ticket"
         fi
 
   lint-commits:
@@ -52,21 +52,21 @@ jobs:
   check-claude-md:
     name: Check CLAUDE.md
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.files.*.filename, '.vide-ticket/config.yaml')
+    if: contains(github.event.pull_request.files.*.filename, '.vibe-ticket/config.yaml')
     steps:
     - uses: actions/checkout@v4
     
     - name: Check if CLAUDE.md needs update
       run: |
         if [ ! -f "CLAUDE.md" ]; then
-          echo "::warning::CLAUDE.md not found. Consider creating one with 'vide-ticket config claude'"
+          echo "::warning::CLAUDE.md not found. Consider creating one with 'vibe-ticket config claude'"
         else
           # Check if CLAUDE.md is older than config
-          CONFIG_TIME=$(stat -c %Y .vide-ticket/config.yaml 2>/dev/null || stat -f %m .vide-ticket/config.yaml)
+          CONFIG_TIME=$(stat -c %Y .vibe-ticket/config.yaml 2>/dev/null || stat -f %m .vibe-ticket/config.yaml)
           CLAUDE_TIME=$(stat -c %Y CLAUDE.md 2>/dev/null || stat -f %m CLAUDE.md)
           
           if [ "$CONFIG_TIME" -gt "$CLAUDE_TIME" ]; then
-            echo "::warning::CLAUDE.md may be outdated. Consider updating with 'vide-ticket config claude --append'"
+            echo "::warning::CLAUDE.md may be outdated. Consider updating with 'vibe-ticket config claude --append'"
           fi
         fi
 

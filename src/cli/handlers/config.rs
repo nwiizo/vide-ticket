@@ -4,7 +4,7 @@
 
 use crate::cli::{find_project_root, ConfigCommands, OutputFormatter};
 use crate::config::Config;
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 
 /// Handler for the `config` subcommands
 ///
@@ -26,7 +26,7 @@ pub fn handle_config_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let config_path = project_root.join(".vide-ticket/config.yaml");
+    let config_path = project_root.join(".vibe-ticket/config.yaml");
 
     match command {
         ConfigCommands::Show { key } => handle_show(key, &config_path, output),
@@ -167,7 +167,7 @@ fn handle_reset(
     output: &OutputFormatter,
 ) -> Result<()> {
     if !force {
-        return Err(VideTicketError::custom(
+        return Err(VibeTicketError::custom(
             "Configuration reset requires --force flag to confirm",
         ));
     }
@@ -203,7 +203,7 @@ fn get_config_value(config: &Config, key: &str) -> Result<serde_json::Value> {
         match current.get(part) {
             Some(value) => current = value,
             None => {
-                return Err(VideTicketError::custom(format!(
+                return Err(VibeTicketError::custom(format!(
                     "Configuration key '{}' not found",
                     key
                 )))
@@ -223,7 +223,7 @@ fn set_config_value(config: &mut Config, key: &str, value: &str) -> Result<()> {
         "project.default_priority" => {
             // Validate priority
             if !["low", "medium", "high", "critical"].contains(&value) {
-                return Err(VideTicketError::custom(
+                return Err(VibeTicketError::custom(
                     "Invalid priority. Must be one of: low, medium, high, critical",
                 ));
             }
@@ -232,7 +232,7 @@ fn set_config_value(config: &mut Config, key: &str, value: &str) -> Result<()> {
         "ui.theme" => {
             // Validate theme
             if !["light", "dark", "auto"].contains(&value) {
-                return Err(VideTicketError::custom(
+                return Err(VibeTicketError::custom(
                     "Invalid theme. Must be one of: light, dark, auto",
                 ));
             }
@@ -241,29 +241,29 @@ fn set_config_value(config: &mut Config, key: &str, value: &str) -> Result<()> {
         "ui.emoji" => {
             config.ui.emoji = value
                 .parse::<bool>()
-                .map_err(|_| VideTicketError::custom("Value must be true or false"))?;
+                .map_err(|_| VibeTicketError::custom("Value must be true or false"))?;
         },
         "ui.page_size" => {
             config.ui.page_size = value
                 .parse::<usize>()
-                .map_err(|_| VideTicketError::custom("Value must be a positive number"))?;
+                .map_err(|_| VibeTicketError::custom("Value must be a positive number"))?;
         },
         "ui.date_format" => config.ui.date_format = value.to_string(),
         "git.enabled" => {
             config.git.enabled = value
                 .parse::<bool>()
-                .map_err(|_| VideTicketError::custom("Value must be true or false"))?;
+                .map_err(|_| VibeTicketError::custom("Value must be true or false"))?;
         },
         "git.branch_prefix" => config.git.branch_prefix = value.to_string(),
         "git.auto_branch" => {
             config.git.auto_branch = value
                 .parse::<bool>()
-                .map_err(|_| VideTicketError::custom("Value must be true or false"))?;
+                .map_err(|_| VibeTicketError::custom("Value must be true or false"))?;
         },
         "git.commit_template" => config.git.commit_template = Some(value.to_string()),
         "plugins.directory" => config.plugins.directory = value.to_string(),
         _ => {
-            return Err(VideTicketError::custom(format!(
+            return Err(VibeTicketError::custom(format!(
                 "Configuration key '{}' cannot be set or doesn't exist",
                 key
             )))
@@ -300,7 +300,7 @@ fn handle_claude(
         "basic" => generate_basic_claude_md(&config, project_root)?,
         "advanced" => generate_advanced_claude_md(&config, project_root)?,
         _ => {
-            return Err(VideTicketError::custom(format!(
+            return Err(VibeTicketError::custom(format!(
                 "Unknown template '{}'. Available templates: basic, advanced",
                 template
             )))
@@ -346,7 +346,7 @@ fn handle_claude(
 fn generate_basic_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
     use crate::storage::{FileStorage, TicketRepository};
 
-    let storage = FileStorage::new(&project_root.join(".vide-ticket"));
+    let storage = FileStorage::new(&project_root.join(".vibe-ticket"));
     let tickets = storage.load_all().unwrap_or_default();
     let active_tickets = tickets
         .iter()
@@ -354,44 +354,44 @@ fn generate_basic_claude_md(config: &Config, project_root: &std::path::Path) -> 
         .count();
 
     let content = format!(
-        r#"# vide-ticket Project: {}
+        r#"# vibe-ticket Project: {}
 
 {}
 
 ## Overview
 
-This project uses vide-ticket for ticket management. This document provides guidance for Claude Code when working with this codebase.
+This project uses vibe-ticket for ticket management. This document provides guidance for Claude Code when working with this codebase.
 
-## Common vide-ticket Commands
+## Common vibe-ticket Commands
 
 ### Basic Operations
 ```bash
 # Create a new ticket
-vide-ticket new <slug> --title "<title>" --priority <priority>
+vibe-ticket new <slug> --title "<title>" --priority <priority>
 
 # List all tickets
-vide-ticket list
+vibe-ticket list
 
 # Show ticket details
-vide-ticket show <ticket>
+vibe-ticket show <ticket>
 
 # Start working on a ticket
-vide-ticket start <ticket>
+vibe-ticket start <ticket>
 
 # Close a ticket
-vide-ticket close <ticket> --message "<completion message>"
+vibe-ticket close <ticket> --message "<completion message>"
 ```
 
 ### Task Management
 ```bash
 # Add a task to current ticket
-vide-ticket task add "<task description>"
+vibe-ticket task add "<task description>"
 
 # Complete a task
-vide-ticket task complete <task-number>
+vibe-ticket task complete <task-number>
 
 # List tasks
-vide-ticket task list
+vibe-ticket task list
 ```
 
 ## Current Configuration
@@ -431,7 +431,7 @@ Generated on: {}
             .project
             .description
             .as_deref()
-            .unwrap_or("A vide-ticket managed project"),
+            .unwrap_or("A vibe-ticket managed project"),
         config.project.name,
         config.project.default_priority,
         if config.git.enabled {
@@ -460,53 +460,53 @@ fn generate_advanced_claude_md(config: &Config, project_root: &std::path::Path) 
 ### Git Worktree Support
 ```bash
 # Enable worktree support
-vide-ticket config set git.worktree_enabled true
+vibe-ticket config set git.worktree_enabled true
 
 # Start ticket with worktree
-vide-ticket start <ticket> --worktree
+vibe-ticket start <ticket> --worktree
 ```
 
 ### Search and Filter
 ```bash
 # Search tickets by content
-vide-ticket search "<query>"
+vibe-ticket search "<query>"
 
 # Filter by status
-vide-ticket list --status doing
+vibe-ticket list --status doing
 
 # Filter by priority
-vide-ticket list --priority high
+vibe-ticket list --priority high
 
 # Complex filters
-vide-ticket list --status todo --priority high --assignee me
+vibe-ticket list --status todo --priority high --assignee me
 ```
 
 ### Export and Import
 ```bash
 # Export tickets to JSON
-vide-ticket export json -o tickets.json
+vibe-ticket export json -o tickets.json
 
 # Export to CSV
-vide-ticket export csv -o tickets.csv
+vibe-ticket export csv -o tickets.csv
 
 # Import tickets
-vide-ticket import tickets.json
+vibe-ticket import tickets.json
 ```
 
 ## Integration Points
 
 ### Environment Variables
-- `VIDE_TICKET_PROJECT`: Override project directory
-- `VIDE_TICKET_NO_COLOR`: Disable colored output
-- `VIDE_TICKET_JSON`: Force JSON output
+- `VIBE_TICKET_PROJECT`: Override project directory
+- `VIBE_TICKET_NO_COLOR`: Disable colored output
+- `VIBE_TICKET_JSON`: Force JSON output
 
 ### Git Hooks
-You can integrate vide-ticket with Git hooks for automated workflows:
+You can integrate vibe-ticket with Git hooks for automated workflows:
 
 ```bash
 # pre-commit hook example
 #!/bin/bash
-if [ -z "$(vide-ticket check --active)" ]; then
+if [ -z "$(vibe-ticket check --active)" ]; then
     echo "Error: No active ticket. Start a ticket before committing."
     exit 1
 fi
@@ -515,17 +515,17 @@ fi
 ## Troubleshooting
 
 ### Common Issues
-1. **"Project not initialized"**: Run `vide-ticket init` in the project root
-2. **"No active ticket"**: Use `vide-ticket start <ticket>` to set active ticket
-3. **"Ticket not found"**: Check ticket slug with `vide-ticket list`
+1. **"Project not initialized"**: Run `vibe-ticket init` in the project root
+2. **"No active ticket"**: Use `vibe-ticket start <ticket>` to set active ticket
+3. **"Ticket not found"**: Check ticket slug with `vibe-ticket list`
 
 ### Debug Mode
 ```bash
 # Enable verbose output
-vide-ticket --verbose <command>
+vibe-ticket --verbose <command>
 
 # Check project status
-vide-ticket check --detailed
+vibe-ticket check --detailed
 ```
 "#
     );

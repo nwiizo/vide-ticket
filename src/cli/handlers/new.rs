@@ -1,6 +1,6 @@
 use crate::cli::{find_project_root, validate_slug, OutputFormatter};
 use crate::core::{Priority, Ticket};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 use super::parse_tags;
@@ -18,10 +18,10 @@ pub fn handle_new_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Generate timestamp prefix for the slug
     let now = chrono::Local::now();
@@ -36,12 +36,12 @@ pub fn handle_new_command(
 
     // Check if a ticket with this slug already exists
     if storage.ticket_exists_with_slug(&slug)? {
-        return Err(VideTicketError::DuplicateTicket { slug: slug.clone() });
+        return Err(VibeTicketError::DuplicateTicket { slug: slug.clone() });
     }
 
     // Parse priority
     let priority = Priority::try_from(priority.as_str())
-        .map_err(|_| VideTicketError::InvalidPriority { priority })?;
+        .map_err(|_| VibeTicketError::InvalidPriority { priority })?;
 
     // Parse tags
     let tags = tags.map(|t| parse_tags(Some(t))).unwrap_or_default();
@@ -112,7 +112,7 @@ pub fn handle_new_command(
         }
         output.info("");
         output.info("To start working on this ticket:");
-        output.info(&format!("  vide-ticket start {}", ticket.slug));
+        output.info(&format!("  vibe-ticket start {}", ticket.slug));
     }
 
     Ok(())
@@ -126,8 +126,8 @@ mod tests {
     #[test]
     fn test_create_ticket_from_slug() {
         let temp_dir = TempDir::new().unwrap();
-        let vide_ticket_dir = temp_dir.path().join(".vide-ticket");
-        std::fs::create_dir_all(&vide_ticket_dir).unwrap();
+        let vibe_ticket_dir = temp_dir.path().join(".vibe-ticket");
+        std::fs::create_dir_all(&vibe_ticket_dir).unwrap();
 
         // Initialize project state
         let state = crate::storage::ProjectState {
@@ -138,7 +138,7 @@ mod tests {
             ticket_count: 0,
         };
 
-        let storage = FileStorage::new(&vide_ticket_dir);
+        let storage = FileStorage::new(&vibe_ticket_dir);
         storage.save_state(&state).unwrap();
         storage.ensure_directories().unwrap();
 

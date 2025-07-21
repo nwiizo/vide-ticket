@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use super::{Priority, Status, Task, TaskId, TicketId};
 
-/// Represents a ticket in the vide-ticket system
+/// Represents a ticket in the vibe-ticket system
 ///
 /// A ticket encapsulates a unit of work with associated metadata,
 /// tasks, and lifecycle information.

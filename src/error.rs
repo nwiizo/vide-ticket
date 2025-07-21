@@ -2,12 +2,12 @@ use std::io;
 use std::path::PathBuf;
 use thiserror::Error;
 
-/// Main error type for vide-ticket
+/// Main error type for vibe-ticket
 ///
 /// This enum represents all possible errors that can occur in the application.
 /// Using thiserror for automatic Error trait implementation.
 #[derive(Error, Debug)]
-pub enum VideTicketError {
+pub enum VibeTicketError {
     /// I/O related errors
     #[error("I/O error: {0}")]
     Io(#[from] io::Error),
@@ -45,7 +45,7 @@ pub enum VideTicketError {
     InvalidPriority { priority: String },
 
     /// Project not initialized
-    #[error("Project not initialized. Run 'vide-ticket init' first")]
+    #[error("Project not initialized. Run 'vibe-ticket init' first")]
     ProjectNotInitialized,
 
     /// Project already initialized
@@ -53,7 +53,7 @@ pub enum VideTicketError {
     ProjectAlreadyInitialized { path: PathBuf },
 
     /// No active ticket
-    #[error("No active ticket. Use 'vide-ticket start <id>' to start working on a ticket")]
+    #[error("No active ticket. Use 'vibe-ticket start <id>' to start working on a ticket")]
     NoActiveTicket,
 
     /// Multiple active tickets
@@ -89,7 +89,7 @@ pub enum VideTicketError {
     SpecNotFound { id: String },
 
     /// No active specification
-    #[error("No active specification. Use 'vide-ticket spec activate <id>' to set active spec")]
+    #[error("No active specification. Use 'vibe-ticket spec activate <id>' to set active spec")]
     NoActiveSpec,
 
     /// Invalid input
@@ -101,10 +101,10 @@ pub enum VideTicketError {
     Custom(String),
 }
 
-/// Result type alias for vide-ticket operations
-pub type Result<T> = std::result::Result<T, VideTicketError>;
+/// Result type alias for vibe-ticket operations
+pub type Result<T> = std::result::Result<T, VibeTicketError>;
 
-impl VideTicketError {
+impl VibeTicketError {
     /// Creates a custom error with the given message
     pub fn custom(msg: impl Into<String>) -> Self {
         Self::Custom(msg.into())
@@ -147,12 +147,12 @@ impl VideTicketError {
     pub fn suggestions(&self) -> Vec<String> {
         match self {
             Self::ProjectNotInitialized => vec![
-                "Run 'vide-ticket init' to initialize the project".to_string(),
+                "Run 'vibe-ticket init' to initialize the project".to_string(),
                 "Make sure you're in the correct directory".to_string(),
             ],
             Self::NoActiveTicket => vec![
-                "Run 'vide-ticket list' to see available tickets".to_string(),
-                "Run 'vide-ticket start <id>' to start working on a ticket".to_string(),
+                "Run 'vibe-ticket list' to see available tickets".to_string(),
+                "Run 'vibe-ticket start <id>' to start working on a ticket".to_string(),
             ],
             Self::InvalidSlug { .. } => vec![
                 "Use lowercase letters, numbers, and hyphens only".to_string(),
@@ -160,15 +160,15 @@ impl VideTicketError {
             ],
             Self::DuplicateTicket { slug } => vec![
                 format!("Use a different slug or check existing ticket '{}'", slug),
-                "Run 'vide-ticket list' to see all tickets".to_string(),
+                "Run 'vibe-ticket list' to see all tickets".to_string(),
             ],
             Self::NoActiveSpec => vec![
-                "Run 'vide-ticket spec list' to see available specifications".to_string(),
-                "Run 'vide-ticket spec activate <id>' to set an active specification".to_string(),
+                "Run 'vibe-ticket spec list' to see available specifications".to_string(),
+                "Run 'vibe-ticket spec activate <id>' to set an active specification".to_string(),
             ],
             Self::SpecNotFound { id } => vec![
                 format!("Check if specification '{}' exists", id),
-                "Run 'vide-ticket spec list' to see all specifications".to_string(),
+                "Run 'vibe-ticket spec list' to see all specifications".to_string(),
             ],
             _ => vec![],
         }
@@ -188,12 +188,12 @@ pub trait ErrorContext<T> {
 
 impl<T, E> ErrorContext<T> for std::result::Result<T, E>
 where
-    E: Into<VideTicketError>,
+    E: Into<VibeTicketError>,
 {
     fn context(self, msg: &str) -> Result<T> {
         self.map_err(|e| {
             let base_error = e.into();
-            VideTicketError::Custom(format!("{}: {}", msg, base_error))
+            VibeTicketError::Custom(format!("{}: {}", msg, base_error))
         })
     }
 
@@ -203,7 +203,7 @@ where
     {
         self.map_err(|e| {
             let base_error = e.into();
-            VideTicketError::Custom(format!("{}: {}", f(), base_error))
+            VibeTicketError::Custom(format!("{}: {}", f(), base_error))
         })
     }
 }
@@ -214,7 +214,7 @@ mod tests {
 
     #[test]
     fn test_error_display() {
-        let err = VideTicketError::TicketNotFound {
+        let err = VibeTicketError::TicketNotFound {
             id: "123".to_string(),
         };
         assert_eq!(err.to_string(), "Ticket not found: 123");
@@ -222,15 +222,15 @@ mod tests {
 
     #[test]
     fn test_is_recoverable() {
-        assert!(VideTicketError::NoActiveTicket.is_recoverable());
-        assert!(!VideTicketError::ProjectNotInitialized.is_recoverable());
+        assert!(VibeTicketError::NoActiveTicket.is_recoverable());
+        assert!(!VibeTicketError::ProjectNotInitialized.is_recoverable());
     }
 
     #[test]
     fn test_suggestions() {
-        let err = VideTicketError::ProjectNotInitialized;
+        let err = VibeTicketError::ProjectNotInitialized;
         let suggestions = err.suggestions();
         assert!(!suggestions.is_empty());
-        assert!(suggestions[0].contains("vide-ticket init"));
+        assert!(suggestions[0].contains("vibe-ticket init"));
     }
 }

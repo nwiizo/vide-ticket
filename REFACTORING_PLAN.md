@@ -1,4 +1,4 @@
-# Refactoring Plan - vide-ticket
+# Refactoring Plan - vibe-ticket
 
 Based on similarity-rs analysis performed on 2025-07-21
 

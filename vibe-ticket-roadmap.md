@@ -83,7 +83,7 @@ Create benchmarks for critical operations like ticket loading, searching, and fi
 - **Tags**: documentation
 - **Created**: 2025-07-21
 
-Document the development workflow, contribution guidelines, and best practices for vide-ticket development using vide-ticket itself
+Document the development workflow, contribution guidelines, and best practices for vibe-ticket development using vibe-ticket itself
 
 ---
 
@@ -95,7 +95,7 @@ Document the development workflow, contribution guidelines, and best practices f
 - **Tags**: feature, specs, core
 - **Created**: 2025-07-21
 
-仕様書（要件定義書、技術設計書、実装計画書）の作成、保存、読み込み、バージョン管理の基本機能を実装。.vide-ticket/specs/配下でMarkdownファイルとして管理し、spec.jsonで進捗を追跡
+仕様書（要件定義書、技術設計書、実装計画書）の作成、保存、読み込み、バージョン管理の基本機能を実装。.vibe-ticket/specs/配下でMarkdownファイルとして管理し、spec.jsonで進捗を追跡
 
 ---
 

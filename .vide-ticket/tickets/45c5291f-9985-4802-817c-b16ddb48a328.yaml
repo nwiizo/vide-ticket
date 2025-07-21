@@ -1,0 +1,15 @@
+id: 45c5291f-9985-4802-817c-b16ddb48a328
+slug: 202507212350-update-readme-install
+title: Update README with cargo install instructions
+description: Add installation instructions for v0.1.1 using 'cargo install vide-ticket'. Include version badge and link to crates.io.
+priority: high
+status: done
+tags:
+- documentation
+created_at: 2025-07-21T14:50:50.061596Z
+started_at: 2025-07-21T14:50:56.352080Z
+closed_at: 2025-07-21T14:51:41.411616Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Updated README with crates.io installation instructions and version badges

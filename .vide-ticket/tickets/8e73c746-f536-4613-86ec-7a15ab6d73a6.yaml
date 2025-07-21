@@ -1,0 +1,15 @@
+id: 8e73c746-f536-4613-86ec-7a15ab6d73a6
+slug: 202507212357-show-full-id-option
+title: Add --full-id flag to show command for easy copying
+description: Add option to display full UUID instead of short ID for easier copying. Also consider adding a 'vide-ticket id <ticket>' command that just outputs the full ID.
+priority: low
+status: todo
+tags:
+- ux
+- cli
+created_at: 2025-07-21T14:57:43.428776Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

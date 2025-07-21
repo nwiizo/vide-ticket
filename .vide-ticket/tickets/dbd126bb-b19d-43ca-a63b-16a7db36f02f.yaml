@@ -1,0 +1,51 @@
+id: dbd126bb-b19d-43ca-a63b-16a7db36f02f
+slug: 202507212353-rename-to-vibe
+title: Rename project from vide-ticket to vibe-ticket
+description: 'The project name should be ''vibe-ticket'' not ''vide-ticket''. This requires updating: package name, binary name, documentation, README, and all references throughout the codebase.'
+priority: critical
+status: done
+tags:
+- refactoring
+- breaking-change
+created_at: 2025-07-21T14:53:59.541963Z
+started_at: 2025-07-21T14:55:55.508544Z
+closed_at: 2025-07-21T15:16:04.365355Z
+assignee: null
+tasks:
+- id: b1667968-d2c8-4e71-b09a-fc49ec9fa8d2
+  title: Update Cargo.toml package name to vibe-ticket
+  completed: true
+  created_at: 2025-07-21T14:54:07.964966Z
+  completed_at: 2025-07-21T15:15:13.723080Z
+- id: e8b4e29d-d4d6-4251-a8f5-b92c18bec722
+  title: Rename all vide references to vibe in source code
+  completed: true
+  created_at: 2025-07-21T14:54:14.844549Z
+  completed_at: 2025-07-21T15:15:19.700457Z
+- id: c44ce452-ff60-40fe-95b5-5d84bb6d5482
+  title: Update README and documentation
+  completed: true
+  created_at: 2025-07-21T14:54:22.785376Z
+  completed_at: 2025-07-21T15:15:25.028055Z
+- id: 0fc747d4-695a-4eda-9302-9d8a4ff86562
+  title: Update binary name in Cargo.toml
+  completed: true
+  created_at: 2025-07-21T14:54:30.766764Z
+  completed_at: 2025-07-21T15:15:30.422378Z
+- id: b70c6f9e-9e40-4361-9d46-183e28088f28
+  title: Update error messages and help text
+  completed: true
+  created_at: 2025-07-21T14:54:37.386199Z
+  completed_at: 2025-07-21T15:15:36.266600Z
+- id: 9dd1d95e-2e20-427a-acaa-061b8ba75a98
+  title: Update GitHub repository name and links
+  completed: true
+  created_at: 2025-07-21T14:54:44.040072Z
+  completed_at: 2025-07-21T15:15:44.266554Z
+- id: 52279232-5615-4d6b-b68a-546c3a4849fe
+  title: Create migration guide for existing users
+  completed: true
+  created_at: 2025-07-21T14:54:50.890154Z
+  completed_at: 2025-07-21T15:15:50.029347Z
+metadata:
+  close_message: Successfully renamed project from vide-ticket to vibe-ticket

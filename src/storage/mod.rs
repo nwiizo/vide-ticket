@@ -1,4 +1,4 @@
-//! Storage layer for vide-ticket
+//! Storage layer for vibe-ticket
 //!
 //! This module provides implementations for persisting and retrieving ticket data.
 //! It supports multiple storage backends through a common trait interface.
@@ -22,10 +22,10 @@
 //! # Example
 //!
 //! ```no_run
-//! use vide_ticket::storage::{FileStorage, Repository};
+//! use vibe_ticket::storage::{FileStorage, Repository};
 //!
 //! // Initialize storage backend
-//! let storage = FileStorage::new(".vide-ticket");
+//! let storage = FileStorage::new(".vibe-ticket");
 //!
 //! // Use storage through repository traits
 //! let tickets = storage.load_all()?;
@@ -33,7 +33,7 @@
 //!
 //! # Error Handling
 //!
-//! All storage operations return `Result<T, VideTicketError>` to handle:
+//! All storage operations return `Result<T, VibeTicketError>` to handle:
 //! - I/O errors
 //! - Serialization/deserialization errors
 //! - Not found errors

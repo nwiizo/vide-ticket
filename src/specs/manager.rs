@@ -4,7 +4,7 @@
 //! including creation, loading, saving, and version control.
 
 use super::{SpecDocumentType, SpecMetadata, SpecPhase, Specification};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::specs::storage::{DocumentOperations, FileSystemStore};
 use std::path::PathBuf;
 
@@ -120,7 +120,7 @@ impl SpecManager {
         match phase {
             SpecPhase::Requirements => {
                 if !metadata.progress.requirements_completed {
-                    return Err(VideTicketError::custom(
+                    return Err(VibeTicketError::custom(
                         "Cannot approve requirements: document not completed",
                     ));
                 }
@@ -128,7 +128,7 @@ impl SpecManager {
             },
             SpecPhase::Design => {
                 if !metadata.progress.design_completed {
-                    return Err(VideTicketError::custom(
+                    return Err(VibeTicketError::custom(
                         "Cannot approve design: document not completed",
                     ));
                 }
@@ -136,14 +136,14 @@ impl SpecManager {
             },
             SpecPhase::Implementation => {
                 if !metadata.progress.tasks_completed {
-                    return Err(VideTicketError::custom(
+                    return Err(VibeTicketError::custom(
                         "Cannot approve tasks: document not completed",
                     ));
                 }
                 metadata.progress.tasks_approved = true;
             },
             _ => {
-                return Err(VideTicketError::custom("Invalid phase for approval"));
+                return Err(VibeTicketError::custom("Invalid phase for approval"));
             },
         }
 
@@ -192,14 +192,14 @@ impl SpecManager {
         let spec_dir = self.get_spec_dir(spec_id);
 
         if !spec_dir.exists() {
-            return Err(VideTicketError::custom(format!(
+            return Err(VibeTicketError::custom(format!(
                 "Specification not found: {}",
                 spec_id
             )));
         }
         
         std::fs::remove_dir_all(&spec_dir)
-            .map_err(|e| VideTicketError::custom(format!(
+            .map_err(|e| VibeTicketError::custom(format!(
                 "Failed to delete specification: {}",
                 e
             )))?;
@@ -213,11 +213,11 @@ impl SpecManager {
         self.load_metadata(spec_id)?;
         
         let active_file = self.ops.base_dir().parent()
-            .ok_or_else(|| VideTicketError::custom("Invalid specs directory structure"))?
+            .ok_or_else(|| VibeTicketError::custom("Invalid specs directory structure"))?
             .join(".active_spec");
         
         std::fs::write(&active_file, spec_id)
-            .map_err(|e| VideTicketError::custom(format!(
+            .map_err(|e| VibeTicketError::custom(format!(
                 "Failed to set active spec: {}",
                 e
             )))?;
@@ -228,7 +228,7 @@ impl SpecManager {
     /// Get active specification ID
     pub fn get_active_spec(&self) -> Result<Option<String>> {
         let active_file = self.ops.base_dir().parent()
-            .ok_or_else(|| VideTicketError::custom("Invalid specs directory structure"))?
+            .ok_or_else(|| VibeTicketError::custom("Invalid specs directory structure"))?
             .join(".active_spec");
         
         if !active_file.exists() {
@@ -236,7 +236,7 @@ impl SpecManager {
         }
         
         let content = std::fs::read_to_string(&active_file)
-            .map_err(|e| VideTicketError::custom(format!(
+            .map_err(|e| VibeTicketError::custom(format!(
                 "Failed to read active spec: {}",
                 e
             )))?;

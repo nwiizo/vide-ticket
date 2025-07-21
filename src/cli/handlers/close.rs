@@ -5,7 +5,7 @@
 
 use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Status, TicketId};
-use crate::error::{Result, VideTicketError};
+use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 use chrono::Utc;
 
@@ -45,10 +45,10 @@ pub fn handle_close_command(
 ) -> Result<()> {
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
-    let vide_ticket_dir = project_root.join(".vide-ticket");
+    let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
-    let storage = FileStorage::new(&vide_ticket_dir);
+    let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
@@ -57,7 +57,7 @@ pub fn handle_close_command(
         // Get active ticket
         storage
             .get_active()?
-            .ok_or(VideTicketError::NoActiveTicket)?
+            .ok_or(VibeTicketError::NoActiveTicket)?
     };
 
     // Load the ticket
@@ -65,7 +65,7 @@ pub fn handle_close_command(
 
     // Check if ticket is already closed
     if ticket.status == Status::Done {
-        return Err(VideTicketError::custom(format!(
+        return Err(VibeTicketError::custom(format!(
             "Ticket '{}' is already closed",
             ticket.slug
         )));
@@ -177,7 +177,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
         }
     }
 
-    Err(VideTicketError::TicketNotFound {
+    Err(VibeTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
 }
@@ -197,10 +197,10 @@ fn create_pull_request(
         .arg("HEAD")
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to get current branch: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to get current branch: {}", e)))?;
 
     if !current_branch.status.success() {
-        return Err(VideTicketError::custom("Failed to get current branch name"));
+        return Err(VibeTicketError::custom("Failed to get current branch name"));
     }
 
     let branch_name = String::from_utf8_lossy(&current_branch.stdout)
@@ -246,7 +246,7 @@ fn create_pull_request(
         .arg(&branch_name)
         .current_dir(project_root)
         .output()
-        .map_err(|e| VideTicketError::custom(format!("Failed to create PR: {}", e)))?;
+        .map_err(|e| VibeTicketError::custom(format!("Failed to create PR: {}", e)))?;
 
     if create_pr.status.success() {
         let pr_url = String::from_utf8_lossy(&create_pr.stdout)

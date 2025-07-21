@@ -15,8 +15,8 @@
 //! # Example
 //!
 //! ```no_run
-//! use vide_ticket::cli::handlers::init::handle_init;
-//! use vide_ticket::cli::output::OutputFormatter;
+//! use vibe_ticket::cli::handlers::init::handle_init;
+//! use vibe_ticket::cli::output::OutputFormatter;
 //!
 //! let formatter = OutputFormatter::new(false, false);
 //! handle_init(Some("my-project".to_string()), None, false, &formatter)?;
@@ -76,20 +76,20 @@ pub trait CommandHandler {
 
 /// Helper function to ensure a project is initialized
 ///
-/// This function checks if the current directory contains a vide-ticket project
+/// This function checks if the current directory contains a vibe-ticket project
 /// and returns an error if not. Many commands require an initialized project.
 ///
 /// # Errors
 ///
-/// Returns `VideTicketError::ProjectNotInitialized` if no project is found.
+/// Returns `VibeTicketError::ProjectNotInitialized` if no project is found.
 pub fn ensure_project_initialized() -> Result<()> {
     use crate::config::Config;
-    use crate::error::VideTicketError;
+    use crate::error::VibeTicketError;
     use std::path::Path;
 
-    let config_path = Path::new(".vide-ticket/config.yaml");
+    let config_path = Path::new(".vibe-ticket/config.yaml");
     if !config_path.exists() {
-        return Err(VideTicketError::ProjectNotInitialized);
+        return Err(VibeTicketError::ProjectNotInitialized);
     }
 
     // Try to load config to ensure it's valid
@@ -104,18 +104,18 @@ pub fn ensure_project_initialized() -> Result<()> {
 ///
 /// # Errors
 ///
-/// Returns `VideTicketError::NoActiveTicket` if no ticket is active.
+/// Returns `VibeTicketError::NoActiveTicket` if no ticket is active.
 pub fn get_active_ticket() -> Result<String> {
-    use crate::error::VideTicketError;
+    use crate::error::VibeTicketError;
     use crate::storage::FileStorage;
 
     ensure_project_initialized()?;
 
-    let storage = FileStorage::new(".vide-ticket");
+    let storage = FileStorage::new(".vibe-ticket");
     if let Some(ticket_id) = storage.get_active_ticket()? {
         Ok(ticket_id.to_string())
     } else {
-        Err(VideTicketError::NoActiveTicket)
+        Err(VibeTicketError::NoActiveTicket)
     }
 }
 
@@ -139,7 +139,7 @@ pub fn resolve_ticket_id(ticket_ref: Option<String>) -> Result<String> {
             use crate::storage::FileStorage;
 
             ensure_project_initialized()?;
-            let storage = FileStorage::new(".vide-ticket");
+            let storage = FileStorage::new(".vibe-ticket");
 
             // First try to parse as ticket ID
             if let Ok(ticket_id) = TicketId::parse_str(&ref_str) {
@@ -154,7 +154,7 @@ pub fn resolve_ticket_id(ticket_ref: Option<String>) -> Result<String> {
                 return Ok(ticket.id.to_string());
             }
 
-            Err(crate::error::VideTicketError::TicketNotFound { id: ref_str })
+            Err(crate::error::VibeTicketError::TicketNotFound { id: ref_str })
         },
         None => get_active_ticket(),
     }
@@ -185,12 +185,12 @@ pub fn parse_tags(tags_str: Option<String>) -> Vec<String> {
 ///
 /// # Errors
 ///
-/// Returns `VideTicketError::InvalidSlug` if the slug format is invalid.
+/// Returns `VibeTicketError::InvalidSlug` if the slug format is invalid.
 pub fn validate_slug(slug: &str) -> Result<()> {
-    use crate::error::VideTicketError;
+    use crate::error::VibeTicketError;
 
     if slug.is_empty() {
-        return Err(VideTicketError::InvalidSlug {
+        return Err(VibeTicketError::InvalidSlug {
             slug: slug.to_string(),
         });
     }
@@ -200,7 +200,7 @@ pub fn validate_slug(slug: &str) -> Result<()> {
         .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
 
     if !valid || slug.starts_with('-') || slug.ends_with('-') || slug.contains("--") {
-        return Err(VideTicketError::InvalidSlug {
+        return Err(VibeTicketError::InvalidSlug {
             slug: slug.to_string(),
         });
     }

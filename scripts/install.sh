@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install vide-ticket to the system
+# Install vibe-ticket to the system
 
 set -euo pipefail
 
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo -e "${BLUE}Installing vide-ticket...${NC}"
+echo -e "${BLUE}Installing vibe-ticket...${NC}"
 
 # Check if cargo is available
 if ! command -v cargo >/dev/null 2>&1; then
@@ -34,9 +34,9 @@ cargo build --release
 mkdir -p "$INSTALL_DIR"
 
 # Copy binary
-echo "Installing to $INSTALL_DIR/vide-ticket"
-cp target/release/vide-ticket "$INSTALL_DIR/vide-ticket"
-chmod +x "$INSTALL_DIR/vide-ticket"
+echo "Installing to $INSTALL_DIR/vibe-ticket"
+cp target/release/vibe-ticket "$INSTALL_DIR/vibe-ticket"
+chmod +x "$INSTALL_DIR/vibe-ticket"
 
 # Check if installation directory is in PATH
 if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
@@ -50,8 +50,8 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
 fi
 
 # Verify installation
-if "$INSTALL_DIR/vide-ticket" --version >/dev/null 2>&1; then
-    VERSION=$("$INSTALL_DIR/vide-ticket" --version)
+if "$INSTALL_DIR/vibe-ticket" --version >/dev/null 2>&1; then
+    VERSION=$("$INSTALL_DIR/vibe-ticket" --version)
     echo -e "${GREEN}✓ Successfully installed $VERSION to $INSTALL_DIR${NC}"
 else
     echo -e "${RED}✗ Installation verification failed${NC}"
@@ -61,4 +61,4 @@ fi
 echo -e "${GREEN}Installation complete!${NC}"
 echo ""
 echo "To get started, run:"
-echo "  vide-ticket init"
+echo "  vibe-ticket init"

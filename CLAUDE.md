@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-vide-ticket is a high-performance ticket management system written in Rust for the Vide Coding environment. Built for maximum speed and reliability with comprehensive features for modern development workflows.
+vibe-ticket is a high-performance ticket management system written in Rust for the Vibe Coding environment. Built for maximum speed and reliability with comprehensive features for modern development workflows.
 
 ## Common Development Commands
 
@@ -79,7 +79,7 @@ cargo package --list
 cargo publish
 
 # Publish with specific version
-cargo publish --package vide-ticket
+cargo publish --package vibe-ticket
 
 # Login to crates.io (first time setup)
 cargo login
@@ -195,21 +195,21 @@ When writing CLAUDE.md for your project:
 
 ## CLAUDE.md Generation Features
 
-vide-ticket includes built-in support for generating and maintaining CLAUDE.md files to enhance Claude Code integration.
+vibe-ticket includes built-in support for generating and maintaining CLAUDE.md files to enhance Claude Code integration.
 
 ### Generating CLAUDE.md
 
 #### During Project Initialization
 ```bash
 # Initialize project with CLAUDE.md
-vide-ticket init --claude-md
+vibe-ticket init --claude-md
 # or
-vide-ticket init --claude
+vibe-ticket init --claude
 ```
 
 This creates a CLAUDE.md file with:
 - Project overview and metadata
-- Common vide-ticket commands
+- Common vibe-ticket commands
 - Current configuration settings
 - Workflow guidelines
 - The initialization command itself is recorded in the file
@@ -217,23 +217,23 @@ This creates a CLAUDE.md file with:
 #### For Existing Projects
 ```bash
 # Generate basic CLAUDE.md
-vide-ticket config claude
+vibe-ticket config claude
 
 # Generate with advanced template
-vide-ticket config claude --template advanced
+vibe-ticket config claude --template advanced
 
 # Append to existing CLAUDE.md
-vide-ticket config claude --append
+vibe-ticket config claude --append
 
 # Custom output path
-vide-ticket config claude --output ./docs/CLAUDE.md
+vibe-ticket config claude --output ./docs/CLAUDE.md
 ```
 
 ### Template Options
 
 #### Basic Template
 - Project name and description
-- Essential vide-ticket commands
+- Essential vibe-ticket commands
 - Current project configuration (Git integration, default priority, etc.)
 - Project statistics (total tickets, active tickets)
 - Basic workflow guidelines
@@ -258,8 +258,8 @@ The generated CLAUDE.md includes dynamically populated information:
 
 ### Usage Workflow
 
-1. **New Projects**: Use `vide-ticket init --claude-md` to start with AI assistance ready
-2. **Existing Projects**: Run `vide-ticket config claude` to add CLAUDE.md
+1. **New Projects**: Use `vibe-ticket init --claude-md` to start with AI assistance ready
+2. **Existing Projects**: Run `vibe-ticket config claude` to add CLAUDE.md
 3. **Updates**: Use `--append` flag when project configuration changes
 4. **Customization**: Add project-specific instructions after generation
 
@@ -269,24 +269,24 @@ The generated CLAUDE.md includes dynamically populated information:
 - Follows established project conventions
 - Assists with ticket management best practices
 
-## vide-ticket Command Reference
+## vibe-ticket Command Reference
 
 ### Quick Start
 ```bash
 # Initialize a new project
-vide-ticket init --claude-md
+vibe-ticket init --claude-md
 
 # Create a new ticket (note: -P for priority, not -p)
-vide-ticket new "implement-auth" -t "Add user authentication" -P high
+vibe-ticket new "implement-auth" -t "Add user authentication" -P high
 
 # List all open tickets
-vide-ticket open
+vibe-ticket open
 
 # Start working on a ticket
-vide-ticket start implement-auth
+vibe-ticket start implement-auth
 
 # Close current ticket
-vide-ticket close -m "Implemented OAuth2 authentication"
+vibe-ticket close -m "Implemented OAuth2 authentication"
 ```
 
 ### Essential Commands
@@ -294,67 +294,67 @@ vide-ticket close -m "Implemented OAuth2 authentication"
 #### Ticket Management
 ```bash
 # Create ticket with automatic timestamp prefix
-vide-ticket new "feature-name" -t "Title" -d "Description" -P high --tags "backend,api"
+vibe-ticket new "feature-name" -t "Title" -d "Description" -P high --tags "backend,api"
 
 # List tickets with filters
-vide-ticket list --status todo --priority high
-vide-ticket list --open  # Show only todo/doing tickets
-vide-ticket open         # Alias for list --open
+vibe-ticket list --status todo --priority high
+vibe-ticket list --open  # Show only todo/doing tickets
+vibe-ticket open         # Alias for list --open
 
 # Search tickets
-vide-ticket search "authentication" --regex
-vide-ticket search "bug" --tags
+vibe-ticket search "authentication" --regex
+vibe-ticket search "bug" --tags
 
 # Update ticket
-vide-ticket edit <ticket> -t "New Title" -P critical --add-tags "urgent"
+vibe-ticket edit <ticket> -t "New Title" -P critical --add-tags "urgent"
 ```
 
 #### Workflow Commands
 ```bash
 # Start working (creates Git branch)
-vide-ticket start <ticket>
+vibe-ticket start <ticket>
 
 # Check current status
-vide-ticket check --detailed
+vibe-ticket check --detailed
 
 # Complete and archive
-vide-ticket close <ticket> -m "Completion message" --archive
+vibe-ticket close <ticket> -m "Completion message" --archive
 ```
 
 #### Task Management
 ```bash
 # Add tasks to current ticket
-vide-ticket task add "Write unit tests"
-vide-ticket task add "Update documentation"
+vibe-ticket task add "Write unit tests"
+vibe-ticket task add "Update documentation"
 
 # Complete tasks
-vide-ticket task complete 1
-vide-ticket task list --incomplete
+vibe-ticket task complete 1
+vibe-ticket task list --incomplete
 ```
 
 #### Data Management
 ```bash
 # Export for backup
-vide-ticket export --format json -o backup.json
-vide-ticket export --format csv -o tickets.csv --include-archived
+vibe-ticket export --format json -o backup.json
+vibe-ticket export --format csv -o tickets.csv --include-archived
 
 # Import tickets
-vide-ticket import backup.json --dry-run
-vide-ticket import tickets.csv
+vibe-ticket import backup.json --dry-run
+vibe-ticket import tickets.csv
 ```
 
 #### Configuration
 ```bash
 # View configuration
-vide-ticket config show
+vibe-ticket config show
 
 # Set configuration values
-vide-ticket config set git.auto_branch true
-vide-ticket config set project.default_priority high
-vide-ticket config set ui.emoji true
+vibe-ticket config set git.auto_branch true
+vibe-ticket config set project.default_priority high
+vibe-ticket config set ui.emoji true
 
 # Generate/update CLAUDE.md
-vide-ticket config claude --template advanced --append
+vibe-ticket config claude --template advanced --append
 ```
 
 ### Important Notes
@@ -362,39 +362,39 @@ vide-ticket config claude --template advanced --append
 1. **Priority Flag**: Use `-P` or `--priority` for priority (not `-p`, which is for project path)
 2. **Timestamps**: All tickets get YYYYMMDDHHMM prefix automatically
 3. **Git Integration**: Branches are created as `ticket/<timestamp>-<slug>` by default
-4. **Open Tickets**: Use `vide-ticket open` for quick view of active work
+4. **Open Tickets**: Use `vibe-ticket open` for quick view of active work
 
 ### Common Workflows
 
 #### Bug Fix Workflow
 ```bash
-vide-ticket new "fix-login-error" -t "Fix login validation error" -P high --tags "bug,auth"
-vide-ticket start fix-login-error
+vibe-ticket new "fix-login-error" -t "Fix login validation error" -P high --tags "bug,auth"
+vibe-ticket start fix-login-error
 # ... fix the bug ...
-vide-ticket close -m "Fixed validation regex pattern"
+vibe-ticket close -m "Fixed validation regex pattern"
 ```
 
 #### Feature Development
 ```bash
-vide-ticket new "api-endpoints" -t "Implement REST API endpoints" -P medium
-vide-ticket start api-endpoints
-vide-ticket task add "Design API schema"
-vide-ticket task add "Implement GET endpoints"
-vide-ticket task add "Implement POST endpoints"
-vide-ticket task add "Add authentication"
-vide-ticket task add "Write API tests"
+vibe-ticket new "api-endpoints" -t "Implement REST API endpoints" -P medium
+vibe-ticket start api-endpoints
+vibe-ticket task add "Design API schema"
+vibe-ticket task add "Implement GET endpoints"
+vibe-ticket task add "Implement POST endpoints"
+vibe-ticket task add "Add authentication"
+vibe-ticket task add "Write API tests"
 # ... complete tasks one by one ...
-vide-ticket task complete 1
+vibe-ticket task complete 1
 ```
 
 #### Daily Standup
 ```bash
 # Check what you're working on
-vide-ticket check
+vibe-ticket check
 
 # See all open tickets
-vide-ticket open
+vibe-ticket open
 
 # Review high priority items
-vide-ticket list --open --priority high
+vibe-ticket list --open --priority high
 ```

@@ -1,0 +1,35 @@
+id: 108c202a-24fb-495f-945e-24c6048f5515
+slug: 202507212348-publish-v011
+title: Publish v0.1.1 to crates.io
+description: Release v0.1.1 with critical Unicode boundary fix. Package is ready for publishing with all tests passing.
+priority: critical
+status: todo
+tags:
+- release
+- v0.1.1
+created_at: 2025-07-21T14:48:17.365548Z
+started_at: null
+closed_at: null
+assignee: null
+tasks:
+- id: 3a80adb2-00c4-4655-a860-4003346436a7
+  title: Run cargo publish command
+  completed: false
+  created_at: 2025-07-21T14:48:23.811316Z
+  completed_at: null
+- id: 72e53e7d-60d8-413f-a5c4-6a80e048eb6d
+  title: Push tags to GitHub
+  completed: false
+  created_at: 2025-07-21T14:48:30.220399Z
+  completed_at: null
+- id: 830a5933-51e5-463b-b77e-e448e82fd81e
+  title: Create GitHub release with changelog
+  completed: false
+  created_at: 2025-07-21T14:48:37.125385Z
+  completed_at: null
+- id: 6c55e42b-a107-4d55-946f-1fc680f61ed5
+  title: Update README with new version badge
+  completed: false
+  created_at: 2025-07-21T14:48:49.329661Z
+  completed_at: null
+metadata: {}

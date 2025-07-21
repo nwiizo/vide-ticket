@@ -3,7 +3,7 @@ name: Update CLAUDE.md
 on:
   push:
     paths:
-      - '.vide-ticket/config.yaml'
+      - '.vibe-ticket/config.yaml'
       - 'Cargo.toml'
   workflow_dispatch:
     inputs:
@@ -40,7 +40,7 @@ jobs:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
     
-    - name: Build vide-ticket
+    - name: Build vibe-ticket
       run: cargo build --release
     
     - name: Update CLAUDE.md
@@ -48,10 +48,10 @@ jobs:
         TEMPLATE="${{ github.event.inputs.template || 'basic' }}"
         if [ -f "CLAUDE.md" ]; then
           echo "Appending to existing CLAUDE.md with $TEMPLATE template"
-          ./target/release/vide-ticket config claude --template $TEMPLATE --append
+          ./target/release/vibe-ticket config claude --template $TEMPLATE --append
         else
           echo "Creating new CLAUDE.md with $TEMPLATE template"
-          ./target/release/vide-ticket config claude --template $TEMPLATE
+          ./target/release/vibe-ticket config claude --template $TEMPLATE
         fi
     
     - name: Check for changes
