@@ -34,6 +34,7 @@ mod list;
 mod new;
 mod search;
 mod show;
+mod spec;
 mod start;
 mod task;
 
@@ -51,6 +52,11 @@ pub use new::handle_new_command;
 pub use search::handle_search_command;
 pub use show::handle_show_command;
 pub use start::handle_start_command;
+pub use spec::{
+    handle_spec_activate, handle_spec_approve, handle_spec_delete, handle_spec_design,
+    handle_spec_init, handle_spec_list, handle_spec_requirements, handle_spec_show,
+    handle_spec_status, handle_spec_tasks,
+};
 pub use task::{
     handle_task_add, handle_task_complete, handle_task_list, handle_task_remove,
     handle_task_uncomplete,
