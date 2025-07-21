@@ -145,18 +145,17 @@ pub fn handle_search_command(
             })).collect::<Vec<_>>(),
             "total": matches.len(),
         }))?;
+    } else if matches.is_empty() {
+        output.info(&format!("No tickets found matching '{}'", query));
     } else {
-        if matches.is_empty() {
-            output.info(&format!("No tickets found matching '{}'", query));
-        } else {
-            output.success(&format!("Found {} ticket{} matching '{}'", 
-                matches.len(), 
-                if matches.len() == 1 { "" } else { "s" },
-                query
-            ));
-            output.info("");
-            
-            for (ticket, locations) in &matches {
+        output.success(&format!("Found {} ticket{} matching '{}'", 
+            matches.len(), 
+            if matches.len() == 1 { "" } else { "s" },
+            query
+        ));
+        output.info("");
+        
+        for (ticket, locations) in &matches {
                 let status_emoji = match ticket.status {
                     crate::core::Status::Todo => "📋",
                     crate::core::Status::Doing => "🔄",
