@@ -170,7 +170,6 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
 
 #[cfg(test)]
 mod tests {
-    
 
     #[test]
     fn test_archive_metadata() {

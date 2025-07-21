@@ -272,7 +272,8 @@ fn generate_claude_md_for_init(
     project_name: &str,
     description: Option<&str>,
 ) -> Result<()> {
-    let claude_content = format!(r#"# vide-ticket Project: {}
+    let claude_content = format!(
+        r#"# vide-ticket Project: {}
 
 {}
 
@@ -380,9 +381,10 @@ Generated on: {}
 
     let claude_path = project_dir.join("CLAUDE.md");
     fs::write(&claude_path, &claude_content)?;
-    
+
     // Also update the generated CLAUDE.md to mention the init command
-    let additional_content = format!(r#"
+    let additional_content = format!(
+        r#"
 
 ## Project Initialization
 
@@ -399,8 +401,9 @@ vide-ticket config claude
 # Append with advanced features
 vide-ticket config claude --template advanced --append
 ```
-"#);
-    
+"#
+    );
+
     let full_content = format!("{}{}", claude_content, additional_content);
     fs::write(&claude_path, full_content)?;
 
@@ -455,16 +458,13 @@ mod tests {
     #[test]
     fn test_generate_claude_md_for_init() {
         let temp_dir = TempDir::new().unwrap();
-        
-        generate_claude_md_for_init(
-            temp_dir.path(),
-            "Test Project",
-            Some("Test description"),
-        ).unwrap();
-        
+
+        generate_claude_md_for_init(temp_dir.path(), "Test Project", Some("Test description"))
+            .unwrap();
+
         let claude_path = temp_dir.path().join("CLAUDE.md");
         assert!(claude_path.exists());
-        
+
         let content = fs::read_to_string(&claude_path).unwrap();
         assert!(content.contains("# vide-ticket Project: Test Project"));
         assert!(content.contains("Test description"));

@@ -103,6 +103,10 @@ pub enum Commands {
         #[arg(long)]
         archived: bool,
 
+        /// Show only open tickets (todo, doing)
+        #[arg(long)]
+        open: bool,
+
         /// Filter tickets created since (e.g., "yesterday", "2 days ago", "2025-07-18")
         #[arg(long)]
         since: Option<String>,
@@ -124,6 +128,21 @@ pub enum Commands {
         /// Custom branch name (default: ticket-<slug>)
         #[arg(long)]
         branch_name: Option<String>,
+    },
+
+    /// Show open tickets (alias for list --open)
+    Open {
+        /// Sort by field (created, updated, priority, status, slug)
+        #[arg(long, default_value = "updated")]
+        sort: String,
+
+        /// Reverse sort order
+        #[arg(short, long)]
+        reverse: bool,
+
+        /// Limit number of results
+        #[arg(short, long)]
+        limit: Option<usize>,
     },
 
     /// Close the current ticket

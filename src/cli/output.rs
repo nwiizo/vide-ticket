@@ -253,12 +253,13 @@ impl OutputFormatter {
     }
 }
 
-/// Truncates a string to a maximum length
+/// Truncates a string to a maximum length, respecting Unicode character boundaries
 fn truncate(s: &str, max_len: usize) -> String {
-    if s.len() <= max_len {
+    if s.chars().count() <= max_len {
         s.to_string()
     } else {
-        format!("{}...", &s[..max_len - 3])
+        let truncated: String = s.chars().take(max_len - 3).collect();
+        format!("{}...", truncated)
     }
 }
 
@@ -313,5 +314,46 @@ impl ProgressBar {
         );
 
         std::io::stdout().flush().unwrap();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_truncate_ascii() {
+        assert_eq!(truncate("hello", 10), "hello");
+        assert_eq!(truncate("hello world", 8), "hello...");
+        assert_eq!(truncate("short", 5), "short");
+        assert_eq!(truncate("exactly", 7), "exactly");
+    }
+
+    #[test]
+    fn test_truncate_unicode() {
+        // Test Japanese characters
+        assert_eq!(truncate("こんにちは", 10), "こんにちは");
+        assert_eq!(truncate("こんにちは世界", 5), "こん...");
+        
+        // Test mixed ASCII and Unicode
+        assert_eq!(truncate("Hello世界", 7), "Hello世界");
+        assert_eq!(truncate("Hello世界", 6), "Hel...");
+        
+        // Test emoji
+        assert_eq!(truncate("🚀🎉🔥💻🎯", 3), "...");
+        assert_eq!(truncate("🚀 Rocket", 5), "🚀 ...");
+        
+        // Test the exact case that was causing the panic
+        assert_eq!(truncate("Specs管理システムの中核機能実装", 37), "Specs管理システムの中核機能実装");
+        assert_eq!(truncate("Specs管理システムの中核機能実装", 10), "Specs管理...");
+    }
+
+    #[test]
+    fn test_truncate_edge_cases() {
+        assert_eq!(truncate("", 10), "");
+        assert_eq!(truncate("a", 1), "a");
+        assert_eq!(truncate("ab", 2), "ab");
+        assert_eq!(truncate("abc", 3), "abc");
+        assert_eq!(truncate("abcd", 3), "...");
     }
 }

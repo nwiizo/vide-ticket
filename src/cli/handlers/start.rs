@@ -194,8 +194,6 @@ fn create_git_branch(
 
 #[cfg(test)]
 mod tests {
-    
-    
 
     #[test]
     fn test_branch_name_generation() {

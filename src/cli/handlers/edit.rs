@@ -279,7 +279,6 @@ fn edit_in_editor(
 
 #[cfg(test)]
 mod tests {
-    
 
     #[test]
     fn test_tag_parsing() {

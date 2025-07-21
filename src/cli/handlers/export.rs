@@ -299,7 +299,6 @@ fn output_ticket_markdown(output: &mut String, ticket: &Ticket) {
 
 #[cfg(test)]
 mod tests {
-    
 
     #[test]
     fn test_csv_escaping() {

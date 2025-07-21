@@ -6,7 +6,9 @@
 
 use clap::Parser;
 use std::process;
-use vide_ticket::cli::{handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands};
+use vide_ticket::cli::{
+    handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands,
+};
 use vide_ticket::error::Result;
 
 /// Main entry point for the vide-ticket CLI
@@ -90,6 +92,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             reverse,
             limit,
             archived,
+            open,
             since,
             until,
         } => {
@@ -102,8 +105,32 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 reverse,
                 limit,
                 archived,
+                open,
                 since,
                 until,
+                cli.project,
+                &formatter,
+            )
+        },
+
+        Commands::Open {
+            sort,
+            reverse,
+            limit,
+        } => {
+            use vide_ticket::cli::handlers::handle_list_command;
+            // Call list handler with open filter set to true
+            handle_list_command(
+                None, // status
+                None, // priority
+                None, // assignee
+                sort,
+                reverse,
+                limit,
+                false, // archived
+                true,  // open
+                None,  // since
+                None,  // until
                 cli.project,
                 &formatter,
             )
@@ -255,31 +282,64 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
         },
 
         Commands::Spec { command } => match command {
-            SpecCommands::Init { title, description, ticket, tags } => {
+            SpecCommands::Init {
+                title,
+                description,
+                ticket,
+                tags,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_init;
                 handle_spec_init(title, description, ticket, tags, cli.project, &formatter)
             },
-            SpecCommands::Requirements { spec, editor, complete } => {
+            SpecCommands::Requirements {
+                spec,
+                editor,
+                complete,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_requirements;
                 handle_spec_requirements(spec, editor, complete, cli.project, &formatter)
             },
-            SpecCommands::Design { spec, editor, complete } => {
+            SpecCommands::Design {
+                spec,
+                editor,
+                complete,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_design;
                 handle_spec_design(spec, editor, complete, cli.project, &formatter)
             },
-            SpecCommands::Tasks { spec, editor, complete, export_tickets } => {
+            SpecCommands::Tasks {
+                spec,
+                editor,
+                complete,
+                export_tickets,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_tasks;
-                handle_spec_tasks(spec, editor, complete, export_tickets, cli.project, &formatter)
+                handle_spec_tasks(
+                    spec,
+                    editor,
+                    complete,
+                    export_tickets,
+                    cli.project,
+                    &formatter,
+                )
             },
             SpecCommands::Status { spec, detailed } => {
                 use vide_ticket::cli::handlers::handle_spec_status;
                 handle_spec_status(spec, detailed, cli.project, &formatter)
             },
-            SpecCommands::List { status, phase, archived } => {
+            SpecCommands::List {
+                status,
+                phase,
+                archived,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_list;
                 handle_spec_list(status, phase, archived, cli.project, &formatter)
             },
-            SpecCommands::Show { spec, all, markdown } => {
+            SpecCommands::Show {
+                spec,
+                all,
+                markdown,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_show;
                 handle_spec_show(spec, all, markdown, cli.project, &formatter)
             },
@@ -287,7 +347,11 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 use vide_ticket::cli::handlers::handle_spec_delete;
                 handle_spec_delete(spec, force, cli.project, &formatter)
             },
-            SpecCommands::Approve { spec, phase, message } => {
+            SpecCommands::Approve {
+                spec,
+                phase,
+                message,
+            } => {
                 use vide_ticket::cli::handlers::handle_spec_approve;
                 handle_spec_approve(spec, phase, message, cli.project, &formatter)
             },
