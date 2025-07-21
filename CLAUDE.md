@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-vide-ticket is a high-performance ticket management system written in Rust, designed to replace the existing `ticket.sh` with 10x performance improvement while maintaining backwards compatibility.
+vide-ticket is a high-performance ticket management system written in Rust for the Vide Coding environment. Built for maximum speed and reliability with comprehensive features for modern development workflows.
 
 ## Common Development Commands
 
@@ -104,7 +104,7 @@ cargo owner --list
 1. **Feature Flags**: API and database support are optional features to keep the core binary lightweight
 2. **Error Handling**: Uses `anyhow` for application errors and `thiserror` for library errors
 3. **Async Runtime**: Tokio with full features for concurrent operations
-4. **Backwards Compatibility**: Must maintain compatibility with existing `ticket.sh` commands
+4. **Timestamp-based Slugs**: All tickets are prefixed with YYYYMMDDHHMM for chronological ordering
 
 ### Development Roadmap (from TODO.md)
 The project follows a three-phase implementation plan:
@@ -268,3 +268,133 @@ The generated CLAUDE.md includes dynamically populated information:
 - Provides context-aware suggestions
 - Follows established project conventions
 - Assists with ticket management best practices
+
+## vide-ticket Command Reference
+
+### Quick Start
+```bash
+# Initialize a new project
+vide-ticket init --claude-md
+
+# Create a new ticket (note: -P for priority, not -p)
+vide-ticket new "implement-auth" -t "Add user authentication" -P high
+
+# List all open tickets
+vide-ticket open
+
+# Start working on a ticket
+vide-ticket start implement-auth
+
+# Close current ticket
+vide-ticket close -m "Implemented OAuth2 authentication"
+```
+
+### Essential Commands
+
+#### Ticket Management
+```bash
+# Create ticket with automatic timestamp prefix
+vide-ticket new "feature-name" -t "Title" -d "Description" -P high --tags "backend,api"
+
+# List tickets with filters
+vide-ticket list --status todo --priority high
+vide-ticket list --open  # Show only todo/doing tickets
+vide-ticket open         # Alias for list --open
+
+# Search tickets
+vide-ticket search "authentication" --regex
+vide-ticket search "bug" --tags
+
+# Update ticket
+vide-ticket edit <ticket> -t "New Title" -P critical --add-tags "urgent"
+```
+
+#### Workflow Commands
+```bash
+# Start working (creates Git branch)
+vide-ticket start <ticket>
+
+# Check current status
+vide-ticket check --detailed
+
+# Complete and archive
+vide-ticket close <ticket> -m "Completion message" --archive
+```
+
+#### Task Management
+```bash
+# Add tasks to current ticket
+vide-ticket task add "Write unit tests"
+vide-ticket task add "Update documentation"
+
+# Complete tasks
+vide-ticket task complete 1
+vide-ticket task list --incomplete
+```
+
+#### Data Management
+```bash
+# Export for backup
+vide-ticket export --format json -o backup.json
+vide-ticket export --format csv -o tickets.csv --include-archived
+
+# Import tickets
+vide-ticket import backup.json --dry-run
+vide-ticket import tickets.csv
+```
+
+#### Configuration
+```bash
+# View configuration
+vide-ticket config show
+
+# Set configuration values
+vide-ticket config set git.auto_branch true
+vide-ticket config set project.default_priority high
+vide-ticket config set ui.emoji true
+
+# Generate/update CLAUDE.md
+vide-ticket config claude --template advanced --append
+```
+
+### Important Notes
+
+1. **Priority Flag**: Use `-P` or `--priority` for priority (not `-p`, which is for project path)
+2. **Timestamps**: All tickets get YYYYMMDDHHMM prefix automatically
+3. **Git Integration**: Branches are created as `ticket/<timestamp>-<slug>` by default
+4. **Open Tickets**: Use `vide-ticket open` for quick view of active work
+
+### Common Workflows
+
+#### Bug Fix Workflow
+```bash
+vide-ticket new "fix-login-error" -t "Fix login validation error" -P high --tags "bug,auth"
+vide-ticket start fix-login-error
+# ... fix the bug ...
+vide-ticket close -m "Fixed validation regex pattern"
+```
+
+#### Feature Development
+```bash
+vide-ticket new "api-endpoints" -t "Implement REST API endpoints" -P medium
+vide-ticket start api-endpoints
+vide-ticket task add "Design API schema"
+vide-ticket task add "Implement GET endpoints"
+vide-ticket task add "Implement POST endpoints"
+vide-ticket task add "Add authentication"
+vide-ticket task add "Write API tests"
+# ... complete tasks one by one ...
+vide-ticket task complete 1
+```
+
+#### Daily Standup
+```bash
+# Check what you're working on
+vide-ticket check
+
+# See all open tickets
+vide-ticket open
+
+# Review high priority items
+vide-ticket list --open --priority high
+```

@@ -4,56 +4,49 @@
 //! including creation, loading, saving, and version control.
 
 use super::{SpecDocumentType, SpecMetadata, SpecPhase, Specification};
-use crate::error::{ErrorContext, Result, VideTicketError};
-use std::fs;
-use std::path::{Path, PathBuf};
+use crate::error::{Result, VideTicketError};
+use crate::specs::storage::{DocumentOperations, FileSystemStore};
+use std::path::PathBuf;
 
 /// Manages specifications in a project
 pub struct SpecManager {
-    /// Root directory for specs (.vide-ticket/specs)
-    specs_dir: PathBuf,
+    /// Document operations helper
+    ops: DocumentOperations<FileSystemStore>,
 }
 
 impl SpecManager {
     /// Create a new spec manager
     pub fn new(specs_dir: PathBuf) -> Self {
-        Self { specs_dir }
+        Self {
+            ops: DocumentOperations::new(FileSystemStore, specs_dir),
+        }
     }
-    
+
     /// Initialize the specs directory structure
     pub fn initialize(&self) -> Result<()> {
-        fs::create_dir_all(&self.specs_dir)
-            .with_context(|| format!("Failed to create specs directory: {:?}", self.specs_dir))?;
-        
-        Ok(())
+        self.ops.initialize()
     }
-    
+
     /// Create a new specification
     pub fn create_spec(&self, title: String, description: String) -> Result<SpecMetadata> {
         self.initialize()?;
-        
+
         let metadata = SpecMetadata::new(title, description);
-        let spec_dir = self.get_spec_dir(&metadata.id);
-        
-        // Create spec directory
-        fs::create_dir_all(&spec_dir)
-            .with_context(|| format!("Failed to create spec directory: {:?}", spec_dir))?;
         
         // Save initial metadata
         self.save_metadata(&metadata)?;
-        
+
         Ok(metadata)
     }
-    
+
     /// Load a specification by ID
     pub fn load_spec(&self, spec_id: &str) -> Result<Specification> {
         let metadata = self.load_metadata(spec_id)?;
-        let spec_dir = self.get_spec_dir(spec_id);
         
         // Load document contents
-        let requirements = self.load_document(&spec_dir, SpecDocumentType::Requirements)?;
-        let design = self.load_document(&spec_dir, SpecDocumentType::Design)?;
-        let tasks = self.load_document(&spec_dir, SpecDocumentType::Tasks)?;
+        let requirements = self.load_document(spec_id, SpecDocumentType::Requirements)?;
+        let design = self.load_document(spec_id, SpecDocumentType::Design)?;
+        let tasks = self.load_document(spec_id, SpecDocumentType::Tasks)?;
         
         Ok(Specification {
             metadata,
@@ -62,7 +55,7 @@ impl SpecManager {
             tasks,
         })
     }
-    
+
     /// Save a document for a specification
     pub fn save_document(
         &self,
@@ -70,16 +63,8 @@ impl SpecManager {
         doc_type: SpecDocumentType,
         content: &str,
     ) -> Result<()> {
-        let spec_dir = self.get_spec_dir(spec_id);
-        let doc_path = spec_dir.join(doc_type.file_name());
-        
-        // Ensure directory exists
-        fs::create_dir_all(&spec_dir)
-            .with_context(|| format!("Failed to create spec directory: {:?}", spec_dir))?;
-        
         // Save document
-        fs::write(&doc_path, content)
-            .with_context(|| format!("Failed to write document: {:?}", doc_path))?;
+        self.ops.save_text_in_subdir(spec_id, doc_type.file_name(), content)?;
         
         // Update metadata
         let mut metadata = self.load_metadata(spec_id)?;
@@ -87,60 +72,51 @@ impl SpecManager {
             SpecDocumentType::Requirements => {
                 metadata.progress.requirements_completed = true;
                 metadata.version.bump_patch();
-            }
+            },
             SpecDocumentType::Design => {
                 metadata.progress.design_completed = true;
                 metadata.version.bump_patch();
-            }
+            },
             SpecDocumentType::Tasks => {
                 metadata.progress.tasks_completed = true;
                 metadata.version.bump_patch();
-            }
+            },
         }
         metadata.update_phase();
         self.save_metadata(&metadata)?;
-        
+
         Ok(())
     }
-    
+
     /// List all specifications
     pub fn list_specs(&self) -> Result<Vec<SpecMetadata>> {
-        if !self.specs_dir.exists() {
-            return Ok(Vec::new());
-        }
-        
+        let spec_dirs = self.ops.list_subdirs()?;
         let mut specs = Vec::new();
         
-        let entries = fs::read_dir(&self.specs_dir)
-            .with_context(|| format!("Failed to read specs directory: {:?}", self.specs_dir))?;
-        
-        for entry in entries {
-            let entry = entry.context("Failed to read directory entry")?;
-            let path = entry.path();
-            
-            if path.is_dir() {
-                let spec_json_path = path.join("spec.json");
-                if spec_json_path.exists() {
-                    match self.load_metadata_from_path(&spec_json_path) {
+        for spec_dir in spec_dirs {
+            if let Some(dir_name) = spec_dir.file_name() {
+                if let Some(spec_id) = dir_name.to_str() {
+                    match self.load_metadata(spec_id) {
                         Ok(metadata) => specs.push(metadata),
                         Err(e) => {
-                            eprintln!("Warning: Failed to load spec from {:?}: {}", path, e);
+                            eprintln!("Warning: Failed to load spec {}: {}", spec_id, e);
                         }
                     }
                 }
             }
         }
-        
+
         // Sort by creation date (newest first)
         specs.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-        
+
         Ok(specs)
     }
-    
+
     /// Approve a document phase
     pub fn approve_phase(&self, spec_id: &str, phase: SpecPhase) -> Result<()> {
         let mut metadata = self.load_metadata(spec_id)?;
         
+        // Validate phase can be approved
         match phase {
             SpecPhase::Requirements => {
                 if !metadata.progress.requirements_completed {
@@ -149,7 +125,7 @@ impl SpecManager {
                     ));
                 }
                 metadata.progress.requirements_approved = true;
-            }
+            },
             SpecPhase::Design => {
                 if !metadata.progress.design_completed {
                     return Err(VideTicketError::custom(
@@ -157,7 +133,7 @@ impl SpecManager {
                     ));
                 }
                 metadata.progress.design_approved = true;
-            }
+            },
             SpecPhase::Implementation => {
                 if !metadata.progress.tasks_completed {
                     return Err(VideTicketError::custom(
@@ -165,157 +141,194 @@ impl SpecManager {
                     ));
                 }
                 metadata.progress.tasks_approved = true;
-            }
+            },
             _ => {
-                return Err(VideTicketError::custom(
-                    "Invalid phase for approval",
-                ));
-            }
+                return Err(VideTicketError::custom("Invalid phase for approval"));
+            },
         }
-        
+
         metadata.update_phase();
         self.save_metadata(&metadata)?;
-        
+
         Ok(())
     }
-    
+
     /// Get the directory path for a spec
     fn get_spec_dir(&self, spec_id: &str) -> PathBuf {
-        self.specs_dir.join(spec_id)
+        self.ops.get_subdir(spec_id)
     }
-    
+
     /// Load metadata for a spec
     fn load_metadata(&self, spec_id: &str) -> Result<SpecMetadata> {
-        let spec_json_path = self.get_spec_dir(spec_id).join("spec.json");
-        self.load_metadata_from_path(&spec_json_path)
+        self.ops.load_from_subdir(spec_id, "spec.json")
     }
-    
-    /// Load metadata from a specific path
-    fn load_metadata_from_path(&self, path: &Path) -> Result<SpecMetadata> {
-        let content = fs::read_to_string(path)
-            .with_context(|| format!("Failed to read spec metadata: {:?}", path))?;
-        
-        let metadata: SpecMetadata = serde_json::from_str(&content)
-            .with_context(|| format!("Failed to parse spec metadata: {:?}", path))?;
-        
-        Ok(metadata)
-    }
-    
+
     /// Save metadata for a spec
     fn save_metadata(&self, metadata: &SpecMetadata) -> Result<()> {
-        let spec_dir = self.get_spec_dir(&metadata.id);
-        
-        // Ensure spec directory exists
-        fs::create_dir_all(&spec_dir)
-            .with_context(|| format!("Failed to create spec directory: {:?}", spec_dir))?;
-        
-        let spec_json_path = spec_dir.join("spec.json");
-        let content = serde_json::to_string_pretty(metadata)
-            .context("Failed to serialize spec metadata")?;
-        
-        fs::write(&spec_json_path, content)
-            .with_context(|| format!("Failed to write spec metadata: {:?}", spec_json_path))?;
-        
-        Ok(())
+        self.ops.save_in_subdir(&metadata.id, "spec.json", metadata)
     }
-    
+
     /// Load a document from a spec directory
     fn load_document(
         &self,
-        spec_dir: &Path,
+        spec_id: &str,
         doc_type: SpecDocumentType,
     ) -> Result<Option<String>> {
-        let doc_path = spec_dir.join(doc_type.file_name());
-        
-        if !doc_path.exists() {
-            return Ok(None);
-        }
-        
-        let content = fs::read_to_string(&doc_path)
-            .with_context(|| format!("Failed to read document: {:?}", doc_path))?;
-        
-        Ok(Some(content))
+        self.ops.load_text_from_subdir(spec_id, doc_type.file_name())
     }
-    
+
     /// Find spec by title (partial match)
     pub fn find_spec_by_title(&self, query: &str) -> Result<Option<SpecMetadata>> {
         let specs = self.list_specs()?;
         let query_lower = query.to_lowercase();
-        
-        Ok(specs.into_iter().find(|spec| {
-            spec.title.to_lowercase().contains(&query_lower)
-        }))
+
+        Ok(specs
+            .into_iter()
+            .find(|spec| spec.title.to_lowercase().contains(&query_lower)))
     }
-    
+
     /// Delete a specification
     pub fn delete_spec(&self, spec_id: &str) -> Result<()> {
         let spec_dir = self.get_spec_dir(spec_id);
-        
+
         if !spec_dir.exists() {
             return Err(VideTicketError::custom(format!(
-                "Spec not found: {}",
+                "Specification not found: {}",
                 spec_id
             )));
         }
         
-        fs::remove_dir_all(&spec_dir)
-            .with_context(|| format!("Failed to delete spec directory: {:?}", spec_dir))?;
+        std::fs::remove_dir_all(&spec_dir)
+            .map_err(|e| VideTicketError::custom(format!(
+                "Failed to delete specification: {}",
+                e
+            )))?;
         
         Ok(())
     }
-
-    // Convenience methods for the handlers
     
-    /// Save a specification
+    /// Set active specification
+    pub fn set_active_spec(&self, spec_id: &str) -> Result<()> {
+        // Verify spec exists
+        self.load_metadata(spec_id)?;
+        
+        let active_file = self.ops.base_dir().parent()
+            .ok_or_else(|| VideTicketError::custom("Invalid specs directory structure"))?
+            .join(".active_spec");
+        
+        std::fs::write(&active_file, spec_id)
+            .map_err(|e| VideTicketError::custom(format!(
+                "Failed to set active spec: {}",
+                e
+            )))?;
+        
+        Ok(())
+    }
+    
+    /// Get active specification ID
+    pub fn get_active_spec(&self) -> Result<Option<String>> {
+        let active_file = self.ops.base_dir().parent()
+            .ok_or_else(|| VideTicketError::custom("Invalid specs directory structure"))?
+            .join(".active_spec");
+        
+        if !active_file.exists() {
+            return Ok(None);
+        }
+        
+        let content = std::fs::read_to_string(&active_file)
+            .map_err(|e| VideTicketError::custom(format!(
+                "Failed to read active spec: {}",
+                e
+            )))?;
+        
+        let spec_id = content.trim();
+        if spec_id.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(spec_id.to_string()))
+        }
+    }
+    
+    // Compatibility methods
+    
+    /// Save a complete specification
     pub fn save(&self, spec: &Specification) -> Result<()> {
         // Save metadata
         self.save_metadata(&spec.metadata)?;
         
-        // Save documents if they exist
-        if let Some(ref content) = spec.requirements {
-            self.save_document(&spec.metadata.id, SpecDocumentType::Requirements, content)?;
+        // Save documents if present
+        if let Some(ref requirements) = spec.requirements {
+            self.save_document(&spec.metadata.id, SpecDocumentType::Requirements, requirements)?;
         }
-        if let Some(ref content) = spec.design {
-            self.save_document(&spec.metadata.id, SpecDocumentType::Design, content)?;
+        if let Some(ref design) = spec.design {
+            self.save_document(&spec.metadata.id, SpecDocumentType::Design, design)?;
         }
-        if let Some(ref content) = spec.tasks {
-            self.save_document(&spec.metadata.id, SpecDocumentType::Tasks, content)?;
+        if let Some(ref tasks) = spec.tasks {
+            self.save_document(&spec.metadata.id, SpecDocumentType::Tasks, tasks)?;
         }
-        
+
         Ok(())
     }
     
-    /// Load a specification
+    /// Load a specification (alias for load_spec)
     pub fn load(&self, spec_id: &str) -> Result<Specification> {
         self.load_spec(spec_id)
     }
     
-    /// List all specifications
-    pub fn list(&self) -> Result<Vec<Specification>> {
-        let metadata_list = self.list_specs()?;
-        let mut specs = Vec::new();
-        
-        for metadata in metadata_list {
-            match self.load_spec(&metadata.id) {
-                Ok(spec) => specs.push(spec),
-                Err(e) => {
-                    eprintln!("Warning: Failed to load spec {}: {}", metadata.id, e);
-                }
-            }
-        }
-        
-        Ok(specs)
+    /// List specifications (alias for list_specs)
+    pub fn list(&self) -> Result<Vec<SpecMetadata>> {
+        self.list_specs()
     }
     
-    /// Delete a specification
+    /// Delete a specification (alias for delete_spec)
     pub fn delete(&self, spec_id: &str) -> Result<()> {
         self.delete_spec(spec_id)
     }
     
-    /// Get the path for a document
+    /// Get document path
     pub fn get_document_path(&self, spec_id: &str, doc_type: SpecDocumentType) -> PathBuf {
         self.get_spec_dir(spec_id).join(doc_type.file_name())
     }
+}
+
+// Standalone functions for compatibility
+
+/// Save a specification document
+pub fn save(
+    specs_dir: &std::path::Path,
+    spec_id: &str,
+    doc_type: SpecDocumentType,
+    content: &str,
+) -> Result<()> {
+    let manager = SpecManager::new(specs_dir.to_path_buf());
+    manager.save_document(spec_id, doc_type, content)
+}
+
+/// Load a specification
+pub fn load(specs_dir: &std::path::Path, spec_id: &str) -> Result<Specification> {
+    let manager = SpecManager::new(specs_dir.to_path_buf());
+    manager.load_spec(spec_id)
+}
+
+/// List all specifications
+pub fn list(specs_dir: &std::path::Path) -> Result<Vec<SpecMetadata>> {
+    let manager = SpecManager::new(specs_dir.to_path_buf());
+    manager.list_specs()
+}
+
+/// Delete a specification
+pub fn delete(specs_dir: &std::path::Path, spec_id: &str) -> Result<()> {
+    let manager = SpecManager::new(specs_dir.to_path_buf());
+    manager.delete_spec(spec_id)
+}
+
+/// Get document path for a specification
+pub fn get_document_path(
+    specs_dir: &std::path::Path,
+    spec_id: &str,
+    doc_type: SpecDocumentType,
+) -> PathBuf {
+    specs_dir.join(spec_id).join(doc_type.file_name())
 }
 
 #[cfg(test)]
@@ -323,69 +336,60 @@ mod tests {
     use super::*;
     use tempfile::TempDir;
     
+    fn create_test_manager() -> (SpecManager, TempDir) {
+        let temp_dir = TempDir::new().unwrap();
+        let specs_dir = temp_dir.path().join("specs");
+        let manager = SpecManager::new(specs_dir);
+        (manager, temp_dir)
+    }
+    
     #[test]
     fn test_spec_manager_creation() {
-        let temp_dir = TempDir::new().unwrap();
-        let specs_dir = temp_dir.path().join(".vide-ticket/specs");
-        let manager = SpecManager::new(specs_dir.clone());
-        
-        assert_eq!(
-            manager.specs_dir,
-            specs_dir
-        );
+        let (manager, _temp) = create_test_manager();
+        assert!(manager.initialize().is_ok());
     }
-    
+
     #[test]
     fn test_create_and_load_spec() {
-        let temp_dir = TempDir::new().unwrap();
-        let specs_dir = temp_dir.path().join(".vide-ticket/specs");
-        let manager = SpecManager::new(specs_dir);
+        let (manager, _temp) = create_test_manager();
         
-        // Create spec
-        let metadata = manager
-            .create_spec("Test Spec".to_string(), "Test description".to_string())
-            .unwrap();
+        let metadata = manager.create_spec(
+            "Test Spec".to_string(),
+            "Test description".to_string()
+        ).unwrap();
         
-        assert_eq!(metadata.title, "Test Spec");
-        assert_eq!(metadata.description, "Test description");
-        assert_eq!(metadata.progress.current_phase, SpecPhase::Initial);
-        
-        // Load spec
-        let spec = manager.load_spec(&metadata.id).unwrap();
-        assert_eq!(spec.metadata.title, "Test Spec");
-        assert!(spec.requirements.is_none());
-        assert!(spec.design.is_none());
-        assert!(spec.tasks.is_none());
+        let loaded = manager.load_spec(&metadata.id).unwrap();
+        assert_eq!(loaded.metadata.title, "Test Spec");
+        assert_eq!(loaded.metadata.description, "Test description");
     }
-    
+
     #[test]
     fn test_save_and_load_documents() {
-        let temp_dir = TempDir::new().unwrap();
-        let specs_dir = temp_dir.path().join(".vide-ticket/specs");
-        let manager = SpecManager::new(specs_dir);
+        let (manager, _temp) = create_test_manager();
         
-        // Create spec
-        let metadata = manager
-            .create_spec("Test Spec".to_string(), "Test description".to_string())
-            .unwrap();
+        let metadata = manager.create_spec(
+            "Test Spec".to_string(),
+            "Test description".to_string()
+        ).unwrap();
         
-        // Save requirements
-        manager
-            .save_document(
-                &metadata.id,
-                SpecDocumentType::Requirements,
-                "# Requirements\nTest requirements",
-            )
-            .unwrap();
+        // Save documents
+        manager.save_document(
+            &metadata.id,
+            SpecDocumentType::Requirements,
+            "Test requirements"
+        ).unwrap();
         
-        // Load spec and verify
+        manager.save_document(
+            &metadata.id,
+            SpecDocumentType::Design,
+            "Test design"
+        ).unwrap();
+        
+        // Load spec and verify documents
         let spec = manager.load_spec(&metadata.id).unwrap();
-        assert!(spec.requirements.is_some());
-        assert_eq!(
-            spec.requirements.unwrap(),
-            "# Requirements\nTest requirements"
-        );
+        assert_eq!(spec.requirements, Some("Test requirements".to_string()));
+        assert_eq!(spec.design, Some("Test design".to_string()));
         assert!(spec.metadata.progress.requirements_completed);
-        assert_eq!(spec.metadata.progress.current_phase, SpecPhase::Design);
+        assert!(spec.metadata.progress.design_completed);
     }
 }

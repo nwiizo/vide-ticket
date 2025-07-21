@@ -12,5 +12,8 @@ pub mod storage;
 #[cfg(feature = "api")]
 pub mod api;
 
+#[cfg(test)]
+pub mod test_utils;
+
 // Re-export commonly used types
 pub use error::{Result, VideTicketError};

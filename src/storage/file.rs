@@ -23,7 +23,7 @@ impl FileStorage {
 
     /// Returns the path to the tickets directory
     fn tickets_dir(&self) -> PathBuf {
-        self.base_dir.join("tickets")
+        self.get_path("tickets")
     }
 
     /// Returns the path to a specific ticket file
@@ -33,12 +33,17 @@ impl FileStorage {
 
     /// Returns the path to the active ticket file
     fn active_ticket_path(&self) -> PathBuf {
-        self.base_dir.join("active_ticket")
+        self.get_path("active_ticket")
     }
 
     /// Returns the path to the project state file
     fn state_path(&self) -> PathBuf {
-        self.base_dir.join("state.yaml")
+        self.get_path("state.yaml")
+    }
+
+    /// Helper method to get a path relative to base directory
+    fn get_path(&self, name: &str) -> PathBuf {
+        self.base_dir.join(name)
     }
 
     /// Ensures the storage directories exist

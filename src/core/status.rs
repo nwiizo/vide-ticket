@@ -24,25 +24,45 @@ pub enum Status {
     Review,
 }
 
-impl Default for Status {
-    fn default() -> Self {
-        Self::Todo
-    }
-}
-
-impl fmt::Display for Status {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Todo => write!(f, "Todo"),
-            Self::Doing => write!(f, "Doing"),
-            Self::Done => write!(f, "Done"),
-            Self::Blocked => write!(f, "Blocked"),
-            Self::Review => write!(f, "Review"),
-        }
-    }
+/// Visual properties for a status
+struct StatusVisual {
+    display: &'static str,
+    emoji: &'static str,
+    color: &'static str,
 }
 
 impl Status {
+    /// Returns the visual properties for this status
+    const fn visual(&self) -> StatusVisual {
+        match self {
+            Self::Todo => StatusVisual {
+                display: "Todo",
+                emoji: "📋",
+                color: "blue",
+            },
+            Self::Doing => StatusVisual {
+                display: "Doing",
+                emoji: "🔧",
+                color: "yellow",
+            },
+            Self::Done => StatusVisual {
+                display: "Done",
+                emoji: "✅",
+                color: "green",
+            },
+            Self::Blocked => StatusVisual {
+                display: "Blocked",
+                emoji: "🚫",
+                color: "red",
+            },
+            Self::Review => StatusVisual {
+                display: "Review",
+                emoji: "👀",
+                color: "cyan",
+            },
+        }
+    }
+
     /// Returns all possible status values
     pub fn all() -> Vec<Self> {
         vec![
@@ -71,24 +91,24 @@ impl Status {
 
     /// Returns the emoji representation of the status
     pub fn emoji(&self) -> &'static str {
-        match self {
-            Self::Todo => "📋",
-            Self::Doing => "🔧",
-            Self::Done => "✅",
-            Self::Blocked => "🚫",
-            Self::Review => "👀",
-        }
+        self.visual().emoji
     }
 
     /// Returns the color code for terminal output
     pub fn color(&self) -> &'static str {
-        match self {
-            Self::Todo => "blue",
-            Self::Doing => "yellow",
-            Self::Done => "green",
-            Self::Blocked => "red",
-            Self::Review => "cyan",
-        }
+        self.visual().color
+    }
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Self::Todo
+    }
+}
+
+impl fmt::Display for Status {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.visual().display)
     }
 }
 
@@ -121,6 +141,26 @@ mod tests {
         assert_eq!(Status::Todo.to_string(), "Todo");
         assert_eq!(Status::Doing.to_string(), "Doing");
         assert_eq!(Status::Done.to_string(), "Done");
+        assert_eq!(Status::Blocked.to_string(), "Blocked");
+        assert_eq!(Status::Review.to_string(), "Review");
+    }
+
+    #[test]
+    fn test_status_emoji() {
+        assert_eq!(Status::Todo.emoji(), "📋");
+        assert_eq!(Status::Doing.emoji(), "🔧");
+        assert_eq!(Status::Done.emoji(), "✅");
+        assert_eq!(Status::Blocked.emoji(), "🚫");
+        assert_eq!(Status::Review.emoji(), "👀");
+    }
+
+    #[test]
+    fn test_status_color() {
+        assert_eq!(Status::Todo.color(), "blue");
+        assert_eq!(Status::Doing.color(), "yellow");
+        assert_eq!(Status::Done.color(), "green");
+        assert_eq!(Status::Blocked.color(), "red");
+        assert_eq!(Status::Review.color(), "cyan");
     }
 
     #[test]
@@ -144,5 +184,16 @@ mod tests {
         assert_eq!(Status::try_from("in-progress").unwrap(), Status::Doing);
         assert_eq!(Status::try_from("completed").unwrap(), Status::Done);
         assert!(Status::try_from("invalid").is_err());
+    }
+
+    #[test]
+    fn test_all_statuses() {
+        let all = Status::all();
+        assert_eq!(all.len(), 5);
+        assert!(all.contains(&Status::Todo));
+        assert!(all.contains(&Status::Doing));
+        assert!(all.contains(&Status::Done));
+        assert!(all.contains(&Status::Blocked));
+        assert!(all.contains(&Status::Review));
     }
 }

@@ -1,0 +1,50 @@
+id: c42fc9cc-e73b-4f30-81be-320a15e316e5
+slug: 202507212333-improve-ux-based-on-dogfooding
+title: Improve UX based on dogfooding experience
+description: Collection of improvements identified while using vide-ticket for its own development
+priority: high
+status: todo
+tags:
+- ux
+- improvement
+created_at: 2025-07-21T14:33:32.737198Z
+started_at: null
+closed_at: null
+assignee: null
+tasks:
+- id: 34e2728b-3b86-4ff2-bf5a-4906a91695a6
+  title: Add --format option to list command for better output control
+  completed: false
+  created_at: 2025-07-21T14:33:40.352443Z
+  completed_at: null
+- id: b3423b9d-06ee-4629-9026-4cddf16a3912
+  title: 'Error recovery: show partial results when one ticket has invalid data'
+  completed: false
+  created_at: 2025-07-21T14:33:47.564071Z
+  completed_at: null
+- id: 638f7bbf-9df7-4093-9280-ec34ff511a2d
+  title: Add global --no-panic flag for graceful error handling
+  completed: false
+  created_at: 2025-07-21T14:33:55.431494Z
+  completed_at: null
+- id: 6b13beae-f658-44ed-a93b-822abea8b7f9
+  title: Show ticket ID in error messages for easier debugging
+  completed: false
+  created_at: 2025-07-21T14:34:02.287999Z
+  completed_at: null
+- id: 0bfe4d22-8a81-43f4-b209-bacf66553ac0
+  title: Add vide-ticket doctor command for diagnostics
+  completed: false
+  created_at: 2025-07-21T14:34:08.571924Z
+  completed_at: null
+- id: be365aa2-426f-45ac-84fd-035dc3e7ec35
+  title: Improve export command syntax (vide-ticket export json vs --format json)
+  completed: false
+  created_at: 2025-07-21T14:34:16.138896Z
+  completed_at: null
+- id: e184be39-b0f9-431d-b293-b0a3235764e2
+  title: Add batch operations (close multiple tickets, bulk status update)
+  completed: false
+  created_at: 2025-07-21T14:34:22.075116Z
+  completed_at: null
+metadata: {}

@@ -15,13 +15,14 @@ use chrono::Utc;
 /// 1. Loads the specified ticket
 /// 2. Updates the ticket status to "doing"
 /// 3. Sets the ticket as active
-/// 4. Optionally creates a Git branch for the ticket
+/// 4. Optionally creates a Git branch or worktree for the ticket
 ///
 /// # Arguments
 ///
 /// * `ticket_ref` - Ticket ID or slug to start
 /// * `create_branch` - Whether to create a Git branch
 /// * `branch_name` - Optional custom branch name
+/// * `create_worktree` - Whether to create a Git worktree instead of just a branch
 /// * `project_dir` - Optional project directory path
 /// * `output` - Output formatter for displaying results
 ///
@@ -36,6 +37,7 @@ pub fn handle_start_command(
     ticket_ref: String,
     create_branch: bool,
     branch_name: Option<String>,
+    create_worktree: bool,
     project_dir: Option<String>,
     output: &OutputFormatter,
 ) -> Result<()> {
@@ -70,14 +72,19 @@ pub fn handle_start_command(
     // Set as active ticket
     storage.set_active(&ticket_id)?;
 
-    // Create Git branch if requested
-    let branch_name_final = if create_branch {
+    // Create Git branch or worktree if requested
+    let (branch_name_final, worktree_created) = if create_branch {
         let branch_name = branch_name.unwrap_or_else(|| format!("ticket/{}", ticket.slug));
 
-        create_git_branch(&project_root, &branch_name, output)?;
-        Some(branch_name)
+        if create_worktree {
+            create_git_worktree(&project_root, &branch_name, &ticket.slug, output)?;
+            (Some(branch_name), true)
+        } else {
+            create_git_branch(&project_root, &branch_name, output)?;
+            (Some(branch_name), false)
+        }
     } else {
-        None
+        (None, false)
     };
 
     // Output results
@@ -93,6 +100,7 @@ pub fn handle_start_command(
             },
             "branch_created": create_branch,
             "branch_name": branch_name_final,
+            "worktree_created": worktree_created,
         }))?;
     } else {
         output.success(&format!("Started working on ticket: {}", ticket.slug));
@@ -100,7 +108,15 @@ pub fn handle_start_command(
         output.info(&format!("Status: {} → {}", Status::Todo, Status::Doing));
 
         if let Some(branch) = branch_name_final {
-            output.info(&format!("Git branch created: {}", branch));
+            if worktree_created {
+                output.info(&format!(
+                    "Git worktree created: ../project-ticket-{}",
+                    ticket.slug
+                ));
+                output.info(&format!("Branch: {}", branch));
+            } else {
+                output.info(&format!("Git branch created: {}", branch));
+            }
         }
 
         output.info(&format!("\nTicket '{}' is now active.", ticket.slug));
@@ -192,15 +208,103 @@ fn create_git_branch(
     Ok(())
 }
 
+/// Create a Git worktree for the ticket
+fn create_git_worktree(
+    project_root: &std::path::Path,
+    branch_name: &str,
+    ticket_slug: &str,
+    output: &OutputFormatter,
+) -> Result<()> {
+    use std::process::Command;
+
+    // Check if we're in a git repository
+    let status = Command::new("git")
+        .arg("rev-parse")
+        .arg("--git-dir")
+        .current_dir(project_root)
+        .output()
+        .map_err(|e| VideTicketError::custom(format!("Failed to run git command: {}", e)))?;
+
+    if !status.status.success() {
+        return Err(VideTicketError::custom("Not in a Git repository"));
+    }
+
+    // Get the parent directory of the project root
+    let parent_dir = project_root
+        .parent()
+        .ok_or_else(|| VideTicketError::custom("Cannot find parent directory for worktree"))?;
+
+    // Construct the worktree path
+    let worktree_dir_name = format!("project-ticket-{}", ticket_slug);
+    let worktree_path = parent_dir.join(&worktree_dir_name);
+
+    // Check if worktree directory already exists
+    if worktree_path.exists() {
+        return Err(VideTicketError::custom(format!(
+            "Worktree directory '{}' already exists",
+            worktree_path.display()
+        )));
+    }
+
+    // Check if branch already exists
+    let check_branch = Command::new("git")
+        .arg("show-ref")
+        .arg("--verify")
+        .arg("--quiet")
+        .arg(format!("refs/heads/{}", branch_name))
+        .current_dir(project_root)
+        .output()
+        .map_err(|e| VideTicketError::custom(format!("Failed to check branch existence: {}", e)))?;
+
+    if check_branch.status.success() {
+        return Err(VideTicketError::custom(format!(
+            "Branch '{}' already exists",
+            branch_name
+        )));
+    }
+
+    // Create the worktree with a new branch
+    let create_worktree = Command::new("git")
+        .arg("worktree")
+        .arg("add")
+        .arg(&worktree_path)
+        .arg("-b")
+        .arg(branch_name)
+        .current_dir(project_root)
+        .output()
+        .map_err(|e| VideTicketError::custom(format!("Failed to create worktree: {}", e)))?;
+
+    if !create_worktree.status.success() {
+        let error_msg = String::from_utf8_lossy(&create_worktree.stderr);
+        return Err(VideTicketError::custom(format!(
+            "Failed to create worktree: {}",
+            error_msg
+        )));
+    }
+
+    output.success(&format!(
+        "Created worktree at '{}'",
+        worktree_path.display()
+    ));
+    output.info(&format!("You can now cd to '../{}'", worktree_dir_name));
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
-    
-    
 
     #[test]
     fn test_branch_name_generation() {
         let default_name = "test-ticket";
         let branch_name = format!("ticket/{}", default_name);
         assert_eq!(branch_name, "ticket/test-ticket");
+    }
+
+    #[test]
+    fn test_worktree_path_generation() {
+        let ticket_slug = "fix-login-bug";
+        let worktree_dir_name = format!("project-ticket-{}", ticket_slug);
+        assert_eq!(worktree_dir_name, "project-ticket-fix-login-bug");
     }
 }

@@ -33,9 +33,18 @@ pub fn handle_config_command(
         ConfigCommands::Set { key, value } => handle_set(&key, &value, &config_path, output),
         ConfigCommands::Get { key } => handle_get(&key, &config_path, output),
         ConfigCommands::Reset { force } => handle_reset(force, &config_path, output),
-        ConfigCommands::Claude { append, template, output: output_path } => {
-            handle_claude(append, &template, output_path, &project_root, &config_path, output)
-        }
+        ConfigCommands::Claude {
+            append,
+            template,
+            output: output_path,
+        } => handle_claude(
+            append,
+            &template,
+            output_path,
+            &project_root,
+            &config_path,
+            output,
+        ),
     }
 }
 
@@ -290,10 +299,12 @@ fn handle_claude(
     let content = match template {
         "basic" => generate_basic_claude_md(&config, project_root)?,
         "advanced" => generate_advanced_claude_md(&config, project_root)?,
-        _ => return Err(VideTicketError::custom(format!(
-            "Unknown template '{}'. Available templates: basic, advanced", 
-            template
-        ))),
+        _ => {
+            return Err(VideTicketError::custom(format!(
+                "Unknown template '{}'. Available templates: basic, advanced",
+                template
+            )))
+        },
     };
 
     // Write or append content
@@ -301,7 +312,7 @@ fn handle_claude(
         let existing = fs::read_to_string(&claude_path)?;
         let combined = format!("{}\n\n{}", existing, content);
         fs::write(&claude_path, combined)?;
-        
+
         if output.is_json() {
             output.print_json(&serde_json::json!({
                 "action": "appended",
@@ -309,11 +320,14 @@ fn handle_claude(
                 "template": template,
             }))?;
         } else {
-            output.success(&format!("Appended to CLAUDE.md at: {}", claude_path.display()));
+            output.success(&format!(
+                "Appended to CLAUDE.md at: {}",
+                claude_path.display()
+            ));
         }
     } else {
         fs::write(&claude_path, &content)?;
-        
+
         if output.is_json() {
             output.print_json(&serde_json::json!({
                 "action": "created",
@@ -331,14 +345,16 @@ fn handle_claude(
 /// Generate basic CLAUDE.md template
 fn generate_basic_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
     use crate::storage::{FileStorage, TicketRepository};
-    
+
     let storage = FileStorage::new(&project_root.join(".vide-ticket"));
     let tickets = storage.load_all().unwrap_or_default();
-    let active_tickets = tickets.iter()
+    let active_tickets = tickets
+        .iter()
         .filter(|t| matches!(t.status, crate::core::Status::Doing))
         .count();
 
-    let content = format!(r#"# vide-ticket Project: {}
+    let content = format!(
+        r#"# vide-ticket Project: {}
 
 {}
 
@@ -411,10 +427,18 @@ vide-ticket task list
 Generated on: {}
 "#,
         config.project.name,
-        config.project.description.as_deref().unwrap_or("A vide-ticket managed project"),
+        config
+            .project
+            .description
+            .as_deref()
+            .unwrap_or("A vide-ticket managed project"),
         config.project.name,
         config.project.default_priority,
-        if config.git.enabled { "Enabled" } else { "Disabled" },
+        if config.git.enabled {
+            "Enabled"
+        } else {
+            "Disabled"
+        },
         config.git.auto_branch,
         config.ui.emoji,
         tickets.len(),
@@ -428,8 +452,9 @@ Generated on: {}
 /// Generate advanced CLAUDE.md template
 fn generate_advanced_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
     let basic = generate_basic_claude_md(config, project_root)?;
-    
-    let advanced_section = format!(r#"
+
+    let advanced_section = format!(
+        r#"
 ## Advanced Features
 
 ### Git Worktree Support
@@ -502,7 +527,8 @@ vide-ticket --verbose <command>
 # Check project status
 vide-ticket check --detailed
 ```
-"#);
+"#
+    );
 
     Ok(format!("{}\n{}", basic, advanced_section))
 }
@@ -525,7 +551,6 @@ fn format_value(value: &serde_json::Value) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
     #[test]
     fn test_get_config_value() {
