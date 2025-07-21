@@ -1,0 +1,69 @@
+name: Update CLAUDE.md
+
+on:
+  push:
+    paths:
+      - '.vide-ticket/config.yaml'
+      - 'Cargo.toml'
+  workflow_dispatch:
+    inputs:
+      template:
+        description: 'Template to use (basic or advanced)'
+        required: false
+        default: 'basic'
+        type: choice
+        options:
+          - basic
+          - advanced
+
+jobs:
+  update-claude:
+    name: Update CLAUDE.md
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Cache cargo index
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Build vide-ticket
+      run: cargo build --release
+    
+    - name: Update CLAUDE.md
+      run: |
+        TEMPLATE="${{ github.event.inputs.template || 'basic' }}"
+        if [ -f "CLAUDE.md" ]; then
+          echo "Appending to existing CLAUDE.md with $TEMPLATE template"
+          ./target/release/vide-ticket config claude --template $TEMPLATE --append
+        else
+          echo "Creating new CLAUDE.md with $TEMPLATE template"
+          ./target/release/vide-ticket config claude --template $TEMPLATE
+        fi
+    
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        git diff --name-only --exit-code || echo "changed=true" >> $GITHUB_OUTPUT
+    
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add CLAUDE.md
+        git commit -m "chore: update CLAUDE.md [skip ci]"
+        git push

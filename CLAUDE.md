@@ -192,3 +192,79 @@ When writing CLAUDE.md for your project:
 - Use slash commands (`/memory`, `/config`) for quick access
 - Enable appropriate tools with `--allowedTools` flag
 - Set permission mode based on workflow needs
+
+## CLAUDE.md Generation Features
+
+vide-ticket includes built-in support for generating and maintaining CLAUDE.md files to enhance Claude Code integration.
+
+### Generating CLAUDE.md
+
+#### During Project Initialization
+```bash
+# Initialize project with CLAUDE.md
+vide-ticket init --claude-md
+# or
+vide-ticket init --claude
+```
+
+This creates a CLAUDE.md file with:
+- Project overview and metadata
+- Common vide-ticket commands
+- Current configuration settings
+- Workflow guidelines
+- The initialization command itself is recorded in the file
+
+#### For Existing Projects
+```bash
+# Generate basic CLAUDE.md
+vide-ticket config claude
+
+# Generate with advanced template
+vide-ticket config claude --template advanced
+
+# Append to existing CLAUDE.md
+vide-ticket config claude --append
+
+# Custom output path
+vide-ticket config claude --output ./docs/CLAUDE.md
+```
+
+### Template Options
+
+#### Basic Template
+- Project name and description
+- Essential vide-ticket commands
+- Current project configuration (Git integration, default priority, etc.)
+- Project statistics (total tickets, active tickets)
+- Basic workflow guidelines
+- Best practices
+
+#### Advanced Template  
+- Everything from basic template plus:
+- Git worktree support examples
+- Advanced search and filtering
+- Export/import functionality
+- Environment variables documentation
+- Git hooks integration examples
+- Troubleshooting guide
+
+### Dynamic Content
+The generated CLAUDE.md includes dynamically populated information:
+- Project name from configuration
+- Current date of generation
+- Real-time ticket statistics
+- Active project settings
+- Git integration status
+
+### Usage Workflow
+
+1. **New Projects**: Use `vide-ticket init --claude-md` to start with AI assistance ready
+2. **Existing Projects**: Run `vide-ticket config claude` to add CLAUDE.md
+3. **Updates**: Use `--append` flag when project configuration changes
+4. **Customization**: Add project-specific instructions after generation
+
+### Benefits for Claude Code
+- Understands project-specific commands and workflows
+- Provides context-aware suggestions
+- Follows established project conventions
+- Assists with ticket management best practices
