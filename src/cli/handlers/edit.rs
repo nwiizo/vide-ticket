@@ -279,7 +279,7 @@ fn edit_in_editor(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 
     #[test]
     fn test_tag_parsing() {

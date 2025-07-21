@@ -194,8 +194,8 @@ fn create_git_branch(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use tempfile::TempDir;
+    
+    
 
     #[test]
     fn test_branch_name_generation() {

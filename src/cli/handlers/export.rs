@@ -299,7 +299,7 @@ fn output_ticket_markdown(output: &mut String, ticket: &Ticket) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 
     #[test]
     fn test_csv_escaping() {
