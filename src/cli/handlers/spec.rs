@@ -6,8 +6,7 @@
 use crate::cli::output::OutputFormatter;
 use crate::error::{ErrorContext, Result, VideTicketError};
 use crate::specs::{
-    SpecDocumentType, SpecManager, SpecPhase, SpecTemplate,
-    Specification, TemplateEngine,
+    SpecDocumentType, SpecManager, SpecPhase, SpecTemplate, Specification, TemplateEngine,
 };
 use chrono::Utc;
 use std::env;
@@ -122,7 +121,7 @@ pub fn handle_spec_requirements(
         specification.metadata.progress.requirements_completed = true;
         specification.metadata.updated_at = Utc::now();
         spec_manager.save(&specification)?;
-        
+
         formatter.success(&format!(
             "Marked requirements phase as complete for spec '{}'",
             specification.metadata.title
@@ -132,21 +131,21 @@ pub fn handle_spec_requirements(
 
     // Get or create requirements document
     let doc_path = spec_manager.get_document_path(&spec_id, SpecDocumentType::Requirements);
-    
+
     if !doc_path.exists() {
         // Create from template
         let mut engine = TemplateEngine::new();
         engine.set_variable("spec_id".to_string(), spec_id.clone());
-        
+
         let template = SpecTemplate::for_document_type(
             SpecDocumentType::Requirements,
             specification.metadata.title.clone(),
             Some(specification.metadata.description.clone()),
         );
-        
+
         let content = engine.generate(&template);
         fs::write(&doc_path, content).context("Failed to create requirements document")?;
-        
+
         formatter.info(&format!(
             "Created requirements document: {}",
             doc_path.display()
@@ -159,7 +158,8 @@ pub fn handle_spec_requirements(
         formatter.success("Requirements document saved");
     } else {
         // Display content
-        let content = fs::read_to_string(&doc_path).context("Failed to read requirements document")?;
+        let content =
+            fs::read_to_string(&doc_path).context("Failed to read requirements document")?;
         formatter.info(&content);
     }
 
@@ -208,7 +208,7 @@ pub fn handle_spec_design(
         specification.metadata.progress.design_completed = true;
         specification.metadata.updated_at = Utc::now();
         spec_manager.save(&specification)?;
-        
+
         formatter.success(&format!(
             "Marked design phase as complete for spec '{}'",
             specification.metadata.title
@@ -218,33 +218,31 @@ pub fn handle_spec_design(
 
     // Get or create design document
     let doc_path = spec_manager.get_document_path(&spec_id, SpecDocumentType::Design);
-    
+
     if !doc_path.exists() {
         // Create from template with requirements summary
-        let requirements_path = spec_manager.get_document_path(&spec_id, SpecDocumentType::Requirements);
+        let requirements_path =
+            spec_manager.get_document_path(&spec_id, SpecDocumentType::Requirements);
         let requirements_summary = if requirements_path.exists() {
             // Extract summary from requirements doc
             "See requirements document for details."
         } else {
             "Requirements not yet defined."
         };
-        
+
         let mut engine = TemplateEngine::new();
         engine.set_variable("spec_id".to_string(), spec_id.clone());
-        
+
         let template = SpecTemplate::for_document_type(
             SpecDocumentType::Design,
             specification.metadata.title.clone(),
             Some(requirements_summary.to_string()),
         );
-        
+
         let content = engine.generate(&template);
         fs::write(&doc_path, content).context("Failed to create design document")?;
-        
-        formatter.info(&format!(
-            "Created design document: {}",
-            doc_path.display()
-        ));
+
+        formatter.info(&format!("Created design document: {}", doc_path.display()));
     }
 
     if editor {
@@ -303,7 +301,7 @@ pub fn handle_spec_tasks(
         specification.metadata.progress.tasks_completed = true;
         specification.metadata.updated_at = Utc::now();
         spec_manager.save(&specification)?;
-        
+
         formatter.success(&format!(
             "Marked tasks phase as complete for spec '{}'",
             specification.metadata.title
@@ -313,7 +311,7 @@ pub fn handle_spec_tasks(
 
     // Get or create tasks document
     let doc_path = spec_manager.get_document_path(&spec_id, SpecDocumentType::Tasks);
-    
+
     if !doc_path.exists() {
         // Create from template with design summary
         let design_path = spec_manager.get_document_path(&spec_id, SpecDocumentType::Design);
@@ -322,23 +320,20 @@ pub fn handle_spec_tasks(
         } else {
             "Design not yet defined."
         };
-        
+
         let mut engine = TemplateEngine::new();
         engine.set_variable("spec_id".to_string(), spec_id.clone());
-        
+
         let template = SpecTemplate::for_document_type(
             SpecDocumentType::Tasks,
             specification.metadata.title.clone(),
             Some(design_summary.to_string()),
         );
-        
+
         let content = engine.generate(&template);
         fs::write(&doc_path, content).context("Failed to create tasks document")?;
-        
-        formatter.info(&format!(
-            "Created tasks document: {}",
-            doc_path.display()
-        ));
+
+        formatter.info(&format!("Created tasks document: {}", doc_path.display()));
     }
 
     if export_tickets {
@@ -411,19 +406,31 @@ pub fn handle_spec_status(
             "Current Phase: {:?}",
             specification.metadata.progress.current_phase()
         ));
-        
+
         formatter.info("\nProgress:");
         formatter.info(&format!(
             "  Requirements: {}",
-            if specification.metadata.progress.requirements_completed { "✓ Complete" } else { "○ In Progress" }
+            if specification.metadata.progress.requirements_completed {
+                "✓ Complete"
+            } else {
+                "○ In Progress"
+            }
         ));
         formatter.info(&format!(
             "  Design: {}",
-            if specification.metadata.progress.design_completed { "✓ Complete" } else { "○ Pending" }
+            if specification.metadata.progress.design_completed {
+                "✓ Complete"
+            } else {
+                "○ Pending"
+            }
         ));
         formatter.info(&format!(
             "  Tasks: {}",
-            if specification.metadata.progress.tasks_completed { "✓ Complete" } else { "○ Pending" }
+            if specification.metadata.progress.tasks_completed {
+                "✓ Complete"
+            } else {
+                "○ Pending"
+            }
         ));
 
         if detailed {
@@ -471,12 +478,13 @@ pub fn handle_spec_list(
         .filter(|spec| {
             // Filter by status if provided
             if let Some(ref status_filter) = status {
-                let current_status = format!("{:?}", spec.metadata.progress.current_phase()).to_lowercase();
+                let current_status =
+                    format!("{:?}", spec.metadata.progress.current_phase()).to_lowercase();
                 if !current_status.contains(&status_filter.to_lowercase()) {
                     return false;
                 }
             }
-            
+
             // Filter by phase if provided
             if let Some(ref phase_filter) = phase {
                 match phase_filter.to_lowercase().as_str() {
@@ -484,21 +492,25 @@ pub fn handle_spec_list(
                         if spec.metadata.progress.requirements_completed {
                             return false;
                         }
-                    }
+                    },
                     "design" => {
-                        if !spec.metadata.progress.requirements_completed || spec.metadata.progress.design_completed {
+                        if !spec.metadata.progress.requirements_completed
+                            || spec.metadata.progress.design_completed
+                        {
                             return false;
                         }
-                    }
+                    },
                     "tasks" => {
-                        if !spec.metadata.progress.design_completed || spec.metadata.progress.tasks_completed {
+                        if !spec.metadata.progress.design_completed
+                            || spec.metadata.progress.tasks_completed
+                        {
                             return false;
                         }
-                    }
-                    _ => {}
+                    },
+                    _ => {},
                 }
             }
-            
+
             true
         })
         .collect();
@@ -518,20 +530,21 @@ pub fn handle_spec_list(
             })
             .collect();
         formatter.json(&serde_json::json!(specs_json))?;
+    } else if filtered_specs.is_empty() {
+        formatter.info("No specifications found");
     } else {
-        if filtered_specs.is_empty() {
-            formatter.info("No specifications found");
-        } else {
-            formatter.info(&format!("Found {} specification(s):\n", filtered_specs.len()));
-            
-            for spec in &filtered_specs {
-                formatter.info(&format!(
-                    "{} - {} ({:?})",
-                    spec.metadata.id,
-                    spec.metadata.title,
-                    spec.metadata.progress.current_phase()
-                ));
-            }
+        formatter.info(&format!(
+            "Found {} specification(s):\n",
+            filtered_specs.len()
+        ));
+
+        for spec in &filtered_specs {
+            formatter.info(&format!(
+                "{} - {} ({:?})",
+                spec.metadata.id,
+                spec.metadata.title,
+                spec.metadata.progress.current_phase()
+            ));
         }
     }
 
@@ -565,11 +578,20 @@ pub fn handle_spec_show(
     if formatter.is_json() {
         formatter.json(&serde_json::json!(specification))?;
     } else {
-        formatter.info(&format!("# Specification: {}", specification.metadata.title));
+        formatter.info(&format!(
+            "# Specification: {}",
+            specification.metadata.title
+        ));
         formatter.info(&format!("ID: {}", specification.metadata.id));
-        formatter.info(&format!("Description: {}", specification.metadata.description));
-        formatter.info(&format!("Phase: {:?}", specification.metadata.progress.current_phase()));
-        
+        formatter.info(&format!(
+            "Description: {}",
+            specification.metadata.description
+        ));
+        formatter.info(&format!(
+            "Phase: {:?}",
+            specification.metadata.progress.current_phase()
+        ));
+
         if all || markdown {
             // Show all documents
             let doc_types = [
@@ -577,13 +599,13 @@ pub fn handle_spec_show(
                 SpecDocumentType::Design,
                 SpecDocumentType::Tasks,
             ];
-            
+
             for doc_type in &doc_types {
                 let doc_path = spec_manager.get_document_path(&spec, *doc_type);
                 if doc_path.exists() {
                     formatter.info(&format!("\n## {:?} Document\n", doc_type));
-                    let content = fs::read_to_string(&doc_path)
-                        .context("Failed to read document")?;
+                    let content =
+                        fs::read_to_string(&doc_path).context("Failed to read document")?;
                     formatter.info(&content);
                 }
             }
@@ -617,7 +639,10 @@ pub fn handle_spec_delete(
 
     if !force {
         // Confirm deletion
-        formatter.warning(&format!("Are you sure you want to delete specification '{}'?", spec));
+        formatter.warning(&format!(
+            "Are you sure you want to delete specification '{}'?",
+            spec
+        ));
         formatter.warning("This will delete all associated documents and cannot be undone.");
         formatter.info("Use --force to skip this confirmation.");
         return Ok(());
@@ -662,14 +687,14 @@ pub fn handle_spec_approve(
             return Err(VideTicketError::InvalidInput(
                 "Invalid phase. Must be one of: requirements, design, tasks".to_string(),
             ));
-        }
+        },
     };
 
     // Update approval status
     if specification.metadata.progress.approval_status.is_none() {
         specification.metadata.progress.approval_status = Some(std::collections::HashMap::new());
     }
-    
+
     if let Some(ref mut approvals) = specification.metadata.progress.approval_status {
         approvals.insert(
             format!("{:?}", phase_enum),
@@ -730,11 +755,11 @@ pub fn handle_spec_activate(
 /// Get the active specification ID
 fn get_active_spec(project_dir: &Path) -> Result<String> {
     let active_spec_path = project_dir.join(".active_spec");
-    
+
     if !active_spec_path.exists() {
         return Err(VideTicketError::NoActiveSpec);
     }
-    
+
     fs::read_to_string(&active_spec_path)
         .context("Failed to read active specification")
         .map(|s| s.trim().to_string())
@@ -743,11 +768,11 @@ fn get_active_spec(project_dir: &Path) -> Result<String> {
 /// Open a file in the default editor
 fn open_in_editor(path: &Path) -> Result<()> {
     let editor = env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
-    
+
     std::process::Command::new(&editor)
         .arg(path)
         .status()
         .with_context(|| format!("Failed to open editor: {}", editor))?;
-    
+
     Ok(())
 }

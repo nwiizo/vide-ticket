@@ -85,7 +85,7 @@ matches-for-let-else = "AllTypes"
 unreadable-literal-lint-fractions = true
 
 # Async specific
-large-futures = 64
+future-size-threshold = 64
 
 # Documentation URLs
 # doc-comment-code-block-check-backticks = true
@@ -96,5 +96,4 @@ absolute-paths-max-segments = 2
 
 # Misc
 suppress-restriction-lint-in-const = false
-missing-docs-in-crate-items = false
 enable-raw-pointer-heuristic-for-send = true
