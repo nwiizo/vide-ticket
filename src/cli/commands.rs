@@ -567,49 +567,49 @@ pub enum SpecCommands {
     },
 }
 
-#[derive(Subcommand, Debug)]
-pub enum WorktreeCommands {
-    /// List all worktrees for vide-ticket
-    List {
-        /// Show worktrees for all tickets
-        #[arg(short, long)]
-        all: bool,
+// #[derive(Subcommand, Debug)]
+// pub enum WorktreeCommands {
+//     /// List all worktrees for vide-ticket
+//     List {
+//         /// Show worktrees for all tickets
+//         #[arg(short, long)]
+//         all: bool,
 
-        /// Filter by status (active, stale, orphaned)
-        #[arg(short, long)]
-        status: Option<String>,
+//         /// Filter by status (active, stale, orphaned)
+//         #[arg(short, long)]
+//         status: Option<String>,
 
-        /// Show detailed information
-        #[arg(short, long)]
-        verbose: bool,
-    },
+//         /// Show detailed information
+//         #[arg(short, long)]
+//         verbose: bool,
+//     },
 
-    /// Remove a worktree
-    Remove {
-        /// Worktree path or ticket ID/slug
-        worktree: String,
+//     /// Remove a worktree
+//     Remove {
+//         /// Worktree path or ticket ID/slug
+//         worktree: String,
 
-        /// Force removal even if there are uncommitted changes
-        #[arg(short, long)]
-        force: bool,
+//         /// Force removal even if there are uncommitted changes
+//         #[arg(short, long)]
+//         force: bool,
 
-        /// Keep the branch associated with the worktree
-        #[arg(long)]
-        keep_branch: bool,
-    },
+//         /// Keep the branch associated with the worktree
+//         #[arg(long)]
+//         keep_branch: bool,
+//     },
 
-    /// Prune stale worktrees
-    Prune {
-        /// Remove worktrees without confirmation
-        #[arg(short, long)]
-        force: bool,
+//     /// Prune stale worktrees
+//     Prune {
+//         /// Remove worktrees without confirmation
+//         #[arg(short, long)]
+//         force: bool,
 
-        /// Dry run - show what would be removed
-        #[arg(short, long)]
-        dry_run: bool,
+//         /// Dry run - show what would be removed
+//         #[arg(short, long)]
+//         dry_run: bool,
 
-        /// Remove branches for pruned worktrees
-        #[arg(long)]
-        remove_branches: bool,
-    },
-}
+//         /// Remove branches for pruned worktrees
+//         #[arg(long)]
+//         remove_branches: bool,
+//     },
+// }
