@@ -104,3 +104,7 @@ TODO.md
 .vide-ticket/backups/
 .vide-ticket/tmp/
 .vide-ticket/*.log
+# vibe-ticket
+.vibe-ticket/backups/
+.vibe-ticket/tmp/
+.vibe-ticket/*.log

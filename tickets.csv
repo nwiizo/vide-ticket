@@ -1,3 +1,0 @@
-ID,Slug,Title,Status,Priority,Assignee,Tags,Created At,Started At,Closed At,Tasks Total,Tasks Completed,Description
-67df659f-bd5f-4bfe-b862-c9d6cd3a3e86,202507192053-test-start-command,Test start command,Done,Medium,,,2025-07-19T11:53:54.691157+00:00,2025-07-19T11:53:59.509621+00:00,2025-07-19T11:57:19.920131+00:00,0,0,
-c25e12c0-63ca-45a2-a23d-aec584dd5603,202507201230-test-check-command,Updated check command test,Review,Critical,,"bug, urgent",2025-07-20T03:30:10.987308+00:00,2025-07-20T03:30:16.049954+00:00,,3,1,This is an updated description for the check command test
