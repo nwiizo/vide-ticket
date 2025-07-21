@@ -24,9 +24,10 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 pub mod manager;
+pub mod storage;
 pub mod templates;
 
-pub use manager::SpecManager;
+pub use manager::{SpecManager, save, load, list, delete, get_document_path};
 pub use templates::{SpecTemplate, TemplateEngine};
 
 /// Specification metadata and progress tracking

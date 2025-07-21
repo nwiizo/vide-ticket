@@ -471,7 +471,7 @@ pub fn handle_spec_list(
         .filter(|spec| {
             // Filter by status if provided
             if let Some(ref status_filter) = status {
-                let current_status = format!("{:?}", spec.metadata.progress.current_phase()).to_lowercase();
+                let current_status = format!("{:?}", spec.progress.current_phase()).to_lowercase();
                 if !current_status.contains(&status_filter.to_lowercase()) {
                     return false;
                 }
@@ -481,17 +481,17 @@ pub fn handle_spec_list(
             if let Some(ref phase_filter) = phase {
                 match phase_filter.to_lowercase().as_str() {
                     "requirements" => {
-                        if spec.metadata.progress.requirements_completed {
+                        if spec.progress.requirements_completed {
                             return false;
                         }
                     }
                     "design" => {
-                        if !spec.metadata.progress.requirements_completed || spec.metadata.progress.design_completed {
+                        if !spec.progress.requirements_completed || spec.progress.design_completed {
                             return false;
                         }
                     }
                     "tasks" => {
-                        if !spec.metadata.progress.design_completed || spec.metadata.progress.tasks_completed {
+                        if !spec.progress.design_completed || spec.progress.tasks_completed {
                             return false;
                         }
                     }
@@ -508,12 +508,12 @@ pub fn handle_spec_list(
             .iter()
             .map(|spec| {
                 serde_json::json!({
-                    "id": spec.metadata.id,
-                    "title": spec.metadata.title,
-                    "description": spec.metadata.description,
-                    "phase": format!("{:?}", spec.metadata.progress.current_phase()),
-                    "created_at": spec.metadata.created_at,
-                    "updated_at": spec.metadata.updated_at,
+                    "id": spec.id,
+                    "title": spec.title,
+                    "description": spec.description,
+                    "phase": format!("{:?}", spec.progress.current_phase()),
+                    "created_at": spec.created_at,
+                    "updated_at": spec.updated_at,
                 })
             })
             .collect();
@@ -527,9 +527,9 @@ pub fn handle_spec_list(
             for spec in &filtered_specs {
                 formatter.info(&format!(
                     "{} - {} ({:?})",
-                    spec.metadata.id,
-                    spec.metadata.title,
-                    spec.metadata.progress.current_phase()
+                    spec.id,
+                    spec.title,
+                    spec.progress.current_phase()
                 ));
             }
         }
