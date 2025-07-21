@@ -1,0 +1,100 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-ticket:
+    name: Check Active Ticket
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check for active ticket reference
+      run: |
+        PR_BODY="${{ github.event.pull_request.body }}"
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        
+        # Check if PR title or body contains ticket reference
+        if ! echo "$PR_TITLE $PR_BODY" | grep -qE "(ticket|fix|close|resolve)[s]?\s*#?[0-9a-f-]+"; then
+          echo "::warning::No ticket reference found in PR title or description"
+          echo "Consider linking this PR to a vide-ticket"
+        fi
+
+  lint-commits:
+    name: Lint Commits
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check commit messages
+      run: |
+        # Get all commits in this PR
+        COMMITS=$(git log --format="%H %s" origin/${{ github.base_ref }}..HEAD)
+        
+        # Check each commit message
+        echo "$COMMITS" | while read -r line; do
+          HASH=$(echo "$line" | cut -d' ' -f1)
+          MSG=$(echo "$line" | cut -d' ' -f2-)
+          
+          # Check for conventional commit format
+          if ! echo "$MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
+            echo "::warning file=commit::Commit $HASH does not follow conventional commits format: $MSG"
+          fi
+        done
+
+  check-claude-md:
+    name: Check CLAUDE.md
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.files.*.filename, '.vide-ticket/config.yaml')
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check if CLAUDE.md needs update
+      run: |
+        if [ ! -f "CLAUDE.md" ]; then
+          echo "::warning::CLAUDE.md not found. Consider creating one with 'vide-ticket config claude'"
+        else
+          # Check if CLAUDE.md is older than config
+          CONFIG_TIME=$(stat -c %Y .vide-ticket/config.yaml 2>/dev/null || stat -f %m .vide-ticket/config.yaml)
+          CLAUDE_TIME=$(stat -c %Y CLAUDE.md 2>/dev/null || stat -f %m CLAUDE.md)
+          
+          if [ "$CONFIG_TIME" -gt "$CLAUDE_TIME" ]; then
+            echo "::warning::CLAUDE.md may be outdated. Consider updating with 'vide-ticket config claude --append'"
+          fi
+        fi
+
+  size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check PR size
+      run: |
+        # Get PR stats
+        ADDITIONS=${{ github.event.pull_request.additions }}
+        DELETIONS=${{ github.event.pull_request.deletions }}
+        TOTAL=$((ADDITIONS + DELETIONS))
+        FILES=${{ github.event.pull_request.changed_files }}
+        
+        # Warn if PR is too large
+        if [ $TOTAL -gt 1000 ]; then
+          echo "::warning::Large PR detected ($TOTAL lines changed). Consider breaking it into smaller PRs."
+        fi
+        
+        if [ $FILES -gt 20 ]; then
+          echo "::warning::Many files changed ($FILES files). Consider breaking it into smaller PRs."
+        fi
+        
+        echo "## PR Statistics" >> $GITHUB_STEP_SUMMARY
+        echo "- Files changed: $FILES" >> $GITHUB_STEP_SUMMARY
+        echo "- Lines added: $ADDITIONS" >> $GITHUB_STEP_SUMMARY
+        echo "- Lines deleted: $DELETIONS" >> $GITHUB_STEP_SUMMARY
+        echo "- Total changes: $TOTAL" >> $GITHUB_STEP_SUMMARY
