@@ -96,28 +96,26 @@ pub fn handle_new_command(
             // TODO: Create Git branch when Git integration is implemented
             output.info("Note: Git branch creation will be available in future version");
         }
+    } else if output.is_json() {
+        output.print_json(&serde_json::json!({
+            "success": true,
+            "message": "Created ticket",
+            "ticket": ticket,
+        }))?;
     } else {
-        if output.is_json() {
-            output.print_json(&serde_json::json!({
-                "success": true,
-                "message": "Created ticket",
-                "ticket": ticket,
-            }))?;
-        } else {
-            output.success(&format!(
-                "Created ticket '{}' (ID: {})",
-                ticket.slug,
-                ticket.id.short()
-            ));
-            output.info(&format!("Title: {}", ticket.title));
-            output.info(&format!("Priority: {}", ticket.priority));
-            if !ticket.tags.is_empty() {
-                output.info(&format!("Tags: {}", ticket.tags.join(", ")));
-            }
-            output.info("");
-            output.info("To start working on this ticket:");
-            output.info(&format!("  vide-ticket start {}", ticket.slug));
+        output.success(&format!(
+            "Created ticket '{}' (ID: {})",
+            ticket.slug,
+            ticket.id.short()
+        ));
+        output.info(&format!("Title: {}", ticket.title));
+        output.info(&format!("Priority: {}", ticket.priority));
+        if !ticket.tags.is_empty() {
+            output.info(&format!("Tags: {}", ticket.tags.join(", ")));
         }
+        output.info("");
+        output.info("To start working on this ticket:");
+        output.info(&format!("  vide-ticket start {}", ticket.slug));
     }
     
     Ok(())

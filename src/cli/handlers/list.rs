@@ -49,12 +49,10 @@ pub fn handle_list_command(
             "tickets": tickets,
             "count": tickets.len(),
         }))?;
+    } else if tickets.is_empty() {
+        output.info("No tickets found matching the criteria.");
     } else {
-        if tickets.is_empty() {
-            output.info("No tickets found matching the criteria.");
-        } else {
-            output.print_tickets(&tickets)?;
-        }
+        output.print_tickets(&tickets)?;
     }
     
     Ok(())
