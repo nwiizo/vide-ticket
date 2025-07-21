@@ -9,13 +9,13 @@ use std::fmt;
 pub enum Priority {
     /// Low priority - can be deferred
     Low,
-    
+
     /// Medium priority - normal workflow
     Medium,
-    
+
     /// High priority - should be addressed soon
     High,
-    
+
     /// Critical priority - requires immediate attention
     Critical,
 }
@@ -42,7 +42,7 @@ impl Priority {
     pub fn all() -> Vec<Self> {
         vec![Self::Low, Self::Medium, Self::High, Self::Critical]
     }
-    
+
     /// Returns the numeric value for sorting (higher = more urgent)
     pub fn value(&self) -> u8 {
         match self {
@@ -52,7 +52,7 @@ impl Priority {
             Self::Critical => 4,
         }
     }
-    
+
     /// Returns the emoji representation of the priority
     pub fn emoji(&self) -> &'static str {
         match self {
@@ -62,7 +62,7 @@ impl Priority {
             Self::Critical => "🔴",
         }
     }
-    
+
     /// Returns the color code for terminal output
     pub fn color(&self) -> &'static str {
         match self {
@@ -72,7 +72,7 @@ impl Priority {
             Self::Critical => "red",
         }
     }
-    
+
     /// Returns whether this priority requires immediate attention
     pub fn is_urgent(&self) -> bool {
         matches!(self, Self::High | Self::Critical)
@@ -81,7 +81,7 @@ impl Priority {
 
 impl TryFrom<&str> for Priority {
     type Error = String;
-    
+
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value.to_lowercase().as_str() {
             "low" | "l" => Ok(Self::Low),
@@ -108,19 +108,19 @@ impl From<u8> for Priority {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_default_priority() {
         assert_eq!(Priority::default(), Priority::Medium);
     }
-    
+
     #[test]
     fn test_priority_ordering() {
         assert!(Priority::Low < Priority::Medium);
         assert!(Priority::Medium < Priority::High);
         assert!(Priority::High < Priority::Critical);
     }
-    
+
     #[test]
     fn test_priority_value() {
         assert_eq!(Priority::Low.value(), 1);
@@ -128,7 +128,7 @@ mod tests {
         assert_eq!(Priority::High.value(), 3);
         assert_eq!(Priority::Critical.value(), 4);
     }
-    
+
     #[test]
     fn test_priority_from_str() {
         assert_eq!(Priority::try_from("low").unwrap(), Priority::Low);
@@ -138,7 +138,7 @@ mod tests {
         assert_eq!(Priority::try_from("urgent").unwrap(), Priority::Critical);
         assert!(Priority::try_from("invalid").is_err());
     }
-    
+
     #[test]
     fn test_priority_urgency() {
         assert!(!Priority::Low.is_urgent());

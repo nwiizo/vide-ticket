@@ -50,14 +50,12 @@ pub fn handle_init(
 ) -> Result<()> {
     let current_dir = env::current_dir().context("Failed to get current directory")?;
     let project_dir = current_dir.join(".vide-ticket");
-    
+
     // Check if already initialized
     if project_dir.exists() && !force {
-        return Err(VideTicketError::ProjectAlreadyInitialized {
-            path: project_dir,
-        });
+        return Err(VideTicketError::ProjectAlreadyInitialized { path: project_dir });
     }
-    
+
     // Determine project name
     let project_name = name.unwrap_or_else(|| {
         current_dir
@@ -66,30 +64,30 @@ pub fn handle_init(
             .unwrap_or("vide-ticket-project")
             .to_string()
     });
-    
+
     // Start progress
     let progress = formatter.progress_bar("Initializing project");
     progress.set_message("Creating directory structure");
-    
+
     // Create directory structure
     create_directory_structure(&project_dir)?;
-    
+
     progress.set_message("Creating configuration");
-    
+
     // Create default configuration
     let mut config = Config::default();
     config.project.name = project_name.clone();
     config.project.description = description.clone();
-    
+
     // Save configuration
     let config_path = project_dir.join("config.yaml");
-    let config_content = serde_yaml::to_string(&config)
-        .context("Failed to serialize configuration")?;
+    let config_content =
+        serde_yaml::to_string(&config).context("Failed to serialize configuration")?;
     fs::write(&config_path, config_content)
         .with_context(|| format!("Failed to write config to {:?}", config_path))?;
-    
+
     progress.set_message("Initializing repository");
-    
+
     // Initialize storage with project state
     let storage = FileStorage::new(&project_dir);
     let project_state = ProjectState {
@@ -100,23 +98,23 @@ pub fn handle_init(
         ticket_count: 0,
     };
     storage.save_state(&project_state)?;
-    
+
     progress.set_message("Creating default templates");
-    
+
     // Create default templates
     create_default_templates(&project_dir)?;
-    
+
     // Create .gitignore if it doesn't exist
     create_gitignore(&current_dir)?;
-    
+
     progress.finish_with_message("Project initialized successfully");
-    
+
     // Display success message
     formatter.success(&format!(
         "Initialized vide-ticket project '{}'",
         project_name
     ));
-    
+
     if formatter.is_json() {
         formatter.json(&serde_json::json!({
             "status": "success",
@@ -135,7 +133,7 @@ pub fn handle_init(
         formatter.info("  2. List tickets: vide-ticket list");
         formatter.info("  3. Start working: vide-ticket start <ticket>");
     }
-    
+
     Ok(())
 }
 
@@ -155,12 +153,11 @@ fn create_directory_structure(project_dir: &Path) -> Result<()> {
         &project_dir.join("plugins"),
         &project_dir.join("backups"),
     ];
-    
+
     for dir in directories {
-        fs::create_dir_all(dir)
-            .with_context(|| format!("Failed to create directory {:?}", dir))?;
+        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory {:?}", dir))?;
     }
-    
+
     Ok(())
 }
 
@@ -169,7 +166,7 @@ fn create_directory_structure(project_dir: &Path) -> Result<()> {
 /// Creates starter templates for tickets and other documents
 fn create_default_templates(project_dir: &Path) -> Result<()> {
     let templates_dir = project_dir.join("templates");
-    
+
     // Default ticket template
     let ticket_template = r#"# {{ title }}
 
@@ -190,12 +187,10 @@ Created: {{ created_at }}
 Status: {{ status }}
 Priority: {{ priority }}
 "#;
-    
-    fs::write(
-        templates_dir.join("ticket.md"),
-        ticket_template,
-    ).context("Failed to create ticket template")?;
-    
+
+    fs::write(templates_dir.join("ticket.md"), ticket_template)
+        .context("Failed to create ticket template")?;
+
     // Default PR template
     let pr_template = r#"## Summary
 {{ summary }}
@@ -214,12 +209,10 @@ Closes #{{ ticket_id }} - {{ ticket_title }}
 ## Screenshots (if applicable)
 
 "#;
-    
-    fs::write(
-        templates_dir.join("pull_request.md"),
-        pr_template,
-    ).context("Failed to create PR template")?;
-    
+
+    fs::write(templates_dir.join("pull_request.md"), pr_template)
+        .context("Failed to create PR template")?;
+
     Ok(())
 }
 
@@ -235,12 +228,12 @@ fn create_gitignore(project_dir: &Path) -> Result<()> {
         ".vide-ticket/*.log",
         "",
     ];
-    
+
     if gitignore_path.exists() {
         // Read existing content
-        let mut content = fs::read_to_string(&gitignore_path)
-            .context("Failed to read .gitignore")?;
-        
+        let mut content =
+            fs::read_to_string(&gitignore_path).context("Failed to read .gitignore")?;
+
         // Check if vide-ticket entries already exist
         if !content.contains("# vide-ticket") {
             // Append our entries
@@ -248,16 +241,15 @@ fn create_gitignore(project_dir: &Path) -> Result<()> {
                 content.push('\n');
             }
             content.push_str(&vide_entries.join("\n"));
-            
-            fs::write(&gitignore_path, content)
-                .context("Failed to update .gitignore")?;
+
+            fs::write(&gitignore_path, content).context("Failed to update .gitignore")?;
         }
     } else {
         // Create new .gitignore
         fs::write(&gitignore_path, vide_entries.join("\n"))
             .context("Failed to create .gitignore")?;
     }
-    
+
     Ok(())
 }
 
@@ -265,42 +257,42 @@ fn create_gitignore(project_dir: &Path) -> Result<()> {
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[test]
     fn test_create_directory_structure() {
         let temp_dir = TempDir::new().unwrap();
         let project_dir = temp_dir.path().join(".vide-ticket");
-        
+
         create_directory_structure(&project_dir).unwrap();
-        
+
         assert!(project_dir.exists());
         assert!(project_dir.join("tickets").exists());
         assert!(project_dir.join("templates").exists());
         assert!(project_dir.join("plugins").exists());
         assert!(project_dir.join("backups").exists());
     }
-    
+
     #[test]
     fn test_create_default_templates() {
         let temp_dir = TempDir::new().unwrap();
         let project_dir = temp_dir.path().join(".vide-ticket");
         create_directory_structure(&project_dir).unwrap();
-        
+
         create_default_templates(&project_dir).unwrap();
-        
+
         assert!(project_dir.join("templates/ticket.md").exists());
         assert!(project_dir.join("templates/pull_request.md").exists());
     }
-    
+
     #[test]
     fn test_create_gitignore() {
         let temp_dir = TempDir::new().unwrap();
-        
+
         create_gitignore(temp_dir.path()).unwrap();
-        
+
         let gitignore_path = temp_dir.path().join(".gitignore");
         assert!(gitignore_path.exists());
-        
+
         let content = fs::read_to_string(&gitignore_path).unwrap();
         assert!(content.contains("# vide-ticket"));
         assert!(content.contains(".vide-ticket/backups/"));

@@ -58,13 +58,13 @@ use std::path::Path;
 pub struct Config {
     /// Project configuration
     pub project: ProjectConfig,
-    
+
     /// UI configuration
     pub ui: UiConfig,
-    
+
     /// Git integration configuration
     pub git: GitConfig,
-    
+
     /// Plugin configuration
     pub plugins: PluginsConfig,
 }
@@ -74,13 +74,13 @@ pub struct Config {
 pub struct ProjectConfig {
     /// Project name
     pub name: String,
-    
+
     /// Project description
     pub description: Option<String>,
-    
+
     /// Default assignee for new tickets
     pub default_assignee: Option<String>,
-    
+
     /// Default priority for new tickets
     pub default_priority: String,
 }
@@ -90,13 +90,13 @@ pub struct ProjectConfig {
 pub struct UiConfig {
     /// Color theme (light/dark/auto)
     pub theme: String,
-    
+
     /// Enable emoji in output
     pub emoji: bool,
-    
+
     /// Default page size for list commands
     pub page_size: usize,
-    
+
     /// Date format
     pub date_format: String,
 }
@@ -106,13 +106,13 @@ pub struct UiConfig {
 pub struct GitConfig {
     /// Enable Git integration
     pub enabled: bool,
-    
+
     /// Branch prefix for tickets
     pub branch_prefix: String,
-    
+
     /// Auto-create branches when starting tickets
     pub auto_branch: bool,
-    
+
     /// Commit message template
     pub commit_template: Option<String>,
 }
@@ -122,7 +122,7 @@ pub struct GitConfig {
 pub struct PluginsConfig {
     /// Enabled plugins
     pub enabled: Vec<String>,
-    
+
     /// Plugin directory
     pub directory: String,
 }
@@ -163,45 +163,45 @@ impl Config {
     pub fn load() -> Result<Self> {
         Self::load_from_path(".vide-ticket/config.yaml")
     }
-    
+
     /// Load configuration from a specific path
     pub fn load_from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let content = std::fs::read_to_string(path)
             .with_context(|| format!("Failed to read config from {:?}", path))?;
-        
-        let config: Config = serde_yaml::from_str(&content)
-            .context("Failed to parse configuration")?;
-        
+
+        let config: Config =
+            serde_yaml::from_str(&content).context("Failed to parse configuration")?;
+
         Ok(config)
     }
-    
+
     /// Load configuration or return default if not found
     pub fn load_or_default() -> Result<Self> {
         match Self::load() {
             Ok(config) => Ok(config),
-            Err(crate::error::VideTicketError::Io(e)) 
-                if e.kind() == std::io::ErrorKind::NotFound => {
+            Err(crate::error::VideTicketError::Io(e))
+                if e.kind() == std::io::ErrorKind::NotFound =>
+            {
                 Ok(Self::default())
-            }
+            },
             Err(e) => Err(e),
         }
     }
-    
+
     /// Save configuration to the default location
     pub fn save(&self) -> Result<()> {
         self.save_to_path(".vide-ticket/config.yaml")
     }
-    
+
     /// Save configuration to a specific path
     pub fn save_to_path<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let path = path.as_ref();
-        let yaml = serde_yaml::to_string(self)
-            .context("Failed to serialize configuration")?;
-        
+        let yaml = serde_yaml::to_string(self).context("Failed to serialize configuration")?;
+
         std::fs::write(path, yaml)
             .with_context(|| format!("Failed to write config to {:?}", path))?;
-        
+
         Ok(())
     }
 }
@@ -210,7 +210,7 @@ impl Config {
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[test]
     fn test_default_config() {
         let config = Config::default();
@@ -218,15 +218,15 @@ mod tests {
         assert_eq!(config.ui.theme, "auto");
         assert!(config.git.enabled);
     }
-    
+
     #[test]
     fn test_save_and_load_config() {
         let temp_dir = TempDir::new().unwrap();
         let config_path = temp_dir.path().join("config.yaml");
-        
+
         let config = Config::default();
         config.save_to_path(&config_path).unwrap();
-        
+
         let loaded = Config::load_from_path(&config_path).unwrap();
         assert_eq!(loaded.project.name, config.project.name);
     }

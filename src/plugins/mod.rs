@@ -51,7 +51,7 @@
 //! [[plugins]]
 //! name = "github-integration"
 //! enabled = true
-//! 
+//!
 //! [plugins.config]
 //! token = "$GITHUB_TOKEN"
 //! repo = "owner/repo"

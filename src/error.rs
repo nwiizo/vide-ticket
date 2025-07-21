@@ -11,79 +11,79 @@ pub enum VideTicketError {
     /// I/O related errors
     #[error("I/O error: {0}")]
     Io(#[from] io::Error),
-    
+
     /// YAML serialization/deserialization errors
     #[error("YAML error: {0}")]
     Yaml(#[from] serde_yaml::Error),
-    
+
     /// JSON serialization/deserialization errors
     #[error("JSON error: {0}")]
     Json(#[from] serde_json::Error),
-    
+
     /// Git operation errors
     #[error("Git error: {0}")]
     Git(#[from] git2::Error),
-    
+
     /// Configuration errors
     #[error("Configuration error: {0}")]
     Config(#[from] config::ConfigError),
-    
+
     /// Ticket not found
     #[error("Ticket not found: {id}")]
     TicketNotFound { id: String },
-    
+
     /// Task not found
     #[error("Task not found: {id}")]
     TaskNotFound { id: String },
-    
+
     /// Invalid ticket status
     #[error("Invalid ticket status: {status}")]
     InvalidStatus { status: String },
-    
+
     /// Invalid priority
     #[error("Invalid priority: {priority}")]
     InvalidPriority { priority: String },
-    
+
     /// Project not initialized
     #[error("Project not initialized. Run 'vide-ticket init' first")]
     ProjectNotInitialized,
-    
+
     /// Project already initialized
     #[error("Project already initialized at {path:?}")]
     ProjectAlreadyInitialized { path: PathBuf },
-    
+
     /// No active ticket
     #[error("No active ticket. Use 'vide-ticket start <id>' to start working on a ticket")]
     NoActiveTicket,
-    
+
     /// Multiple active tickets
     #[error("Multiple active tickets found. This should not happen")]
     MultipleActiveTickets,
-    
+
     /// Invalid slug format
     #[error("Invalid slug format: {slug}. Slugs must be lowercase alphanumeric with hyphens")]
     InvalidSlug { slug: String },
-    
+
     /// Duplicate ticket
     #[error("Ticket with slug '{slug}' already exists")]
     DuplicateTicket { slug: String },
-    
+
     /// File operation error
     #[error("File operation failed for {path:?}: {message}")]
     FileOperation { path: PathBuf, message: String },
-    
+
     /// Permission denied
     #[error("Permission denied: {message}")]
     PermissionDenied { message: String },
-    
+
     /// Template error
     #[error("Template error: {0}")]
     Template(#[from] tera::Error),
-    
+
     /// UUID parsing error
     #[error("UUID error: {0}")]
     Uuid(#[from] uuid::Error),
-    
+
     /// Generic error with custom message
     #[error("{0}")]
     Custom(String),
@@ -97,7 +97,7 @@ impl VideTicketError {
     pub fn custom(msg: impl Into<String>) -> Self {
         Self::Custom(msg.into())
     }
-    
+
     /// Returns true if this error is recoverable
     pub fn is_recoverable(&self) -> bool {
         matches!(
@@ -108,7 +108,7 @@ impl VideTicketError {
                 | Self::InvalidSlug { .. }
         )
     }
-    
+
     /// Returns true if this error is a configuration issue
     pub fn is_config_error(&self) -> bool {
         matches!(
@@ -116,21 +116,21 @@ impl VideTicketError {
             Self::Config(_) | Self::ProjectNotInitialized | Self::ProjectAlreadyInitialized { .. }
         )
     }
-    
+
     /// Returns a user-friendly error message
     pub fn user_message(&self) -> String {
         match self {
             Self::Io(e) if e.kind() == io::ErrorKind::NotFound => {
                 "File or directory not found".to_string()
-            }
+            },
             Self::Io(e) if e.kind() == io::ErrorKind::PermissionDenied => {
                 "Permission denied. Check file permissions".to_string()
-            }
+            },
             Self::Git(e) => format!("Git operation failed: {}", e.message()),
             _ => self.to_string(),
         }
     }
-    
+
     /// Returns suggested actions for the error
     pub fn suggestions(&self) -> Vec<String> {
         match self {
@@ -159,7 +159,7 @@ impl VideTicketError {
 pub trait ErrorContext<T> {
     /// Adds context to the error
     fn context(self, msg: &str) -> Result<T>;
-    
+
     /// Adds context with a lazy message
     fn with_context<F>(self, f: F) -> Result<T>
     where
@@ -176,7 +176,7 @@ where
             VideTicketError::Custom(format!("{}: {}", msg, base_error))
         })
     }
-    
+
     fn with_context<F>(self, f: F) -> Result<T>
     where
         F: FnOnce() -> String,
@@ -191,7 +191,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_error_display() {
         let err = VideTicketError::TicketNotFound {
@@ -199,13 +199,13 @@ mod tests {
         };
         assert_eq!(err.to_string(), "Ticket not found: 123");
     }
-    
+
     #[test]
     fn test_is_recoverable() {
         assert!(VideTicketError::NoActiveTicket.is_recoverable());
         assert!(!VideTicketError::ProjectNotInitialized.is_recoverable());
     }
-    
+
     #[test]
     fn test_suggestions() {
         let err = VideTicketError::ProjectNotInitialized;

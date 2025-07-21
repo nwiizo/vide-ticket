@@ -20,12 +20,12 @@ impl OutputFormatter {
         }
         Self { json, no_color }
     }
-    
+
     /// Check if JSON output is enabled
     pub fn is_json(&self) -> bool {
         self.json
     }
-    
+
     /// Print JSON output
     pub fn json<T: Serialize>(&self, data: &T) -> Result<()> {
         if self.json {
@@ -33,7 +33,7 @@ impl OutputFormatter {
         }
         Ok(())
     }
-    
+
     /// Create a progress bar
     pub fn progress_bar(&self, message: &str) -> indicatif::ProgressBar {
         if self.json {
@@ -54,35 +54,35 @@ impl OutputFormatter {
             pb
         }
     }
-    
+
     /// Prints a success message
     pub fn success(&self, message: &str) {
         if !self.json {
             println!("{} {}", "✓".green(), message);
         }
     }
-    
+
     /// Prints an error message
     pub fn error(&self, message: &str) {
         if !self.json {
             eprintln!("{} {}", "✗".red(), message);
         }
     }
-    
+
     /// Prints a warning message
     pub fn warning(&self, message: &str) {
         if !self.json {
             eprintln!("{} {}", "⚠".yellow(), message);
         }
     }
-    
+
     /// Prints an info message
     pub fn info(&self, message: &str) {
         if !self.json {
             println!("{} {}", "ℹ".blue(), message);
         }
     }
-    
+
     /// Prints a ticket
     pub fn print_ticket(&self, ticket: &Ticket) -> Result<()> {
         if self.json {
@@ -92,7 +92,7 @@ impl OutputFormatter {
         }
         Ok(())
     }
-    
+
     /// Prints a list of tickets
     pub fn print_tickets(&self, tickets: &[Ticket]) -> Result<()> {
         if self.json {
@@ -102,14 +102,14 @@ impl OutputFormatter {
         }
         Ok(())
     }
-    
+
     /// Prints data as JSON
     pub fn print_json<T: Serialize + ?Sized>(&self, data: &T) -> Result<()> {
         let json = serde_json::to_string_pretty(data)?;
         println!("{}", json);
         Ok(())
     }
-    
+
     /// Prints a formatted ticket
     fn print_ticket_formatted(&self, ticket: &Ticket) {
         println!("{}", "─".repeat(80).bright_black());
@@ -120,7 +120,7 @@ impl OutputFormatter {
             format!("({})", ticket.slug).bright_black()
         );
         println!("{}", "─".repeat(80).bright_black());
-        
+
         println!("{:<12} {}", "ID:".bright_black(), ticket.id.short());
         println!(
             "{:<12} {}",
@@ -132,11 +132,11 @@ impl OutputFormatter {
             "Priority:".bright_black(),
             self.format_priority(&ticket.priority)
         );
-        
+
         if let Some(assignee) = &ticket.assignee {
             println!("{:<12} {}", "Assignee:".bright_black(), assignee);
         }
-        
+
         if !ticket.tags.is_empty() {
             println!(
                 "{:<12} {}",
@@ -144,13 +144,13 @@ impl OutputFormatter {
                 ticket.tags.join(", ").cyan()
             );
         }
-        
+
         println!(
             "{:<12} {}",
             "Created:".bright_black(),
             ticket.created_at.format("%Y-%m-%d %H:%M")
         );
-        
+
         if let Some(started) = ticket.started_at {
             println!(
                 "{:<12} {}",
@@ -158,23 +158,27 @@ impl OutputFormatter {
                 started.format("%Y-%m-%d %H:%M")
             );
         }
-        
+
         if !ticket.description.is_empty() {
             println!("\n{}", "Description:".bright_black());
             println!("{}", ticket.description);
         }
-        
+
         if !ticket.tasks.is_empty() {
             println!("\n{}", "Tasks:".bright_black());
             for task in &ticket.tasks {
-                let checkbox = if task.completed { "✓".green() } else { "☐".white() };
+                let checkbox = if task.completed {
+                    "✓".green()
+                } else {
+                    "☐".white()
+                };
                 println!("  {} {}", checkbox, task.title);
             }
-            
+
             let completed = ticket.completed_tasks_count();
             let total = ticket.total_tasks_count();
             let percentage = ticket.completion_percentage();
-            
+
             println!(
                 "\n{} {}/{} ({:.0}%)",
                 "Progress:".bright_black(),
@@ -183,17 +187,17 @@ impl OutputFormatter {
                 percentage
             );
         }
-        
+
         println!("{}", "─".repeat(80).bright_black());
     }
-    
+
     /// Prints tickets in a table format
     fn print_tickets_table(&self, tickets: &[Ticket]) {
         if tickets.is_empty() {
             println!("No tickets found.");
             return;
         }
-        
+
         // Header
         println!(
             "{:<8} {:<10} {:<10} {:<40} {}",
@@ -204,7 +208,7 @@ impl OutputFormatter {
             "Tasks".bold()
         );
         println!("{}", "─".repeat(90).bright_black());
-        
+
         // Rows
         for ticket in tickets {
             let tasks = format!(
@@ -212,7 +216,7 @@ impl OutputFormatter {
                 ticket.completed_tasks_count(),
                 ticket.total_tasks_count()
             );
-            
+
             println!(
                 "{:<8} {:<10} {:<10} {:<40} {}",
                 ticket.id.short(),
@@ -222,11 +226,11 @@ impl OutputFormatter {
                 tasks
             );
         }
-        
+
         println!("{}", "─".repeat(90).bright_black());
         println!("Total: {} tickets", tickets.len());
     }
-    
+
     /// Formats status with color
     fn format_status(&self, status: &Status) -> ColoredString {
         match status {
@@ -237,7 +241,7 @@ impl OutputFormatter {
             Status::Review => "Review".cyan(),
         }
     }
-    
+
     /// Formats priority with color
     fn format_priority(&self, priority: &Priority) -> ColoredString {
         match priority {
@@ -274,30 +278,30 @@ impl ProgressBar {
             current: 0,
         }
     }
-    
+
     /// Updates the progress
     pub fn update(&mut self, current: usize) {
         self.current = current;
         self.draw();
     }
-    
+
     /// Increments the progress by 1
     pub fn increment(&mut self) {
         self.current += 1;
         self.draw();
     }
-    
+
     /// Completes the progress bar
     pub fn finish(&self) {
         println!();
     }
-    
+
     /// Draws the progress bar
     fn draw(&self) {
         let percentage = (self.current as f32 / self.total as f32 * 100.0) as u32;
         let filled = (percentage as usize * 30) / 100;
         let empty = 30 - filled;
-        
+
         print!(
             "\r{}: [{}{}] {}% ({}/{})",
             self.message,
@@ -307,7 +311,7 @@ impl ProgressBar {
             self.current,
             self.total
         );
-        
+
         std::io::stdout().flush().unwrap();
     }
 }

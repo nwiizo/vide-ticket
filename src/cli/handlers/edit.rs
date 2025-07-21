@@ -3,10 +3,10 @@
 //! This module implements the logic for editing ticket properties,
 //! including title, description, priority, status, and tags.
 
-use crate::cli::{OutputFormatter, find_project_root};
+use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Priority, Status, TicketId};
 use crate::error::{Result, VideTicketError};
-use crate::storage::{FileStorage, TicketRepository, ActiveTicketRepository};
+use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 /// Handler for the `edit` command
 ///
@@ -53,52 +53,57 @@ pub fn handle_edit_command(
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
     let vide_ticket_dir = project_root.join(".vide-ticket");
-    
+
     // Initialize storage
     let storage = FileStorage::new(&vide_ticket_dir);
-    
+
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
         resolve_ticket_ref(&storage, &ref_str)?
     } else {
         // Get active ticket
-        storage.get_active()?.ok_or(VideTicketError::NoActiveTicket)?
+        storage
+            .get_active()?
+            .ok_or(VideTicketError::NoActiveTicket)?
     };
-    
+
     // Load the ticket
     let mut ticket = storage.load(&ticket_id)?;
-    
+
     // Track what was changed
     let mut changes = Vec::new();
-    
+
     // Open in editor if requested
     if editor {
         edit_in_editor(&mut ticket, &storage, output)?;
         return Ok(());
     }
-    
+
     // Update title if provided
     if let Some(new_title) = title {
         let old_title = ticket.title.clone();
         ticket.title = new_title.clone();
         changes.push(format!("Title: {} → {}", old_title, new_title));
     }
-    
+
     // Update description if provided
     if let Some(new_description) = description {
         ticket.description = new_description;
         changes.push("Description updated".to_string());
     }
-    
+
     // Update priority if provided
     if let Some(priority_str) = priority {
-        let new_priority = Priority::try_from(priority_str.as_str())
-            .map_err(|_| VideTicketError::InvalidPriority { priority: priority_str })?;
+        let new_priority = Priority::try_from(priority_str.as_str()).map_err(|_| {
+            VideTicketError::InvalidPriority {
+                priority: priority_str,
+            }
+        })?;
         let old_priority = ticket.priority;
         ticket.priority = new_priority;
         changes.push(format!("Priority: {} → {}", old_priority, new_priority));
     }
-    
+
     // Update status if provided
     if let Some(status_str) = status {
         let new_status = Status::try_from(status_str.as_str())
@@ -106,19 +111,19 @@ pub fn handle_edit_command(
         let old_status = ticket.status;
         ticket.status = new_status;
         changes.push(format!("Status: {} → {}", old_status, new_status));
-        
+
         // Update timestamps based on status changes
         match (old_status, new_status) {
             (Status::Todo, Status::Doing) => {
                 ticket.started_at = Some(chrono::Utc::now());
-            }
+            },
             (_, Status::Done) if old_status != Status::Done => {
                 ticket.closed_at = Some(chrono::Utc::now());
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
-    
+
     // Add tags if provided
     if let Some(tags_str) = add_tags {
         let new_tags: Vec<String> = tags_str
@@ -126,7 +131,7 @@ pub fn handle_edit_command(
             .map(|s| s.trim().to_string())
             .filter(|s| !s.is_empty())
             .collect();
-        
+
         for tag in new_tags {
             if !ticket.tags.contains(&tag) {
                 ticket.tags.push(tag);
@@ -134,7 +139,7 @@ pub fn handle_edit_command(
         }
         changes.push("Tags added".to_string());
     }
-    
+
     // Remove tags if provided
     if let Some(tags_str) = remove_tags {
         let tags_to_remove: Vec<String> = tags_str
@@ -142,20 +147,20 @@ pub fn handle_edit_command(
             .map(|s| s.trim().to_string())
             .filter(|s| !s.is_empty())
             .collect();
-        
+
         ticket.tags.retain(|tag| !tags_to_remove.contains(tag));
         changes.push("Tags removed".to_string());
     }
-    
+
     // Check if any changes were made
     if changes.is_empty() {
         output.warning("No changes specified");
         return Ok(());
     }
-    
+
     // Save the updated ticket
     storage.save(&ticket)?;
-    
+
     // Output results
     if output.is_json() {
         output.print_json(&serde_json::json!({
@@ -176,7 +181,7 @@ pub fn handle_edit_command(
         for change in &changes {
             output.info(&format!("  • {}", change));
         }
-        
+
         // Show current state
         output.info("");
         output.info("Current state:");
@@ -187,7 +192,7 @@ pub fn handle_edit_command(
             output.info(&format!("  Tags: {}", ticket.tags.join(", ")));
         }
     }
-    
+
     Ok(())
 }
 
@@ -200,7 +205,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket_id);
         }
     }
-    
+
     // Try to find by slug
     let all_tickets = storage.load_all()?;
     for ticket in all_tickets {
@@ -208,7 +213,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket.id);
         }
     }
-    
+
     Err(VideTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
@@ -222,60 +227,60 @@ fn edit_in_editor(
 ) -> Result<()> {
     use std::io::Write;
     use std::process::Command;
-    
+
     // Create a temporary file with the ticket content
     let temp_dir = std::env::temp_dir();
     let temp_file = temp_dir.join(format!("vide-ticket-{}.yaml", ticket.id));
-    
+
     // Serialize ticket to YAML
     let yaml_content = serde_yaml::to_string(&ticket)
         .map_err(|e| VideTicketError::custom(format!("Failed to serialize ticket: {}", e)))?;
-    
+
     // Write to temporary file
     let mut file = std::fs::File::create(&temp_file)
         .map_err(|e| VideTicketError::custom(format!("Failed to create temp file: {}", e)))?;
     file.write_all(yaml_content.as_bytes())
         .map_err(|e| VideTicketError::custom(format!("Failed to write temp file: {}", e)))?;
-    
+
     // Get editor from environment
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
-    
+
     // Open editor
     let status = Command::new(&editor)
         .arg(&temp_file)
         .status()
         .map_err(|e| VideTicketError::custom(format!("Failed to launch editor: {}", e)))?;
-    
+
     if !status.success() {
         return Err(VideTicketError::custom("Editor exited with error"));
     }
-    
+
     // Read the edited content
     let edited_content = std::fs::read_to_string(&temp_file)
         .map_err(|e| VideTicketError::custom(format!("Failed to read edited file: {}", e)))?;
-    
+
     // Parse the edited ticket
     let edited_ticket: crate::core::Ticket = serde_yaml::from_str(&edited_content)
         .map_err(|e| VideTicketError::custom(format!("Failed to parse edited ticket: {}", e)))?;
-    
+
     // Update the original ticket
     *ticket = edited_ticket;
-    
+
     // Save the updated ticket
     storage.save(ticket)?;
-    
+
     // Clean up temp file
     let _ = std::fs::remove_file(&temp_file);
-    
+
     output.success(&format!("Updated ticket: {}", ticket.slug));
-    
+
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_tag_parsing() {
         let tags_str = "bug, ui, urgent";

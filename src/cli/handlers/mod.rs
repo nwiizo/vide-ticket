@@ -22,42 +22,39 @@
 //! handle_init(Some("my-project".to_string()), None, false, &formatter)?;
 //! ```
 
+mod archive;
+mod check;
+mod close;
+mod config;
+mod edit;
+mod export;
+mod import;
 mod init;
 mod list;
 mod new;
-mod start;
-mod close;
-mod check;
-mod edit;
-mod show;
-mod task;
 mod search;
-mod archive;
-mod export;
-mod import;
-mod config;
+mod show;
+mod start;
+mod task;
 
 // Re-export handlers
+pub use archive::handle_archive_command;
+pub use check::handle_check_command;
+pub use close::handle_close_command;
+pub use config::handle_config_command;
+pub use edit::handle_edit_command;
+pub use export::handle_export_command;
+pub use import::handle_import_command;
 pub use init::handle_init;
 pub use list::handle_list_command;
 pub use new::handle_new_command;
-pub use start::handle_start_command;
-pub use close::handle_close_command;
-pub use check::handle_check_command;
-pub use edit::handle_edit_command;
-pub use show::handle_show_command;
-pub use task::{
-    handle_task_add,
-    handle_task_complete,
-    handle_task_uncomplete,
-    handle_task_list,
-    handle_task_remove,
-};
 pub use search::handle_search_command;
-pub use archive::handle_archive_command;
-pub use export::handle_export_command;
-pub use import::handle_import_command;
-pub use config::handle_config_command;
+pub use show::handle_show_command;
+pub use start::handle_start_command;
+pub use task::{
+    handle_task_add, handle_task_complete, handle_task_list, handle_task_remove,
+    handle_task_uncomplete,
+};
 
 use crate::cli::output::OutputFormatter;
 use crate::error::Result;
@@ -83,15 +80,15 @@ pub fn ensure_project_initialized() -> Result<()> {
     use crate::config::Config;
     use crate::error::VideTicketError;
     use std::path::Path;
-    
+
     let config_path = Path::new(".vide-ticket/config.yaml");
     if !config_path.exists() {
         return Err(VideTicketError::ProjectNotInitialized);
     }
-    
+
     // Try to load config to ensure it's valid
     Config::load_or_default()?;
-    
+
     Ok(())
 }
 
@@ -105,9 +102,9 @@ pub fn ensure_project_initialized() -> Result<()> {
 pub fn get_active_ticket() -> Result<String> {
     use crate::error::VideTicketError;
     use crate::storage::FileStorage;
-    
+
     ensure_project_initialized()?;
-    
+
     let storage = FileStorage::new(".vide-ticket");
     if let Some(ticket_id) = storage.get_active_ticket()? {
         Ok(ticket_id.to_string())
@@ -132,12 +129,12 @@ pub fn get_active_ticket() -> Result<String> {
 pub fn resolve_ticket_id(ticket_ref: Option<String>) -> Result<String> {
     match ticket_ref {
         Some(ref_str) => {
-            use crate::storage::FileStorage;
             use crate::core::TicketId;
-            
+            use crate::storage::FileStorage;
+
             ensure_project_initialized()?;
             let storage = FileStorage::new(".vide-ticket");
-            
+
             // First try to parse as ticket ID
             if let Ok(ticket_id) = TicketId::parse_str(&ref_str) {
                 // Try to load the ticket to verify it exists
@@ -145,14 +142,14 @@ pub fn resolve_ticket_id(ticket_ref: Option<String>) -> Result<String> {
                     return Ok(ticket_id.to_string());
                 }
             }
-            
+
             // Then try to find by slug
             if let Some(ticket) = storage.find_ticket_by_slug(&ref_str)? {
                 return Ok(ticket.id.to_string());
             }
-            
+
             Err(crate::error::VideTicketError::TicketNotFound { id: ref_str })
-        }
+        },
         None => get_active_ticket(),
     }
 }
@@ -185,30 +182,30 @@ pub fn parse_tags(tags_str: Option<String>) -> Vec<String> {
 /// Returns `VideTicketError::InvalidSlug` if the slug format is invalid.
 pub fn validate_slug(slug: &str) -> Result<()> {
     use crate::error::VideTicketError;
-    
+
     if slug.is_empty() {
         return Err(VideTicketError::InvalidSlug {
             slug: slug.to_string(),
         });
     }
-    
+
     let valid = slug
         .chars()
         .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
-    
+
     if !valid || slug.starts_with('-') || slug.ends_with('-') || slug.contains("--") {
         return Err(VideTicketError::InvalidSlug {
             slug: slug.to_string(),
         });
     }
-    
+
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_parse_tags() {
         assert_eq!(parse_tags(None), Vec::<String>::new());
@@ -222,13 +219,13 @@ mod tests {
             vec!["bug", "ui"]
         );
     }
-    
+
     #[test]
     fn test_validate_slug() {
         assert!(validate_slug("fix-login-bug").is_ok());
         assert!(validate_slug("feature-123").is_ok());
         assert!(validate_slug("test").is_ok());
-        
+
         assert!(validate_slug("").is_err());
         assert!(validate_slug("Fix-Login").is_err()); // uppercase
         assert!(validate_slug("-start").is_err()); // starts with hyphen

@@ -2,10 +2,10 @@
 //!
 //! This module implements the logic for archiving and unarchiving tickets.
 
-use crate::cli::{OutputFormatter, find_project_root};
+use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::TicketId;
 use crate::error::{Result, VideTicketError};
-use crate::storage::{FileStorage, TicketRepository, ActiveTicketRepository};
+use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 /// Handler for the `archive` command
 ///
@@ -36,34 +36,36 @@ pub fn handle_archive_command(
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
     let vide_ticket_dir = project_root.join(".vide-ticket");
-    
+
     // Initialize storage
     let storage = FileStorage::new(&vide_ticket_dir);
-    
+
     // Resolve ticket ID
     let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
-    
+
     // Load the ticket
     let mut ticket = storage.load(&ticket_id)?;
-    
+
     // Check if already in desired state
-    let is_archived = ticket.metadata.get("archived")
+    let is_archived = ticket
+        .metadata
+        .get("archived")
         .and_then(|v| v.as_bool())
         .unwrap_or(false);
-    
+
     if unarchive {
         // Unarchiving
         if !is_archived {
             return Err(VideTicketError::custom("Ticket is not archived"));
         }
-        
+
         // Remove archive metadata
         ticket.metadata.remove("archived");
         ticket.metadata.remove("archived_at");
-        
+
         // Save the updated ticket
         storage.save(&ticket)?;
-        
+
         // Output results
         if output.is_json() {
             output.print_json(&serde_json::json!({
@@ -86,37 +88,38 @@ pub fn handle_archive_command(
         if is_archived {
             return Err(VideTicketError::custom("Ticket is already archived"));
         }
-        
+
         // Check if ticket is the active ticket
         if let Ok(Some(active_id)) = storage.get_active() {
             if active_id == ticket.id {
                 return Err(VideTicketError::custom(
-                    "Cannot archive the active ticket. Close or switch to another ticket first."
+                    "Cannot archive the active ticket. Close or switch to another ticket first.",
                 ));
             }
         }
-        
+
         // Check if ticket is in progress
-        if ticket.status == crate::core::Status::Doing || ticket.status == crate::core::Status::Review {
+        if ticket.status == crate::core::Status::Doing
+            || ticket.status == crate::core::Status::Review
+        {
             output.warning(&format!(
                 "Warning: Archiving a ticket with status '{}'. Consider closing it first.",
                 ticket.status
             ));
         }
-        
+
         // Add archive metadata
-        ticket.metadata.insert(
-            "archived".to_string(),
-            serde_json::Value::Bool(true),
-        );
+        ticket
+            .metadata
+            .insert("archived".to_string(), serde_json::Value::Bool(true));
         ticket.metadata.insert(
             "archived_at".to_string(),
             serde_json::Value::String(chrono::Utc::now().to_rfc3339()),
         );
-        
+
         // Save the updated ticket
         storage.save(&ticket)?;
-        
+
         // Output results
         if output.is_json() {
             output.print_json(&serde_json::json!({
@@ -138,7 +141,7 @@ pub fn handle_archive_command(
             output.info("Use --unarchive flag to restore this ticket.");
         }
     }
-    
+
     Ok(())
 }
 
@@ -151,7 +154,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket_id);
         }
     }
-    
+
     // Try to find by slug
     let all_tickets = storage.load_all()?;
     for ticket in all_tickets {
@@ -159,7 +162,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket.id);
         }
     }
-    
+
     Err(VideTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
@@ -168,18 +171,19 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_archive_metadata() {
         use serde_json::json;
-        
+
         let mut metadata = std::collections::HashMap::new();
         metadata.insert("archived".to_string(), json!(true));
-        
-        let is_archived = metadata.get("archived")
+
+        let is_archived = metadata
+            .get("archived")
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
-        
+
         assert!(is_archived);
     }
 }

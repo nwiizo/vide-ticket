@@ -26,7 +26,7 @@
 //!
 //! // Initialize storage backend
 //! let storage = FileStorage::new(".vide-ticket");
-//! 
+//!
 //! // Use storage through repository traits
 //! let tickets = storage.load_all()?;
 //! ```

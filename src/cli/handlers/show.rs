@@ -3,11 +3,11 @@
 //! This module implements the logic for displaying detailed information
 //! about a specific ticket, including tasks and history.
 
-use chrono::{DateTime, Utc, Local};
-use crate::cli::{OutputFormatter, find_project_root};
+use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::TicketId;
 use crate::error::{Result, VideTicketError};
 use crate::storage::{FileStorage, TicketRepository};
+use chrono::{DateTime, Local, Utc};
 
 /// Handler for the `show` command
 ///
@@ -46,16 +46,16 @@ pub fn handle_show_command(
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
     let vide_ticket_dir = project_root.join(".vide-ticket");
-    
+
     // Initialize storage
     let storage = FileStorage::new(&vide_ticket_dir);
-    
+
     // Resolve ticket ID
     let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
-    
+
     // Load the ticket
     let ticket = storage.load(&ticket_id)?;
-    
+
     // Output results
     if output.is_json() {
         let mut json_output = serde_json::json!({
@@ -74,18 +74,18 @@ pub fn handle_show_command(
                 "metadata": ticket.metadata,
             }
         });
-        
+
         if show_tasks {
             json_output["tasks"] = serde_json::json!(ticket.tasks);
         }
-        
+
         output.print_json(&json_output)?;
     } else if markdown {
         output_markdown(&ticket, show_tasks, output);
     } else {
         output_plain(&ticket, show_tasks, show_history, output);
     }
-    
+
     Ok(())
 }
 
@@ -98,7 +98,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket_id);
         }
     }
-    
+
     // Try to find by slug
     let all_tickets = storage.load_all()?;
     for ticket in all_tickets {
@@ -106,7 +106,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket.id);
         }
     }
-    
+
     Err(VideTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
@@ -125,25 +125,28 @@ fn output_plain(
     output.info(&format!("Title: {}", ticket.title));
     output.info(&format!("Status: {}", ticket.status));
     output.info(&format!("Priority: {}", ticket.priority));
-    
+
     // Assignee
     if let Some(assignee) = &ticket.assignee {
         output.info(&format!("Assignee: {}", assignee));
     }
-    
+
     // Tags
     if !ticket.tags.is_empty() {
         output.info(&format!("Tags: {}", ticket.tags.join(", ")));
     }
-    
+
     // Timestamps
     output.info("");
     output.info("Timeline:");
-    output.info(&format!("  Created: {}", format_datetime(ticket.created_at)));
-    
+    output.info(&format!(
+        "  Created: {}",
+        format_datetime(ticket.created_at)
+    ));
+
     if let Some(started_at) = ticket.started_at {
         output.info(&format!("  Started: {}", format_datetime(started_at)));
-        
+
         // Calculate time spent
         let end_time = ticket.closed_at.unwrap_or_else(Utc::now);
         let duration = end_time - started_at;
@@ -151,18 +154,18 @@ fn output_plain(
         let minutes = duration.num_minutes() % 60;
         output.info(&format!("  Time spent: {}h {}m", hours, minutes));
     }
-    
+
     if let Some(closed_at) = ticket.closed_at {
         output.info(&format!("  Closed: {}", format_datetime(closed_at)));
     }
-    
+
     // Description
     output.info("");
     output.info("Description:");
     for line in ticket.description.lines() {
         output.info(&format!("  {}", line));
     }
-    
+
     // Tasks
     if show_tasks && !ticket.tasks.is_empty() {
         output.info("");
@@ -170,18 +173,21 @@ fn output_plain(
         let completed = ticket.tasks.iter().filter(|t| t.completed).count();
         output.info(&format!("  Progress: {}/{}", completed, ticket.tasks.len()));
         output.info("");
-        
+
         for task in &ticket.tasks {
             let checkbox = if task.completed { "✓" } else { "○" };
             output.info(&format!("  {} {}", checkbox, task.title));
             if task.completed {
                 if let Some(completed_at) = task.completed_at {
-                    output.info(&format!("      Completed: {}", format_datetime(completed_at)));
+                    output.info(&format!(
+                        "      Completed: {}",
+                        format_datetime(completed_at)
+                    ));
                 }
             }
         }
     }
-    
+
     // Metadata
     if !ticket.metadata.is_empty() {
         output.info("");
@@ -205,7 +211,7 @@ fn output_plain(
             }
         }
     }
-    
+
     // History (placeholder for future implementation)
     if show_history {
         output.info("");
@@ -215,11 +221,7 @@ fn output_plain(
 }
 
 /// Output ticket information in markdown format
-fn output_markdown(
-    ticket: &crate::core::Ticket,
-    show_tasks: bool,
-    _output: &OutputFormatter,
-) {
+fn output_markdown(ticket: &crate::core::Ticket, show_tasks: bool, _output: &OutputFormatter) {
     // Title and metadata
     println!("# {}", ticket.title);
     println!();
@@ -227,44 +229,52 @@ fn output_markdown(
     println!("**Slug**: `{}`", ticket.slug);
     println!("**Status**: {}", ticket.status);
     println!("**Priority**: {}", ticket.priority);
-    
+
     if let Some(assignee) = &ticket.assignee {
         println!("**Assignee**: {}", assignee);
     }
-    
+
     if !ticket.tags.is_empty() {
-        println!("**Tags**: {}", ticket.tags.iter().map(|t| format!("`{}`", t)).collect::<Vec<_>>().join(", "));
+        println!(
+            "**Tags**: {}",
+            ticket
+                .tags
+                .iter()
+                .map(|t| format!("`{}`", t))
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
-    
+
     println!();
-    
+
     // Timeline
     println!("## Timeline");
     println!();
     println!("- **Created**: {}", format_datetime(ticket.created_at));
-    
+
     if let Some(started_at) = ticket.started_at {
         println!("- **Started**: {}", format_datetime(started_at));
-        
+
         let end_time = ticket.closed_at.unwrap_or_else(Utc::now);
         let duration = end_time - started_at;
         let hours = duration.num_hours();
         let minutes = duration.num_minutes() % 60;
         println!("- **Time spent**: {}h {}m", hours, minutes);
     }
-    
+
     if let Some(closed_at) = ticket.closed_at {
         println!("- **Closed**: {}", format_datetime(closed_at));
     }
-    
+
     println!();
-    
+
     // Description
     println!("## Description");
     println!();
     println!("{}", ticket.description);
     println!();
-    
+
     // Tasks
     if show_tasks && !ticket.tasks.is_empty() {
         println!("## Tasks");
@@ -272,7 +282,7 @@ fn output_markdown(
         let completed = ticket.tasks.iter().filter(|t| t.completed).count();
         println!("Progress: {}/{}", completed, ticket.tasks.len());
         println!();
-        
+
         for task in &ticket.tasks {
             let checkbox = if task.completed { "[x]" } else { "[ ]" };
             println!("- {} {}", checkbox, task.title);
@@ -283,13 +293,15 @@ fn output_markdown(
 
 /// Format datetime for display
 fn format_datetime(dt: DateTime<Utc>) -> String {
-    dt.with_timezone(&Local).format("%Y-%m-%d %H:%M").to_string()
+    dt.with_timezone(&Local)
+        .format("%Y-%m-%d %H:%M")
+        .to_string()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_format_datetime() {
         let dt = Utc::now();

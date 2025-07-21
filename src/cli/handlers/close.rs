@@ -3,11 +3,11 @@
 //! This module implements the logic for closing tickets,
 //! including status updates and optional archiving.
 
-use chrono::Utc;
-use crate::cli::{OutputFormatter, find_project_root};
+use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Status, TicketId};
 use crate::error::{Result, VideTicketError};
-use crate::storage::{FileStorage, TicketRepository, ActiveTicketRepository};
+use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
+use chrono::Utc;
 
 /// Handler for the `close` command
 ///
@@ -46,21 +46,23 @@ pub fn handle_close_command(
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
     let vide_ticket_dir = project_root.join(".vide-ticket");
-    
+
     // Initialize storage
     let storage = FileStorage::new(&vide_ticket_dir);
-    
+
     // Get the active ticket if no ticket specified
     let ticket_id = if let Some(ref_str) = ticket_ref {
         resolve_ticket_ref(&storage, &ref_str)?
     } else {
         // Get active ticket
-        storage.get_active()?.ok_or(VideTicketError::NoActiveTicket)?
+        storage
+            .get_active()?
+            .ok_or(VideTicketError::NoActiveTicket)?
     };
-    
+
     // Load the ticket
     let mut ticket = storage.load(&ticket_id)?;
-    
+
     // Check if ticket is already closed
     if ticket.status == Status::Done {
         return Err(VideTicketError::custom(format!(
@@ -68,12 +70,12 @@ pub fn handle_close_command(
             ticket.slug
         )));
     }
-    
+
     // Update ticket status and close time
     let previous_status = ticket.status;
     ticket.status = Status::Done;
     ticket.closed_at = Some(Utc::now());
-    
+
     // Add close message to metadata if provided
     if let Some(msg) = &message {
         ticket.metadata.insert(
@@ -81,37 +83,36 @@ pub fn handle_close_command(
             serde_json::Value::String(msg.clone()),
         );
     }
-    
+
     // Save the updated ticket
     storage.save(&ticket)?;
-    
+
     // Clear active ticket if this was the active one
     if let Some(active_id) = storage.get_active()? {
         if active_id == ticket_id {
             storage.clear_active()?;
         }
     }
-    
+
     // Create pull request if requested
     if create_pr {
         create_pull_request(&project_root, &ticket, output)?;
     }
-    
+
     // Archive if requested (for now, just add a flag to metadata)
     if archive {
         // In a real implementation, we might move the ticket to an archive directory
         let mut archived_ticket = ticket.clone();
-        archived_ticket.metadata.insert(
-            "archived".to_string(),
-            serde_json::Value::Bool(true),
-        );
+        archived_ticket
+            .metadata
+            .insert("archived".to_string(), serde_json::Value::Bool(true));
         archived_ticket.metadata.insert(
             "archived_at".to_string(),
             serde_json::Value::String(Utc::now().to_rfc3339()),
         );
         storage.save(&archived_ticket)?;
     }
-    
+
     // Output results
     if output.is_json() {
         output.print_json(&serde_json::json!({
@@ -131,19 +132,19 @@ pub fn handle_close_command(
         output.success(&format!("Closed ticket: {}", ticket.slug));
         output.info(&format!("Title: {}", ticket.title));
         output.info(&format!("Status: {} → {}", previous_status, Status::Done));
-        
+
         if let Some(msg) = message {
             output.info(&format!("Close message: {}", msg));
         }
-        
+
         if archive {
             output.info("Ticket has been archived");
         }
-        
+
         if create_pr {
             output.info("Pull request creation initiated");
         }
-        
+
         // Calculate duration if started_at is available
         if let Some(started_at) = ticket.started_at {
             if let Some(closed_at) = ticket.closed_at {
@@ -154,7 +155,7 @@ pub fn handle_close_command(
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -167,7 +168,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket_id);
         }
     }
-    
+
     // Try to find by slug
     let all_tickets = storage.load_all()?;
     for ticket in all_tickets {
@@ -175,7 +176,7 @@ fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketI
             return Ok(ticket.id);
         }
     }
-    
+
     Err(VideTicketError::TicketNotFound {
         id: ticket_ref.to_string(),
     })
@@ -188,7 +189,7 @@ fn create_pull_request(
     output: &OutputFormatter,
 ) -> Result<()> {
     use std::process::Command;
-    
+
     // Get current branch name
     let current_branch = Command::new("git")
         .arg("rev-parse")
@@ -197,34 +198,43 @@ fn create_pull_request(
         .current_dir(project_root)
         .output()
         .map_err(|e| VideTicketError::custom(format!("Failed to get current branch: {}", e)))?;
-    
+
     if !current_branch.status.success() {
         return Err(VideTicketError::custom("Failed to get current branch name"));
     }
-    
-    let branch_name = String::from_utf8_lossy(&current_branch.stdout).trim().to_string();
-    
+
+    let branch_name = String::from_utf8_lossy(&current_branch.stdout)
+        .trim()
+        .to_string();
+
     // Check if we have the GitHub CLI installed
-    let gh_check = Command::new("gh")
-        .arg("--version")
-        .output();
-    
+    let gh_check = Command::new("gh").arg("--version").output();
+
     if gh_check.is_err() || !gh_check.unwrap().status.success() {
-        output.warning("GitHub CLI (gh) not found. Please install it to create pull requests automatically.");
-        output.info(&format!("You can create a pull request manually for branch: {}", branch_name));
+        output.warning(
+            "GitHub CLI (gh) not found. Please install it to create pull requests automatically.",
+        );
+        output.info(&format!(
+            "You can create a pull request manually for branch: {}",
+            branch_name
+        ));
         return Ok(());
     }
-    
+
     // Create PR using GitHub CLI
     let pr_title = format!("[{}] {}", ticket.slug, ticket.title);
     let pr_body = format!(
         "## Ticket: {}\n\n{}\n\n**Status:** {} → Done\n**Priority:** {}\n",
         ticket.slug,
         ticket.description,
-        if ticket.started_at.is_some() { "Doing" } else { "Todo" },
+        if ticket.started_at.is_some() {
+            "Doing"
+        } else {
+            "Todo"
+        },
         ticket.priority
     );
-    
+
     let create_pr = Command::new("gh")
         .arg("pr")
         .arg("create")
@@ -237,16 +247,18 @@ fn create_pull_request(
         .current_dir(project_root)
         .output()
         .map_err(|e| VideTicketError::custom(format!("Failed to create PR: {}", e)))?;
-    
+
     if create_pr.status.success() {
-        let pr_url = String::from_utf8_lossy(&create_pr.stdout).trim().to_string();
+        let pr_url = String::from_utf8_lossy(&create_pr.stdout)
+            .trim()
+            .to_string();
         output.success(&format!("Created pull request: {}", pr_url));
     } else {
         let error_msg = String::from_utf8_lossy(&create_pr.stderr);
         output.warning(&format!("Failed to create pull request: {}", error_msg));
         output.info("You can create the pull request manually");
     }
-    
+
     Ok(())
 }
 
@@ -254,7 +266,7 @@ fn create_pull_request(
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[test]
     fn test_close_message_formatting() {
         let message = "Fixed the login bug and added tests";

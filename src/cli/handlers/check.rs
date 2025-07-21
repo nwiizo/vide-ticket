@@ -3,11 +3,11 @@
 //! This module implements the logic for checking the current project status,
 //! including active ticket information and project statistics.
 
-use chrono::{DateTime, Utc, Local};
-use crate::cli::{OutputFormatter, find_project_root};
+use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::{Status, Ticket};
 use crate::error::Result;
-use crate::storage::{FileStorage, TicketRepository, ActiveTicketRepository};
+use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
+use chrono::{DateTime, Local, Utc};
 
 /// Handler for the `check` command
 ///
@@ -39,13 +39,13 @@ pub fn handle_check_command(
     // Ensure project is initialized
     let project_root = find_project_root(project_dir.as_deref())?;
     let vide_ticket_dir = project_root.join(".vide-ticket");
-    
+
     // Initialize storage
     let storage = FileStorage::new(&vide_ticket_dir);
-    
+
     // Load project state
     let project_state = storage.load_state()?;
-    
+
     // Get active ticket
     let active_ticket_id = storage.get_active()?;
     let active_ticket = if let Some(id) = &active_ticket_id {
@@ -53,24 +53,24 @@ pub fn handle_check_command(
     } else {
         None
     };
-    
+
     // Get current Git branch
     let current_branch = get_current_git_branch(&project_root);
-    
+
     // Get statistics if requested
     let statistics = if stats || detailed {
         Some(calculate_statistics(&storage)?)
     } else {
         None
     };
-    
+
     // Get recent tickets if detailed
     let recent_tickets = if detailed {
         get_recent_tickets(&storage, 5)?
     } else {
         vec![]
     };
-    
+
     // Output results
     if output.is_json() {
         output.print_json(&serde_json::json!({
@@ -104,15 +104,18 @@ pub fn handle_check_command(
             output.info(&format!("Description: {}", desc));
         }
         output.info(&format!("Path: {}", project_root.display()));
-        output.info(&format!("Created: {}", format_datetime(project_state.created_at)));
-        
+        output.info(&format!(
+            "Created: {}",
+            format_datetime(project_state.created_at)
+        ));
+
         // Display Git branch
         if let Some(branch) = &current_branch {
             output.info(&format!("Git branch: {}", branch));
         }
-        
+
         output.info("");
-        
+
         // Display active ticket
         if let Some(ticket) = &active_ticket {
             output.success("Active Ticket:");
@@ -121,14 +124,14 @@ pub fn handle_check_command(
             output.info(&format!("  Title: {}", ticket.title));
             output.info(&format!("  Status: {}", ticket.status));
             output.info(&format!("  Priority: {}", ticket.priority));
-            
+
             if let Some(started_at) = ticket.started_at {
                 let duration = Utc::now() - started_at;
                 let hours = duration.num_hours();
                 let minutes = duration.num_minutes() % 60;
                 output.info(&format!("  Time spent: {}h {}m", hours, minutes));
             }
-            
+
             if !ticket.tasks.is_empty() {
                 let completed = ticket.tasks.iter().filter(|t| t.completed).count();
                 output.info(&format!("  Tasks: {}/{}", completed, ticket.tasks.len()));
@@ -136,7 +139,7 @@ pub fn handle_check_command(
         } else {
             output.info("No active ticket");
         }
-        
+
         // Display statistics
         if let Some(stats) = &statistics {
             output.info("");
@@ -147,7 +150,7 @@ pub fn handle_check_command(
             output.info(&format!("  In review: {}", stats.review));
             output.info(&format!("  Blocked: {}", stats.blocked));
             output.info(&format!("  Done: {}", stats.done));
-            
+
             if detailed {
                 output.info("");
                 output.info("Priority breakdown:");
@@ -157,7 +160,7 @@ pub fn handle_check_command(
                 output.info(&format!("  Low: {}", stats.low));
             }
         }
-        
+
         // Display recent tickets in detailed mode
         if detailed && !recent_tickets.is_empty() {
             output.info("");
@@ -172,15 +175,12 @@ pub fn handle_check_command(
                 };
                 output.info(&format!(
                     "  {} {} - {} ({})",
-                    status_emoji,
-                    ticket.slug,
-                    ticket.title,
-                    ticket.priority
+                    status_emoji, ticket.slug, ticket.title, ticket.priority
                 ));
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -202,7 +202,7 @@ struct Statistics {
 /// Calculate project statistics
 fn calculate_statistics(storage: &FileStorage) -> Result<Statistics> {
     let tickets = storage.load_all()?;
-    
+
     let mut stats = Statistics {
         total: tickets.len(),
         todo: 0,
@@ -215,7 +215,7 @@ fn calculate_statistics(storage: &FileStorage) -> Result<Statistics> {
         medium: 0,
         low: 0,
     };
-    
+
     for ticket in &tickets {
         // Count by status
         match ticket.status {
@@ -225,7 +225,7 @@ fn calculate_statistics(storage: &FileStorage) -> Result<Statistics> {
             Status::Blocked => stats.blocked += 1,
             Status::Done => stats.done += 1,
         }
-        
+
         // Count by priority
         match ticket.priority {
             crate::core::Priority::Critical => stats.critical += 1,
@@ -234,27 +234,27 @@ fn calculate_statistics(storage: &FileStorage) -> Result<Statistics> {
             crate::core::Priority::Low => stats.low += 1,
         }
     }
-    
+
     Ok(stats)
 }
 
 /// Get recent tickets sorted by creation date
 fn get_recent_tickets(storage: &FileStorage, limit: usize) -> Result<Vec<Ticket>> {
     let mut tickets = storage.load_all()?;
-    
+
     // Sort by creation date (descending)
     tickets.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-    
+
     // Take the specified limit
     tickets.truncate(limit);
-    
+
     Ok(tickets)
 }
 
 /// Get current Git branch name
 fn get_current_git_branch(project_root: &std::path::Path) -> Option<String> {
     use std::process::Command;
-    
+
     let output = Command::new("git")
         .arg("rev-parse")
         .arg("--abbrev-ref")
@@ -262,7 +262,7 @@ fn get_current_git_branch(project_root: &std::path::Path) -> Option<String> {
         .current_dir(project_root)
         .output()
         .ok()?;
-    
+
     if output.status.success() {
         Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
     } else {
@@ -272,13 +272,15 @@ fn get_current_git_branch(project_root: &std::path::Path) -> Option<String> {
 
 /// Format datetime for display
 fn format_datetime(dt: DateTime<Utc>) -> String {
-    dt.with_timezone(&Local).format("%Y-%m-%d %H:%M").to_string()
+    dt.with_timezone(&Local)
+        .format("%Y-%m-%d %H:%M")
+        .to_string()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_format_datetime() {
         let dt = Utc::now();

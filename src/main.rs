@@ -16,10 +16,10 @@ use vide_ticket::error::Result;
 fn main() {
     // Parse command-line arguments
     let cli = Cli::parse();
-    
+
     // Configure output formatter based on flags
     let formatter = OutputFormatter::new(cli.json, cli.no_color);
-    
+
     // Execute the command and handle errors
     if let Err(e) = run(cli, &formatter) {
         handle_error(e, &formatter);
@@ -43,17 +43,15 @@ fn main() {
 fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
     // Set up logging if verbose mode is enabled
     if cli.verbose {
-        tracing_subscriber::fmt()
-            .with_env_filter("debug")
-            .init();
+        tracing_subscriber::fmt().with_env_filter("debug").init();
     }
-    
+
     // Change to project directory if specified
     if let Some(project_path) = &cli.project {
         std::env::set_current_dir(project_path)
             .map_err(|e| vide_ticket::error::VideTicketError::Io(e))?;
     }
-    
+
     // Dispatch to command handler
     match cli.command {
         Commands::Init {
@@ -61,7 +59,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             description,
             force,
         } => handle_init(name, description, force, formatter),
-        
+
         Commands::New {
             slug,
             title,
@@ -81,8 +79,8 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 cli.project,
                 &formatter,
             )
-        }
-        
+        },
+
         Commands::List {
             status,
             priority,
@@ -108,23 +106,17 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 cli.project,
                 &formatter,
             )
-        }
-        
+        },
+
         Commands::Start {
             ticket,
             branch,
             branch_name,
         } => {
             use vide_ticket::cli::handlers::handle_start_command;
-            handle_start_command(
-                ticket,
-                branch,
-                branch_name,
-                cli.project,
-                &formatter,
-            )
-        }
-        
+            handle_start_command(ticket, branch, branch_name, cli.project, &formatter)
+        },
+
         Commands::Close {
             ticket,
             message,
@@ -132,26 +124,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             pr,
         } => {
             use vide_ticket::cli::handlers::handle_close_command;
-            handle_close_command(
-                ticket,
-                message,
-                archive,
-                pr,
-                cli.project,
-                &formatter,
-            )
-        }
-        
+            handle_close_command(ticket, message, archive, pr, cli.project, &formatter)
+        },
+
         Commands::Check { detailed, stats } => {
             use vide_ticket::cli::handlers::handle_check_command;
-            handle_check_command(
-                detailed,
-                stats,
-                cli.project,
-                &formatter,
-            )
-        }
-        
+            handle_check_command(detailed, stats, cli.project, &formatter)
+        },
+
         Commands::Edit {
             ticket,
             title,
@@ -175,8 +155,8 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 cli.project,
                 &formatter,
             )
-        }
-        
+        },
+
         Commands::Show {
             ticket,
             tasks,
@@ -184,29 +164,22 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             markdown,
         } => {
             use vide_ticket::cli::handlers::handle_show_command;
-            handle_show_command(
-                ticket,
-                tasks,
-                history,
-                markdown,
-                cli.project,
-                &formatter,
-            )
-        }
-        
+            handle_show_command(ticket, tasks, history, markdown, cli.project, &formatter)
+        },
+
         Commands::Task { command } => match command {
             TaskCommands::Add { title, ticket } => {
                 use vide_ticket::cli::handlers::handle_task_add;
                 handle_task_add(title, ticket, cli.project, &formatter)
-            }
+            },
             TaskCommands::Complete { task, ticket } => {
                 use vide_ticket::cli::handlers::handle_task_complete;
                 handle_task_complete(task, ticket, cli.project, &formatter)
-            }
+            },
             TaskCommands::Uncomplete { task, ticket } => {
                 use vide_ticket::cli::handlers::handle_task_uncomplete;
                 handle_task_uncomplete(task, ticket, cli.project, &formatter)
-            }
+            },
             TaskCommands::List {
                 ticket,
                 completed,
@@ -214,7 +187,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             } => {
                 use vide_ticket::cli::handlers::handle_task_list;
                 handle_task_list(ticket, completed, incomplete, cli.project, &formatter)
-            }
+            },
             TaskCommands::Remove {
                 task,
                 ticket,
@@ -222,19 +195,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             } => {
                 use vide_ticket::cli::handlers::handle_task_remove;
                 handle_task_remove(task, ticket, force, cli.project, &formatter)
-            }
+            },
         },
-        
+
         Commands::Archive { ticket, unarchive } => {
             use vide_ticket::cli::handlers::handle_archive_command;
-            handle_archive_command(
-                ticket,
-                unarchive,
-                cli.project,
-                &formatter,
-            )
-        }
-        
+            handle_archive_command(ticket, unarchive, cli.project, &formatter)
+        },
+
         Commands::Search {
             query,
             title,
@@ -252,23 +220,17 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 cli.project,
                 &formatter,
             )
-        }
-        
+        },
+
         Commands::Export {
             format,
             output,
             include_archived,
         } => {
             use vide_ticket::cli::handlers::handle_export_command;
-            handle_export_command(
-                format,
-                output,
-                include_archived,
-                cli.project,
-                &formatter,
-            )
-        }
-        
+            handle_export_command(format, output, include_archived, cli.project, &formatter)
+        },
+
         Commands::Import {
             file,
             format,
@@ -284,12 +246,12 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 cli.project,
                 &formatter,
             )
-        }
-        
+        },
+
         Commands::Config { command } => {
             use vide_ticket::cli::handlers::handle_config_command;
             handle_config_command(command, cli.project, &formatter)
-        }
+        },
     }
 }
 
@@ -307,7 +269,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
 fn handle_error(error: vide_ticket::error::VideTicketError, formatter: &OutputFormatter) {
     // Display the main error message
     formatter.error(&error.user_message());
-    
+
     // Display suggestions if available
     let suggestions = error.suggestions();
     if !suggestions.is_empty() {
@@ -316,7 +278,7 @@ fn handle_error(error: vide_ticket::error::VideTicketError, formatter: &OutputFo
             formatter.info(&format!("  • {}", suggestion));
         }
     }
-    
+
     // In JSON mode, output error as JSON
     if formatter.is_json() {
         let _ = formatter.json(&serde_json::json!({
@@ -328,7 +290,7 @@ fn handle_error(error: vide_ticket::error::VideTicketError, formatter: &OutputFo
             "is_config_error": error.is_config_error(),
         }));
     }
-    
+
     // In verbose mode, show the full error chain
     if tracing::enabled!(tracing::Level::DEBUG) {
         eprintln!("\nDebug information:");
@@ -339,7 +301,7 @@ fn handle_error(error: vide_ticket::error::VideTicketError, formatter: &OutputFo
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_cli_parsing() {
         // Test that the CLI can be parsed with various commands

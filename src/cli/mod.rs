@@ -27,10 +27,10 @@
 //! ```
 
 mod commands;
+pub mod handlers;
 mod output;
 mod utils;
-pub mod handlers;
 
-pub use commands::{Cli, Commands, TaskCommands, ConfigCommands};
+pub use commands::{Cli, Commands, ConfigCommands, TaskCommands};
 pub use output::{OutputFormatter, ProgressBar};
 pub use utils::*;
