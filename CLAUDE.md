@@ -6,9 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 vibe-ticket is a high-performance ticket management system written in Rust for the Vibe Coding environment. Built for maximum speed and reliability with comprehensive features for modern development workflows.
 
+### Key Features
+- Timestamp-based ticket naming (YYYYMMDDHHMM prefix)
+- Git integration with automatic branch management
+- Task management within tickets
+- Spec-driven development support
+- Multiple export/import formats (JSON, YAML, CSV, Markdown)
+- Archive system for completed tickets
+- Powerful search and filtering capabilities
+
 ## Common Development Commands
 
-### Build and Run
+### Build and Test
 ```bash
 # Build the project
 cargo build
@@ -17,384 +26,281 @@ cargo build
 cargo build --release
 
 # Run the application
-cargo run
+cargo run -- <command>
 
-# Run with specific features
-cargo run --features api
-cargo run --features database
-cargo run --all-features
-```
-
-### Testing and Quality Checks
-```bash
 # Run all tests
 cargo test
 
 # Run tests with output
 cargo test -- --nocapture
 
-# Run a specific test
-cargo test test_name
-
 # Run benchmarks
 cargo bench
+```
 
-# Format code
+### Code Quality
+```bash
+# Format code (REQUIRED before commit)
 cargo fmt
 
-# Check formatting without applying
-cargo fmt -- --check
-
-# Run clippy linting
+# Run clippy linting (REQUIRED - must pass with no warnings)
 cargo clippy -- -D warnings
 
-# Fix clippy suggestions
+# Fix clippy suggestions automatically
 cargo clippy --fix
 
-# Detect semantic code similarities
-similarity-rs .
+# Check for security vulnerabilities
+cargo audit
 
-# Analyze duplicate code patterns and create refactoring plan
-# Check detailed options with: similarity-rs -h
-```
-
-### Documentation
-```bash
-# Generate and open documentation
+# Generate documentation
 cargo doc --no-deps --open
-
-# Generate docs with private items
-cargo doc --no-deps --document-private-items
 ```
 
-### Publishing to crates.io
+### CI/CD Workflow
 ```bash
-# Verify package metadata and structure
-cargo publish --dry-run
+# Run full CI checks locally (mimics GitHub Actions)
+cargo fmt -- --check && cargo clippy -- -D warnings && cargo test
 
-# Check package contents that will be uploaded
-cargo package --list
+# Build release artifacts
+./scripts/build-release.sh
 
-# Publish to crates.io (requires authentication)
-cargo publish
-
-# Publish with specific version
-cargo publish --package vibe-ticket
-
-# Login to crates.io (first time setup)
-cargo login
-
-# Owner management
-cargo owner --add username
-cargo owner --remove username
-cargo owner --list
+# Install locally
+./scripts/install.sh
 ```
 
 ## Architecture
 
 ### Module Structure
-- **`core`**: Central business logic containing ticket models, validation rules, and core operations
-- **`storage`**: Abstraction layer for data persistence with implementations for file-based and optional database storage
-- **`cli`**: Command-line interface using clap, handles user interactions and command parsing
-- **`api`**: Optional REST API using axum framework (enabled with `api` feature)
-- **`config`**: Configuration management supporting YAML/JSON formats and environment variables
-- **`plugins`**: Plugin system for extending functionality without modifying core code
-
-### Key Design Decisions
-1. **Feature Flags**: API and database support are optional features to keep the core binary lightweight
-2. **Error Handling**: Uses `anyhow` for application errors and `thiserror` for library errors
-3. **Async Runtime**: Tokio with full features for concurrent operations
-4. **Timestamp-based Slugs**: All tickets are prefixed with YYYYMMDDHHMM for chronological ordering
-
-### Development Roadmap (from TODO.md)
-The project follows a three-phase implementation plan:
-1. **Phase 1 (MVP)**: Basic ticket operations, Git integration, CLI implementation
-2. **Phase 2 (Quality)**: Testing, error handling, performance optimization
-3. **Phase 3 (Extensions)**: Plugin system, API server, advanced features
-
-## Important Configurations
-
-### Rust Edition and MSRV
-- Rust Edition: 2021
-- Minimum Supported Rust Version (MSRV): 1.70.0
-
-### Performance Settings
-Release builds are optimized with:
-- LTO (Link Time Optimization) enabled
-- Optimization level 3
-- Single codegen unit for maximum optimization
-
-### Code Style
-- Line width: 100 characters
-- Import style: Vertical with grouping
-- Unix line endings enforced
-- Comprehensive clippy rules for code quality
-
-## Claude Code Best Practices
-
-### Memory Management (CLAUDE.md)
-- **Be Specific**: Write actionable instructions ("Use 2-space indentation" vs "Format code properly")
-- **Structure Content**: Use clear markdown headings and bullet points for organization
-- **Modular Organization**: Use imports with `@path/to/file` syntax for complex projects
-- **Regular Updates**: Review and update memories as the project evolves
-- **Quick Memory**: Start a line with `#` to quickly add a memory during conversation
-
-### Effective Claude Code Usage
-
-#### CLI Commands
-```bash
-# Start interactive session
-claude
-
-# One-shot query (non-interactive)
-claude -p "analyze this error pattern"
-
-# Continue previous conversation
-claude -c
-
-# Work across multiple directories
-claude --add-dir ../related-project
-
-# Skip permissions for automation
-claude --dangerously-skip-permissions -p "run tests"
+```
+src/
+├── core/           # Business logic (Ticket, Task, Status, Priority)
+├── storage/        # Data persistence layer (FileStorage, Repository trait)
+├── cli/            # CLI interface and command handlers
+├── config/         # Configuration management
+├── specs/          # Spec-driven development support
+├── error.rs        # Error types and handling
+└── main.rs         # Entry point
 ```
 
-#### Keyboard Shortcuts
-- `Ctrl+C` - Cancel current operation
-- `Ctrl+D` - Exit session
-- `Ctrl+L` - Clear screen
-- `Esc + Esc` - Edit previous message
-- `\` + `Enter` - Multiline input (recommended)
-- `↑/↓` - Navigate command history
+### Key Components
 
-#### Workflow Patterns
-1. **Codebase Exploration**: Start high-level → dive into specifics
-2. **Debugging**: Share error → get fix → apply → verify
-3. **Feature Development**: Describe in plain English → iterate on implementation
-4. **Testing**: Identify gaps → generate tests → verify coverage
-5. **Extended Thinking**: Use "think harder" for complex problems
+#### Core Module (`src/core/`)
+- `ticket.rs`: Main Ticket struct with validation and business rules
+- `task.rs`: Task management within tickets
+- `status.rs`: Ticket status enum (Todo, Doing, Done, Blocked, Review)
+- `priority.rs`: Priority levels (Low, Medium, High, Critical)
+- `id.rs`: UUID-based ticket ID generation
 
-#### Session Management
-- Use `--continue` to resume previous conversations
-- Leverage git worktrees for parallel task isolation
-- Batch multiple file operations for better performance
+#### Storage Module (`src/storage/`)
+- `repository.rs`: Repository trait defining storage interface
+- `file.rs`: YAML-based file storage implementation
+- Files stored in `.vibe-ticket/tickets/` directory
 
-### Project-Specific Instructions
-When writing CLAUDE.md for your project:
-1. Include common commands and their purposes
-2. Document project-specific conventions
-3. List critical files and their roles
-4. Define testing and quality standards
-5. Specify security requirements
+#### CLI Module (`src/cli/`)
+- `commands.rs`: Command definitions using clap
+- `handlers/`: Individual command implementations
+- `output.rs`: Output formatting (JSON, colored terminal)
 
-### Integration Tips
-- Configure GitHub Actions behavior through CLAUDE.md
-- Use slash commands (`/memory`, `/config`) for quick access
-- Enable appropriate tools with `--allowedTools` flag
-- Set permission mode based on workflow needs
+### Important Design Decisions
 
-## CLAUDE.md Generation Features
+1. **Timestamp Prefixes**: All tickets get YYYYMMDDHHMM prefix for chronological ordering
+2. **File-based Storage**: Uses YAML for human readability and Git compatibility
+3. **Active Ticket**: Stored in `.vibe-ticket/active_ticket` file
+4. **Error Handling**: User-friendly errors with suggestions
+5. **Git Integration**: Optional but recommended for branch management
 
-vibe-ticket includes built-in support for generating and maintaining CLAUDE.md files to enhance Claude Code integration.
+## Development Guidelines
 
-### Generating CLAUDE.md
-
-#### During Project Initialization
+### Testing
 ```bash
-# Initialize project with CLAUDE.md
-vibe-ticket init --claude-md
-# or
-vibe-ticket init --claude
+# Run unit tests for a specific module
+cargo test core::
+cargo test storage::
+cargo test cli::
+
+# Run integration tests
+cargo test --test '*'
+
+# Test with different feature flags
+cargo test --no-default-features
+cargo test --all-features
 ```
 
-This creates a CLAUDE.md file with:
-- Project overview and metadata
-- Common vibe-ticket commands
-- Current configuration settings
-- Workflow guidelines
-- The initialization command itself is recorded in the file
+### Error Handling Pattern
+```rust
+use crate::error::{Result, VibeTicketError};
 
-#### For Existing Projects
-```bash
-# Generate basic CLAUDE.md
-vibe-ticket config claude
-
-# Generate with advanced template
-vibe-ticket config claude --template advanced
-
-# Append to existing CLAUDE.md
-vibe-ticket config claude --append
-
-# Custom output path
-vibe-ticket config claude --output ./docs/CLAUDE.md
+pub fn function_name() -> Result<ReturnType> {
+    // Use ? operator for error propagation
+    let data = operation_that_might_fail()?;
+    
+    // Custom error with context
+    data.validate()
+        .map_err(|e| VibeTicketError::Validation(format!("Invalid data: {}", e)))?;
+    
+    Ok(data)
+}
 ```
 
-### Template Options
+### Adding New Commands
 
-#### Basic Template
-- Project name and description
-- Essential vibe-ticket commands
-- Current project configuration (Git integration, default priority, etc.)
-- Project statistics (total tickets, active tickets)
-- Basic workflow guidelines
-- Best practices
+1. Define command in `src/cli/commands.rs`
+2. Create handler in `src/cli/handlers/<command>.rs`
+3. Add handler to `src/cli/handlers/mod.rs`
+4. Wire up in `src/main.rs` match statement
+5. Add tests in handler file
 
-#### Advanced Template  
-- Everything from basic template plus:
-- Git worktree support examples
-- Advanced search and filtering
-- Export/import functionality
-- Environment variables documentation
-- Git hooks integration examples
-- Troubleshooting guide
+## Common vibe-ticket Workflows
 
-### Dynamic Content
-The generated CLAUDE.md includes dynamically populated information:
-- Project name from configuration
-- Current date of generation
-- Real-time ticket statistics
-- Active project settings
-- Git integration status
-
-### Usage Workflow
-
-1. **New Projects**: Use `vibe-ticket init --claude-md` to start with AI assistance ready
-2. **Existing Projects**: Run `vibe-ticket config claude` to add CLAUDE.md
-3. **Updates**: Use `--append` flag when project configuration changes
-4. **Customization**: Add project-specific instructions after generation
-
-### Benefits for Claude Code
-- Understands project-specific commands and workflows
-- Provides context-aware suggestions
-- Follows established project conventions
-- Assists with ticket management best practices
-
-## vibe-ticket Command Reference
-
-### Quick Start
+### Creating and Managing Tickets
 ```bash
-# Initialize a new project
-vibe-ticket init --claude-md
+# Create new ticket (note: -P for priority, not -p)
+vibe-ticket new "feature-name" -t "Add feature X" -P high --tags "backend,api"
 
-# Create a new ticket (note: -P for priority, not -p)
-vibe-ticket new "implement-auth" -t "Add user authentication" -P high
-
-# List all open tickets
+# List open tickets (todo/doing status)
 vibe-ticket open
 
-# Start working on a ticket
-vibe-ticket start implement-auth
-
-# Close current ticket
-vibe-ticket close -m "Implemented OAuth2 authentication"
-```
-
-### Essential Commands
-
-#### Ticket Management
-```bash
-# Create ticket with automatic timestamp prefix
-vibe-ticket new "feature-name" -t "Title" -d "Description" -P high --tags "backend,api"
-
-# List tickets with filters
-vibe-ticket list --status todo --priority high
-vibe-ticket list --open  # Show only todo/doing tickets
-vibe-ticket open         # Alias for list --open
-
-# Search tickets
-vibe-ticket search "authentication" --regex
-vibe-ticket search "bug" --tags
-
-# Update ticket
-vibe-ticket edit <ticket> -t "New Title" -P critical --add-tags "urgent"
-```
-
-#### Workflow Commands
-```bash
 # Start working (creates Git branch)
-vibe-ticket start <ticket>
+vibe-ticket start 202507201345-feature-name
 
-# Check current status
-vibe-ticket check --detailed
+# Check current work
+vibe-ticket check
 
-# Complete and archive
-vibe-ticket close <ticket> -m "Completion message" --archive
+# Close ticket
+vibe-ticket close -m "Implemented feature X"
 ```
 
-#### Task Management
+### Task Management
 ```bash
 # Add tasks to current ticket
 vibe-ticket task add "Write unit tests"
 vibe-ticket task add "Update documentation"
 
-# Complete tasks
+# List tasks
+vibe-ticket task list
+
+# Complete task (1-based index)
 vibe-ticket task complete 1
-vibe-ticket task list --incomplete
 ```
 
-#### Data Management
+### Search and Filter
 ```bash
-# Export for backup
-vibe-ticket export --format json -o backup.json
-vibe-ticket export --format csv -o tickets.csv --include-archived
+# Search by text
+vibe-ticket search "authentication"
+
+# Search with regex
+vibe-ticket search "fix.*bug" --regex
+
+# Filter by status and priority
+vibe-ticket list --status todo --priority high
+
+# List archived tickets
+vibe-ticket list --archived
+```
+
+### Data Export/Import
+```bash
+# Export all tickets
+vibe-ticket export json -o backup.json
+
+# Export as CSV
+vibe-ticket export csv -o tickets.csv --include-archived
 
 # Import tickets
 vibe-ticket import backup.json --dry-run
-vibe-ticket import tickets.csv
+vibe-ticket import backup.json
 ```
 
-#### Configuration
+## Configuration
+
+Configuration file: `.vibe-ticket/config.yaml`
+
+### Key Settings
+- `project.name`: Project name
+- `project.default_priority`: Default priority for new tickets
+- `git.enabled`: Enable Git integration
+- `git.auto_branch`: Auto-create branches on ticket start
+- `git.branch_prefix`: Branch naming prefix (default: "ticket/")
+- `ui.emoji`: Enable emoji in output
+- `archive.auto_archive`: Auto-archive closed tickets
+
+### Managing Configuration
 ```bash
-# View configuration
+# View all settings
 vibe-ticket config show
 
-# Set configuration values
+# Set a value
 vibe-ticket config set git.auto_branch true
-vibe-ticket config set project.default_priority high
-vibe-ticket config set ui.emoji true
+
+# Get specific value
+vibe-ticket config get project.name
 
 # Generate/update CLAUDE.md
-vibe-ticket config claude --template advanced --append
+vibe-ticket config claude --template advanced
 ```
 
-### Important Notes
+## Troubleshooting
 
-1. **Priority Flag**: Use `-P` or `--priority` for priority (not `-p`, which is for project path)
-2. **Timestamps**: All tickets get YYYYMMDDHHMM prefix automatically
-3. **Git Integration**: Branches are created as `ticket/<timestamp>-<slug>` by default
-4. **Open Tickets**: Use `vibe-ticket open` for quick view of active work
+### Common Issues
 
-### Common Workflows
+1. **"Project not initialized"**
+   - Run `vibe-ticket init` in project root
+   - Check for `.vibe-ticket/` directory
 
-#### Bug Fix Workflow
+2. **Git integration not working**
+   - Ensure you're in a Git repository
+   - Check `git.enabled` in config
+   - Verify Git is installed
+
+3. **Permission errors**
+   - Check file permissions in `.vibe-ticket/`
+   - Ensure write access to project directory
+
+### Debug Mode
 ```bash
-vibe-ticket new "fix-login-error" -t "Fix login validation error" -P high --tags "bug,auth"
-vibe-ticket start fix-login-error
-# ... fix the bug ...
-vibe-ticket close -m "Fixed validation regex pattern"
+# Enable verbose logging
+RUST_LOG=debug vibe-ticket <command>
+
+# Check version and build info
+vibe-ticket --version
 ```
 
-#### Feature Development
-```bash
-vibe-ticket new "api-endpoints" -t "Implement REST API endpoints" -P medium
-vibe-ticket start api-endpoints
-vibe-ticket task add "Design API schema"
-vibe-ticket task add "Implement GET endpoints"
-vibe-ticket task add "Implement POST endpoints"
-vibe-ticket task add "Add authentication"
-vibe-ticket task add "Write API tests"
-# ... complete tasks one by one ...
-vibe-ticket task complete 1
-```
+## Performance Considerations
 
-#### Daily Standup
-```bash
-# Check what you're working on
-vibe-ticket check
+- File-based storage is efficient for up to ~10,000 tickets
+- Use `--limit` flag for large ticket lists
+- Archive completed tickets regularly
+- CSV export is fastest for large datasets
 
-# See all open tickets
-vibe-ticket open
+## Security Notes
 
-# Review high priority items
-vibe-ticket list --open --priority high
-```
+- No sensitive data in ticket descriptions
+- Git branch names are sanitized
+- File permissions set to user-only by default
+- No network access required (purely local)
+
+## Contributing
+
+When modifying vibe-ticket:
+1. Run `cargo fmt` before committing
+2. Ensure `cargo clippy` passes with no warnings
+3. Add tests for new functionality
+4. Update documentation as needed
+5. Follow existing code patterns
+
+## Release Process
+
+1. Update version in `Cargo.toml`
+2. Run `cargo test` and `cargo clippy`
+3. Build release: `./scripts/build-release.sh`
+4. Test installation: `./scripts/install.sh`
+5. Tag release: `git tag -a v0.x.x -m "Release v0.x.x"`
+6. Push tag: `git push origin v0.x.x`
+
+## Future Enhancements (from TODO.md)
+
+- REST API server (optional feature)
+- Plugin system for extensibility
+- Database backend support
+- Enhanced Git integration (PR creation)
+- Web UI (separate project)
