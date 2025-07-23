@@ -95,6 +95,56 @@ When helping with this project:
 3. Update ticket status as implementation progresses
 4. Use `vibe-ticket check` to understand current context
 5. Generate new tickets for bugs or features discovered during development
+6. **IMPORTANT**: After completing each major task or work session, provide a retrospective that includes:
+   - What was accomplished
+   - What challenges were encountered
+   - What could be improved for next time
+   - Any vibe-tickets that should be created for follow-up work
+   - Lessons learned that could benefit future development
+
+## Work Retrospectives
+
+### Why Retrospectives Matter
+Retrospectives help improve the development process by:
+- Identifying recurring issues before they become major problems
+- Documenting solutions for future reference
+- Creating actionable tickets for improvements
+- Building institutional knowledge
+
+### When to Conduct Retrospectives
+- After completing any release preparation
+- When finishing a complex feature implementation
+- After resolving critical bugs
+- At the end of each work session involving multiple tasks
+- When encountering unexpected challenges
+
+### Retrospective Template
+```markdown
+## Retrospective: [Task/Feature Name] - [Date]
+
+### Summary
+Brief overview of what was worked on.
+
+### What Went Well
+- List successes and smooth processes
+- Note effective tools or techniques used
+
+### Challenges Encountered
+- Document specific problems faced
+- Include error messages or unexpected behaviors
+
+### Improvements for Next Time
+- Concrete suggestions for process improvements
+- Tools or automation that could help
+
+### Follow-up Tickets Created
+- List any vibe-tickets created as a result
+- Include ticket IDs and brief descriptions
+
+### Lessons Learned
+- Key insights that will help future development
+- Patterns to watch for or avoid
+```
 
 ---
 Generated on: 2025-07-22
