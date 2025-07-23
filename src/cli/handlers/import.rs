@@ -40,9 +40,8 @@ pub fn handle_import_command(
     let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Read file content
-    let content = std::fs::read_to_string(&file_path).map_err(|e| {
-        VibeTicketError::custom(format!("Failed to read file {file_path}: {e}"))
-    })?;
+    let content = std::fs::read_to_string(&file_path)
+        .map_err(|e| VibeTicketError::custom(format!("Failed to read file {file_path}: {e}")))?;
 
     // Detect format if not specified
     let format = if let Some(fmt) = format {
