@@ -1,0 +1,99 @@
+id: b87cf60b-2063-4fde-965f-e8b2237e84c4
+slug: 202507240038-refactor-remove-allow-attributes
+title: 'Remove #[allow] attributes and follow Rust best practices'
+description: |-
+  現在のコードベースには多くの#[allow]属性が使用されており、Clippyの警告を抑制しています。これらの属性を削除し、Rustのベストプラクティスに従ってコードをリファクタリングする必要があります。
+
+  ## 対象となる#[allow]属性
+
+  ### 1. #[allow(clippy::too_many_lines)]
+  - src/cli/handlers/check.rs:33
+  - src/cli/handlers/edit.rs:55
+  - src/cli/handlers/search.rs:30
+  - src/specs/templates.rs
+
+  対応策: 関数を小さな関数に分割する
+
+  ### 2. #[allow(clippy::too_many_arguments)]
+  - src/cli/handlers/list.rs:167
+  - src/cli/handlers/search.rs:30
+
+  対応策: パラメータ構造体を使用する（すでに一部実装済み）
+
+  ### 3. #[allow(clippy::missing_panics_doc)]
+  - src/cli/handlers/search.rs:30
+
+  対応策: パニックする可能性がある場合は適切にドキュメント化するか、パニックしないようにコードを修正
+
+  ### 4. #[allow(clippy::fn_params_excessive_bools)]
+  - src/cli/handlers/search.rs:30
+
+  対応策: ブール値パラメータを列挙型やビットフラグに置き換える
+
+  ### 5. #[allow(clippy::struct_excessive_bools)]
+  - src/config/mod.rs:110 (GitConfig)
+  - src/specs/mod.rs:66 (SpecProgress)
+
+  対応策: ブール値フィールドを列挙型や状態マシンに置き換える
+
+  ## 実装方針
+
+  1. 各ファイルを順番にリファクタリング
+  2. テストを追加・更新して動作を保証
+  3. パフォーマンスへの影響を最小限に抑える
+  4. APIの破壊的変更は避ける（可能な限り）
+  5. ドキュメントを適切に更新
+
+  ## 期待される成果
+
+  - コードの可読性と保守性の向上
+  - Rustのベストプラクティスへの準拠
+  - 将来的な技術的負債の削減
+  - より安全で堅牢なコードベース
+priority: high
+status: doing
+tags:
+- refactoring
+- code-quality
+- best-practices
+created_at: 2025-07-23T15:38:33.825642Z
+started_at: 2025-07-23T15:38:33.825784Z
+closed_at: null
+assignee: null
+tasks:
+- id: 7cbabbf0-cc22-4170-a9d4-ecd2144c3452
+  title: Check.rsの#[allow(clippy::too_many_lines)]を削除して関数を分割
+  completed: false
+  created_at: 2025-07-23T15:39:00.642048Z
+  completed_at: null
+- id: 560684d1-69fe-4270-81e5-4689e408ee3d
+  title: Edit.rsの#[allow(clippy::too_many_lines)]を削除して関数を分割
+  completed: false
+  created_at: 2025-07-23T15:39:05.594695Z
+  completed_at: null
+- id: 89df495f-fce2-485f-9307-21cc33d023a6
+  title: Search.rsの複数の#[allow]属性を削除してコードを改善
+  completed: false
+  created_at: 2025-07-23T15:39:12.539586Z
+  completed_at: null
+- id: d90ac2a6-4e63-4b11-90cc-47c7c178b420
+  title: List.rsの#[allow(clippy::too_many_arguments)]を削除してパラメータ構造体を使用
+  completed: false
+  created_at: 2025-07-23T15:39:18.482368Z
+  completed_at: null
+- id: 0c9a313c-845c-41b5-8068-da15d081d8dc
+  title: GitConfigの#[allow(clippy::struct_excessive_bools)]を削除して状態マシンを実装
+  completed: false
+  created_at: 2025-07-23T15:39:25.145975Z
+  completed_at: null
+- id: b4672d45-ac8c-4897-84c8-74783b09dc79
+  title: SpecProgressの#[allow(clippy::struct_excessive_bools)]を削除して列挙型を使用
+  completed: false
+  created_at: 2025-07-23T15:39:30.323924Z
+  completed_at: null
+- id: 81a17f94-5335-453f-8085-47ef19609769
+  title: Templates.rsの#[allow(clippy::too_many_lines)]を削除して小さな関数に分割
+  completed: false
+  created_at: 2025-07-23T15:39:37.457987Z
+  completed_at: null
+metadata: {}

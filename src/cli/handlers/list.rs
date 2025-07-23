@@ -4,23 +4,36 @@ use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
 use chrono::{DateTime, Duration, Local, NaiveDate, Utc};
 
+/// Parameters for the list command
+pub struct ListParams<'a> {
+    /// Filter by status
+    pub status: Option<String>,
+    /// Filter by priority
+    pub priority: Option<String>,
+    /// Filter by assignee
+    pub assignee: Option<String>,
+    /// Sort field
+    pub sort: &'a str,
+    /// Reverse sort order
+    pub reverse: bool,
+    /// Limit number of results
+    pub limit: Option<usize>,
+    /// Show archived tickets
+    pub archived: bool,
+    /// Show only open tickets
+    pub open: bool,
+    /// Filter tickets created since date
+    pub since: Option<String>,
+    /// Filter tickets created until date
+    pub until: Option<String>,
+    /// Optional project directory path
+    pub project_dir: Option<&'a str>,
+}
+
 /// Handler for the `list` command
-pub fn handle_list_command(
-    status: Option<String>,
-    priority: Option<String>,
-    assignee: Option<String>,
-    sort: &str,
-    reverse: bool,
-    limit: Option<usize>,
-    archived: bool,
-    open: bool,
-    since: Option<String>,
-    until: Option<String>,
-    project_dir: Option<&str>,
-    output: &OutputFormatter,
-) -> Result<()> {
+pub fn handle_list_command(params: ListParams<'_>, output: &OutputFormatter) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir)?;
+    let project_root = find_project_root(params.project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
@@ -30,19 +43,19 @@ pub fn handle_list_command(
     let mut tickets = storage.load_all()?;
 
     // Parse date filters
-    let since_date = since.map(|s| parse_date_filter(&s)).transpose()?;
-    let until_date = until.map(|s| parse_date_filter(&s)).transpose()?;
+    let since_date = params.since.map(|s| parse_date_filter(&s)).transpose()?;
+    let until_date = params.until.map(|s| parse_date_filter(&s)).transpose()?;
 
     // Apply filters
     tickets = filter_tickets(
-        tickets, status, priority, assignee, archived, open, since_date, until_date,
+        tickets, params.status, params.priority, params.assignee, params.archived, params.open, since_date, until_date,
     )?;
 
     // Sort tickets
-    sort_tickets(&mut tickets, &sort, reverse);
+    sort_tickets(&mut tickets, params.sort, params.reverse);
 
     // Apply limit
-    if let Some(limit) = limit {
+    if let Some(limit) = params.limit {
         tickets.truncate(limit);
     }
 
@@ -239,7 +252,7 @@ fn sort_tickets(tickets: &mut Vec<Ticket>, sort_by: &str, reverse: bool) {
                 order(&a.status).cmp(&order(&b.status))
             });
         },
-        "slug" | _ => {
+        _ => {
             // Default to slug sort (which will be chronological due to timestamp prefix)
             tickets.sort_by(|a, b| a.slug.cmp(&b.slug));
         },

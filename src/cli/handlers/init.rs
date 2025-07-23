@@ -119,9 +119,7 @@ pub fn handle_init(
     progress.finish_with_message("Project initialized successfully");
 
     // Display success message
-    formatter.success(&format!(
-        "Initialized vibe-ticket project '{project_name}'"
-    ));
+    formatter.success(&format!("Initialized vibe-ticket project '{project_name}'"));
 
     if formatter.is_json() {
         formatter.json(&serde_json::json!({
@@ -167,7 +165,8 @@ fn create_directory_structure(project_dir: &Path) -> Result<()> {
     ];
 
     for dir in directories {
-        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory {}", dir.display()))?;
+        fs::create_dir_all(dir)
+            .with_context(|| format!("Failed to create directory {}", dir.display()))?;
     }
 
     Ok(())
@@ -233,11 +232,13 @@ Closes #{{ ticket_id }} - {{ ticket_title }}
 /// Adds vibe-ticket specific entries to .gitignore
 fn create_gitignore(project_dir: &Path) -> Result<()> {
     let gitignore_path = project_dir.join(".gitignore");
-    let vibe_entries = ["# vibe-ticket",
+    let vibe_entries = [
+        "# vibe-ticket",
         ".vibe-ticket/backups/",
         ".vibe-ticket/tmp/",
         ".vibe-ticket/*.log",
-        ""];
+        "",
+    ];
 
     if gitignore_path.exists() {
         // Read existing content
@@ -397,7 +398,8 @@ vibe-ticket config claude
 # Append with advanced features
 vibe-ticket config claude --template advanced --append
 ```
-".to_string();
+"
+    .to_string();
 
     let full_content = format!("{claude_content}{additional_content}");
     fs::write(&claude_path, full_content)?;

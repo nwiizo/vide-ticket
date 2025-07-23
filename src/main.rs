@@ -50,8 +50,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
 
     // Change to project directory if specified
     if let Some(project_path) = &cli.project {
-        std::env::set_current_dir(project_path)
-            .map_err(vibe_ticket::error::VibeTicketError::Io)?;
+        std::env::set_current_dir(project_path).map_err(vibe_ticket::error::VibeTicketError::Io)?;
     }
 
     // Dispatch to command handler
@@ -61,7 +60,13 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             description,
             force,
             claude_md,
-        } => handle_init(name.as_deref(), description.as_deref(), force, claude_md, formatter),
+        } => handle_init(
+            name.as_deref(),
+            description.as_deref(),
+            force,
+            claude_md,
+            formatter,
+        ),
 
         Commands::New {
             slug,
@@ -71,17 +76,17 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             tags,
             start,
         } => {
-            use vibe_ticket::cli::handlers::handle_new_command;
-            handle_new_command(
-                &slug,
+            use vibe_ticket::cli::handlers::{handle_new_command, NewParams};
+            let params = NewParams {
+                slug: &slug,
                 title,
                 description,
-                &priority,
+                priority: &priority,
                 tags,
                 start,
-                cli.project.as_deref(),
-                formatter,
-            )
+                project_dir: cli.project.as_deref(),
+            };
+            handle_new_command(params, formatter)
         },
 
         Commands::List {
@@ -96,21 +101,21 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             since,
             until,
         } => {
-            use vibe_ticket::cli::handlers::handle_list_command;
-            handle_list_command(
+            use vibe_ticket::cli::handlers::{handle_list_command, ListParams};
+            let params = ListParams {
                 status,
                 priority,
                 assignee,
-                &sort,
+                sort: &sort,
                 reverse,
                 limit,
                 archived,
                 open,
                 since,
                 until,
-                cli.project.as_deref(),
-                formatter,
-            )
+                project_dir: cli.project.as_deref(),
+            };
+            handle_list_command(params, formatter)
         },
 
         Commands::Open {
@@ -118,22 +123,22 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             reverse,
             limit,
         } => {
-            use vibe_ticket::cli::handlers::handle_list_command;
+            use vibe_ticket::cli::handlers::{handle_list_command, ListParams};
             // Call list handler with open filter set to true
-            handle_list_command(
-                None, // status
-                None, // priority
-                None, // assignee
-                &sort,
+            let params = ListParams {
+                status: None,
+                priority: None,
+                assignee: None,
+                sort: &sort,
                 reverse,
                 limit,
-                false, // archived
-                true,  // open
-                None,  // since
-                None,  // until
-                cli.project.as_deref(),
-                formatter,
-            )
+                archived: false,
+                open: true,
+                since: None,
+                until: None,
+                project_dir: cli.project.as_deref(),
+            };
+            handle_list_command(params, formatter)
         },
 
         Commands::Start {
@@ -160,7 +165,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             pr,
         } => {
             use vibe_ticket::cli::handlers::handle_close_command;
-            handle_close_command(ticket, message, archive, pr, cli.project.as_deref(), formatter)
+            handle_close_command(
+                ticket,
+                message,
+                archive,
+                pr,
+                cli.project.as_deref(),
+                formatter,
+            )
         },
 
         Commands::Check { detailed, stats } => {
@@ -178,9 +190,9 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             remove_tags,
             editor,
         } => {
-            use vibe_ticket::cli::handlers::handle_edit_command;
-            handle_edit_command(
-                ticket,
+            use vibe_ticket::cli::handlers::{handle_edit_command, EditParams};
+            let params = EditParams {
+                ticket_ref: ticket,
                 title,
                 description,
                 priority,
@@ -188,9 +200,9 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 add_tags,
                 remove_tags,
                 editor,
-                cli.project.as_deref(),
-                formatter,
-            )
+                project_dir: cli.project.as_deref(),
+            };
+            handle_edit_command(params, formatter)
         },
 
         Commands::Show {
@@ -200,7 +212,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             markdown,
         } => {
             use vibe_ticket::cli::handlers::handle_show_command;
-            handle_show_command(&ticket, tasks, history, markdown, cli.project.as_deref(), formatter)
+            handle_show_command(
+                &ticket,
+                tasks,
+                history,
+                markdown,
+                cli.project.as_deref(),
+                formatter,
+            )
         },
 
         Commands::Task { command } => match command {
@@ -264,7 +283,13 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             include_archived,
         } => {
             use vibe_ticket::cli::handlers::handle_export_command;
-            handle_export_command(&format, output, include_archived, cli.project.as_deref(), formatter)
+            handle_export_command(
+                &format,
+                output,
+                include_archived,
+                cli.project.as_deref(),
+                formatter,
+            )
         },
 
         Commands::Import {

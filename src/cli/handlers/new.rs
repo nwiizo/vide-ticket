@@ -5,19 +5,28 @@ use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 use super::parse_tags;
 
+/// Parameters for the new command
+pub struct NewParams<'a> {
+    /// Ticket slug
+    pub slug: &'a str,
+    /// Ticket title
+    pub title: Option<String>,
+    /// Ticket description
+    pub description: Option<String>,
+    /// Ticket priority
+    pub priority: &'a str,
+    /// Tags (comma-separated)
+    pub tags: Option<String>,
+    /// Start working on ticket immediately
+    pub start: bool,
+    /// Optional project directory path
+    pub project_dir: Option<&'a str>,
+}
+
 /// Handler for the `new` command
-pub fn handle_new_command(
-    slug: &str,
-    title: Option<String>,
-    description: Option<String>,
-    priority: &str,
-    tags: Option<String>,
-    start: bool,
-    project_dir: Option<&str>,
-    output: &OutputFormatter,
-) -> Result<()> {
+pub fn handle_new_command(params: NewParams<'_>, output: &OutputFormatter) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir)?;
+    let project_root = find_project_root(params.project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
@@ -28,7 +37,7 @@ pub fn handle_new_command(
     let timestamp_prefix = now.format("%Y%m%d%H%M").to_string();
 
     // Validate and normalize the slug
-    let base_slug = slug.trim();
+    let base_slug = params.slug.trim();
     validate_slug(base_slug)?;
 
     // Combine timestamp and slug
@@ -40,22 +49,22 @@ pub fn handle_new_command(
     }
 
     // Parse priority
-    let priority = Priority::try_from(priority)
-        .map_err(|_| VibeTicketError::InvalidPriority { priority: priority.to_string() })?;
+    let priority = Priority::try_from(params.priority).map_err(|_| VibeTicketError::InvalidPriority {
+        priority: params.priority.to_string(),
+    })?;
 
     // Parse tags
-    let tags = tags.map(|t| parse_tags(Some(t))).unwrap_or_default();
+    let tags = params.tags.map(|t| parse_tags(Some(t))).unwrap_or_default();
 
     // Create title from base slug if not provided
-    let title = title.unwrap_or_else(|| {
+    let title = params.title.unwrap_or_else(|| {
         base_slug
             .split('-')
             .map(|word| {
                 let mut chars = word.chars();
-                match chars.next() {
-                    None => String::new(),
-                    Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
-                }
+                chars.next().map_or_else(String::new, |first| {
+                    first.to_uppercase().collect::<String>() + chars.as_str()
+                })
             })
             .collect::<Vec<_>>()
             .join(" ")
@@ -63,7 +72,7 @@ pub fn handle_new_command(
 
     // Create the ticket
     let mut ticket = Ticket::new(&slug, &title);
-    ticket.description = description.unwrap_or_default();
+    ticket.description = params.description.unwrap_or_default();
     ticket.priority = priority;
     ticket.tags = tags;
 
@@ -71,7 +80,7 @@ pub fn handle_new_command(
     storage.save(&ticket)?;
 
     // If --start flag is provided, start working on the ticket immediately
-    if start {
+    if params.start {
         ticket.start();
         storage.save(&ticket)?;
         storage.set_active(&ticket.id)?;

@@ -208,7 +208,7 @@ fn import_yaml(content: &str) -> Result<Vec<Ticket>> {
     struct YamlImport {
         tickets: Vec<Ticket>,
     }
-    
+
     // Try to parse as direct array first
     if let Ok(tickets) = serde_yaml::from_str::<Vec<Ticket>>(content) {
         return Ok(tickets);
@@ -257,7 +257,10 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
         let tags: Vec<String> = if record[6].is_empty() {
             Vec::new()
         } else {
-            record[6].split(", ").map(std::string::ToString::to_string).collect()
+            record[6]
+                .split(", ")
+                .map(std::string::ToString::to_string)
+                .collect()
         };
 
         let created_at = chrono::DateTime::parse_from_rfc3339(&record[7])
@@ -269,9 +272,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
         } else {
             Some(
                 chrono::DateTime::parse_from_rfc3339(&record[8])
-                    .map_err(|e| {
-                        VibeTicketError::custom(format!("Invalid started_at date: {e}"))
-                    })?
+                    .map_err(|e| VibeTicketError::custom(format!("Invalid started_at date: {e}")))?
                     .with_timezone(&chrono::Utc),
             )
         };

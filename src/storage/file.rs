@@ -59,7 +59,8 @@ impl FileStorage {
         let path = self.ticket_path(&ticket.id);
         let yaml = serde_yaml::to_string(ticket).context("Failed to serialize ticket")?;
 
-        fs::write(&path, yaml).with_context(|| format!("Failed to write ticket to {}", path.display()))?;
+        fs::write(&path, yaml)
+            .with_context(|| format!("Failed to write ticket to {}", path.display()))?;
 
         Ok(())
     }
@@ -102,7 +103,10 @@ impl FileStorage {
                     Ok(ticket) => tickets.push(ticket),
                     Err(e) => {
                         // Log error but continue loading other tickets
-                        eprintln!("Warning: Failed to load ticket from {}: {e}", path.display());
+                        eprintln!(
+                            "Warning: Failed to load ticket from {}: {e}",
+                            path.display()
+                        );
                     },
                 }
             }
@@ -119,7 +123,8 @@ impl FileStorage {
             return Err(VibeTicketError::TicketNotFound { id: id.to_string() });
         }
 
-        fs::remove_file(&path).with_context(|| format!("Failed to delete ticket at {}", path.display()))?;
+        fs::remove_file(&path)
+            .with_context(|| format!("Failed to delete ticket at {}", path.display()))?;
 
         Ok(())
     }

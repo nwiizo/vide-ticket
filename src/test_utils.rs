@@ -73,7 +73,10 @@ pub mod test {
         }
 
         pub fn with_tags(mut self, tags: Vec<&str>) -> Self {
-            self.ticket.tags = tags.into_iter().map(std::string::ToString::to_string).collect();
+            self.ticket.tags = tags
+                .into_iter()
+                .map(std::string::ToString::to_string)
+                .collect();
             self
         }
 

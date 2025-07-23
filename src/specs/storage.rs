@@ -49,7 +49,8 @@ impl DocumentStore for FileSystemStore {
             self.ensure_dir(parent)?;
         }
 
-        fs::write(path, content).with_context(|| format!("Failed to write file: {}", path.display()))
+        fs::write(path, content)
+            .with_context(|| format!("Failed to write file: {}", path.display()))
     }
 
     fn load_text(&self, path: &Path) -> Result<String> {
@@ -61,7 +62,8 @@ impl DocumentStore for FileSystemStore {
     }
 
     fn ensure_dir(&self, dir: &Path) -> Result<()> {
-        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory: {}", dir.display()))
+        fs::create_dir_all(dir)
+            .with_context(|| format!("Failed to create directory: {}", dir.display()))
     }
 
     fn list_dirs(&self, path: &Path) -> Result<Vec<PathBuf>> {
@@ -70,8 +72,8 @@ impl DocumentStore for FileSystemStore {
         }
 
         let mut dirs = Vec::new();
-        let entries =
-            fs::read_dir(path).with_context(|| format!("Failed to read directory: {}", path.display()))?;
+        let entries = fs::read_dir(path)
+            .with_context(|| format!("Failed to read directory: {}", path.display()))?;
 
         for entry in entries {
             let entry = entry.context("Failed to read directory entry")?;

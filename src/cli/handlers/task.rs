@@ -406,9 +406,7 @@ pub fn handle_task_remove(
         .tasks
         .iter()
         .position(|t| t.id == task_id)
-        .ok_or_else(|| {
-            VibeTicketError::custom(format!("Task '{task_id}' not found in ticket"))
-        })?;
+        .ok_or_else(|| VibeTicketError::custom(format!("Task '{task_id}' not found in ticket")))?;
 
     let task = &ticket.tasks[task_index];
 

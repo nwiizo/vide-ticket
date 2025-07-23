@@ -8,6 +8,28 @@ use crate::core::{Priority, Status, TicketId};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
+/// Parameters for the edit command
+pub struct EditParams<'a> {
+    /// Optional ticket ID or slug (defaults to active ticket)
+    pub ticket_ref: Option<String>,
+    /// New title for the ticket
+    pub title: Option<String>,
+    /// New description for the ticket
+    pub description: Option<String>,
+    /// New priority for the ticket
+    pub priority: Option<String>,
+    /// New status for the ticket
+    pub status: Option<String>,
+    /// Tags to add (comma-separated)
+    pub add_tags: Option<String>,
+    /// Tags to remove (comma-separated)
+    pub remove_tags: Option<String>,
+    /// Whether to open in the default editor
+    pub editor: bool,
+    /// Optional project directory path
+    pub project_dir: Option<&'a str>,
+}
+
 /// Handler for the `edit` command
 ///
 /// This function allows editing various properties of a ticket:
@@ -20,15 +42,7 @@ use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 ///
 /// # Arguments
 ///
-/// * `ticket_ref` - Optional ticket ID or slug (defaults to active ticket)
-/// * `title` - New title for the ticket
-/// * `description` - New description for the ticket
-/// * `priority` - New priority for the ticket
-/// * `status` - New status for the ticket
-/// * `add_tags` - Tags to add (comma-separated)
-/// * `remove_tags` - Tags to remove (comma-separated)
-/// * `editor` - Whether to open in the default editor
-/// * `project_dir` - Optional project directory path
+/// * `params` - Edit command parameters
 /// * `output` - Output formatter for displaying results
 ///
 /// # Errors
@@ -38,27 +52,16 @@ use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 /// - No ticket is specified and there's no active ticket
 /// - The ticket is not found
 /// - Invalid priority or status values are provided
-pub fn handle_edit_command(
-    ticket_ref: Option<String>,
-    title: Option<String>,
-    description: Option<String>,
-    priority: Option<String>,
-    status: Option<String>,
-    add_tags: Option<String>,
-    remove_tags: Option<String>,
-    editor: bool,
-    project_dir: Option<&str>,
-    output: &OutputFormatter,
-) -> Result<()> {
+pub fn handle_edit_command(params: EditParams<'_>, output: &OutputFormatter) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir)?;
+    let project_root = find_project_root(params.project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
     let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
-    let ticket_id = if let Some(ref_str) = ticket_ref {
+    let ticket_id = if let Some(ref_str) = params.ticket_ref {
         resolve_ticket_ref(&storage, &ref_str)?
     } else {
         // Get active ticket
@@ -74,26 +77,26 @@ pub fn handle_edit_command(
     let mut changes = Vec::new();
 
     // Open in editor if requested
-    if editor {
+    if params.editor {
         edit_in_editor(&mut ticket, &storage, output)?;
         return Ok(());
     }
 
     // Update title if provided
-    if let Some(new_title) = title {
+    if let Some(new_title) = params.title {
         let old_title = ticket.title.clone();
         ticket.title.clone_from(&new_title);
         changes.push(format!("Title: {old_title} → {new_title}"));
     }
 
     // Update description if provided
-    if let Some(new_description) = description {
+    if let Some(new_description) = params.description {
         ticket.description = new_description;
         changes.push("Description updated".to_string());
     }
 
     // Update priority if provided
-    if let Some(priority_str) = priority {
+    if let Some(priority_str) = params.priority {
         let new_priority = Priority::try_from(priority_str.as_str()).map_err(|_| {
             VibeTicketError::InvalidPriority {
                 priority: priority_str,
@@ -105,7 +108,7 @@ pub fn handle_edit_command(
     }
 
     // Update status if provided
-    if let Some(status_str) = status {
+    if let Some(status_str) = params.status {
         let new_status = Status::try_from(status_str.as_str())
             .map_err(|_| VibeTicketError::InvalidStatus { status: status_str })?;
         let old_status = ticket.status;
@@ -125,7 +128,7 @@ pub fn handle_edit_command(
     }
 
     // Add tags if provided
-    if let Some(tags_str) = add_tags {
+    if let Some(tags_str) = params.add_tags {
         let new_tags: Vec<String> = tags_str
             .split(',')
             .map(|s| s.trim().to_string())
@@ -141,7 +144,7 @@ pub fn handle_edit_command(
     }
 
     // Remove tags if provided
-    if let Some(tags_str) = remove_tags {
+    if let Some(tags_str) = params.remove_tags {
         let tags_to_remove: Vec<String> = tags_str
             .split(',')
             .map(|s| s.trim().to_string())
