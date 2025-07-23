@@ -95,15 +95,17 @@ impl SpecManager {
         let mut specs = Vec::new();
 
         for spec_dir in spec_dirs {
-            if let Some(dir_name) = spec_dir.file_name() {
-                if let Some(spec_id) = dir_name.to_str() {
-                    match self.load_metadata(spec_id) {
-                        Ok(metadata) => specs.push(metadata),
-                        Err(e) => {
-                            eprintln!("Warning: Failed to load spec {spec_id}: {e}");
-                        },
-                    }
-                }
+            let Some(dir_name) = spec_dir.file_name() else {
+                continue;
+            };
+            
+            let Some(spec_id) = dir_name.to_str() else {
+                continue;
+            };
+            
+            match self.load_metadata(spec_id) {
+                Ok(metadata) => specs.push(metadata),
+                Err(e) => eprintln!("Warning: Failed to load spec {spec_id}: {e}"),
             }
         }
 

@@ -7,17 +7,17 @@ use super::parse_tags;
 
 /// Handler for the `new` command
 pub fn handle_new_command(
-    slug: String,
+    slug: &str,
     title: Option<String>,
     description: Option<String>,
-    priority: String,
+    priority: &str,
     tags: Option<String>,
     start: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
@@ -40,8 +40,8 @@ pub fn handle_new_command(
     }
 
     // Parse priority
-    let priority = Priority::try_from(priority.as_str())
-        .map_err(|_| VibeTicketError::InvalidPriority { priority })?;
+    let priority = Priority::try_from(priority)
+        .map_err(|_| VibeTicketError::InvalidPriority { priority: priority.to_string() })?;
 
     // Parse tags
     let tags = tags.map(|t| parse_tags(Some(t))).unwrap_or_default();
@@ -147,13 +147,13 @@ mod tests {
 
         // Test creating a ticket
         let result = handle_new_command(
-            "fix-login-bug".to_string(),
+            "fix-login-bug",
             None,
             Some("Users cannot login".to_string()),
-            "high".to_string(),
+            "high",
             Some("bug,auth".to_string()),
             false,
-            Some(temp_dir.path().to_str().unwrap().to_string()),
+            Some(temp_dir.path().to_str().unwrap()),
             &output,
         );
 

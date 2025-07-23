@@ -43,8 +43,8 @@ use std::path::Path;
 /// handle_init(Some("my-project".to_string()), None, false, &formatter)?;
 /// ```
 pub fn handle_init(
-    name: Option<String>,
-    description: Option<String>,
+    name: Option<&str>,
+    description: Option<&str>,
     force: bool,
     claude_md: bool,
     formatter: &OutputFormatter,
@@ -58,7 +58,7 @@ pub fn handle_init(
     }
 
     // Determine project name
-    let project_name = name.unwrap_or_else(|| {
+    let project_name = name.map(ToString::to_string).unwrap_or_else(|| {
         current_dir
             .file_name()
             .and_then(|n| n.to_str())
@@ -77,15 +77,15 @@ pub fn handle_init(
 
     // Create default configuration
     let mut config = Config::default();
-    config.project.name = project_name.clone();
-    config.project.description = description.clone();
+    config.project.name.clone_from(&project_name);
+    config.project.description = description.map(ToString::to_string);
 
     // Save configuration
     let config_path = project_dir.join("config.yaml");
     let config_content =
         serde_yaml::to_string(&config).context("Failed to serialize configuration")?;
     fs::write(&config_path, config_content)
-        .with_context(|| format!("Failed to write config to {config_path:?}"))?;
+        .with_context(|| format!("Failed to write config to {}", config_path.display()))?;
 
     progress.set_message("Initializing repository");
 
@@ -93,7 +93,7 @@ pub fn handle_init(
     let storage = FileStorage::new(&project_dir);
     let project_state = ProjectState {
         name: project_name.clone(),
-        description: description.clone(),
+        description: description.map(ToString::to_string),
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
         ticket_count: 0,
@@ -113,7 +113,7 @@ pub fn handle_init(
     // Generate CLAUDE.md if requested
     if claude_md {
         progress.set_message("Generating CLAUDE.md");
-        generate_claude_md_for_init(&current_dir, &project_name, description.as_deref())?;
+        generate_claude_md_for_init(&current_dir, &project_name, description)?;
     }
 
     progress.finish_with_message("Project initialized successfully");
@@ -167,7 +167,7 @@ fn create_directory_structure(project_dir: &Path) -> Result<()> {
     ];
 
     for dir in directories {
-        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory {dir:?}"))?;
+        fs::create_dir_all(dir).with_context(|| format!("Failed to create directory {}", dir.display()))?;
     }
 
     Ok(())

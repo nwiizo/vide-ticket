@@ -28,20 +28,20 @@ use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 /// - The ticket is not found
 /// - Trying to archive an active ticket
 pub fn handle_archive_command(
-    ticket_ref: String,
+    ticket_ref: &str,
     unarchive: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
     let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Resolve ticket ID
-    let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
+    let ticket_id = resolve_ticket_ref(&storage, ticket_ref)?;
 
     // Load the ticket
     let mut ticket = storage.load(&ticket_id)?;

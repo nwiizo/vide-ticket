@@ -25,29 +25,29 @@ use std::collections::HashMap;
 /// * `project_dir` - Optional project directory path
 /// * `output` - Output formatter for displaying results
 pub fn handle_import_command(
-    file_path: String,
-    format: Option<String>,
+    file_path: &str,
+    format: Option<&str>,
     skip_validation: bool,
     dry_run: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
     let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Read file content
-    let content = std::fs::read_to_string(&file_path)
+    let content = std::fs::read_to_string(file_path)
         .map_err(|e| VibeTicketError::custom(format!("Failed to read file {file_path}: {e}")))?;
 
     // Detect format if not specified
     let format = if let Some(fmt) = format {
-        fmt
+        fmt.to_string()
     } else {
-        detect_format(&file_path, &content)?
+        detect_format(file_path, &content)?
     };
 
     // Parse tickets based on format
@@ -204,16 +204,17 @@ fn import_json(content: &str) -> Result<Vec<Ticket>> {
 
 /// Import tickets from YAML
 fn import_yaml(content: &str) -> Result<Vec<Ticket>> {
+    #[derive(serde::Deserialize)]
+    struct YamlImport {
+        tickets: Vec<Ticket>,
+    }
+    
     // Try to parse as direct array first
     if let Ok(tickets) = serde_yaml::from_str::<Vec<Ticket>>(content) {
         return Ok(tickets);
     }
 
     // Try to parse as object with tickets field
-    #[derive(serde::Deserialize)]
-    struct YamlImport {
-        tickets: Vec<Ticket>,
-    }
 
     if let Ok(import) = serde_yaml::from_str::<YamlImport>(content) {
         return Ok(import.tickets);

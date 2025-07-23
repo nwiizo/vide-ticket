@@ -40,11 +40,11 @@ pub fn handle_close_command(
     message: Option<String>,
     archive: bool,
     create_pr: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage

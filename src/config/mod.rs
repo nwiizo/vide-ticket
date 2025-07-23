@@ -180,7 +180,7 @@ impl Config {
     pub fn load_from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
         let content = std::fs::read_to_string(path)
-            .with_context(|| format!("Failed to read config from {path:?}"))?;
+            .with_context(|| format!("Failed to read config from {}", path.display()))?;
 
         let config: Self =
             serde_yaml::from_str(&content).context("Failed to parse configuration")?;
@@ -212,7 +212,7 @@ impl Config {
         let yaml = serde_yaml::to_string(self).context("Failed to serialize configuration")?;
 
         std::fs::write(path, yaml)
-            .with_context(|| format!("Failed to write config to {path:?}"))?;
+            .with_context(|| format!("Failed to write config to {}", path.display()))?;
 
         Ok(())
     }

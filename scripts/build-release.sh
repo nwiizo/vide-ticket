@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build release binaries for vide-ticket
+# Build release binaries for vibe-ticket
 
 set -euo pipefail
 
@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 VERSION=$(grep '^version' "$PROJECT_ROOT/Cargo.toml" | head -1 | sed 's/.*"\(.*\)".*/\1/')
 
-echo "Building vide-ticket v$VERSION release binaries..."
+echo "Building vibe-ticket v$VERSION release binaries..."
 
 # Create release directory
 RELEASE_DIR="$PROJECT_ROOT/release"
@@ -38,11 +38,11 @@ case "$ARCH" in
 esac
 
 # Binary name
-BINARY_NAME="vide-ticket-v$VERSION-$PLATFORM-$ARCH"
+BINARY_NAME="vibe-ticket-v$VERSION-$PLATFORM-$ARCH"
 
 # Copy and strip binary
 echo "Creating release binary: $BINARY_NAME"
-cp "target/release/vide-ticket" "$RELEASE_DIR/$BINARY_NAME"
+cp "target/release/vibe-ticket" "$RELEASE_DIR/$BINARY_NAME"
 strip "$RELEASE_DIR/$BINARY_NAME" 2>/dev/null || true
 
 # Create tarball

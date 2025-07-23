@@ -21,11 +21,11 @@ use crate::error::{Result, VibeTicketError};
 /// * `output` - Output formatter for displaying results
 pub fn handle_config_command(
     command: ConfigCommands,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let config_path = project_root.join(".vibe-ticket/config.yaml");
 
     match command {
@@ -287,16 +287,15 @@ fn handle_claude(
     let config = Config::load_from_path(config_path)?;
 
     // Determine output path
-    let claude_path = if let Some(path) = output_path {
-        PathBuf::from(path)
-    } else {
-        project_root.join("CLAUDE.md")
-    };
+    let claude_path = output_path.map_or_else(
+        || project_root.join("CLAUDE.md"),
+        PathBuf::from
+    );
 
     // Generate content based on template
     let content = match template {
-        "basic" => generate_basic_claude_md(&config, project_root)?,
-        "advanced" => generate_advanced_claude_md(&config, project_root)?,
+        "basic" => generate_basic_claude_md(&config, project_root),
+        "advanced" => generate_advanced_claude_md(&config, project_root),
         _ => {
             return Err(VibeTicketError::custom(format!(
                 "Unknown template '{template}'. Available templates: basic, advanced"
@@ -340,7 +339,7 @@ fn handle_claude(
 }
 
 /// Generate basic CLAUDE.md template
-fn generate_basic_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
+fn generate_basic_claude_md(config: &Config, project_root: &std::path::Path) -> String {
     use crate::storage::{FileStorage, TicketRepository};
 
     let storage = FileStorage::new(project_root.join(".vibe-ticket"));
@@ -443,12 +442,12 @@ Generated on: {}
         chrono::Local::now().format("%Y-%m-%d")
     );
 
-    Ok(content)
+    content
 }
 
 /// Generate advanced CLAUDE.md template
-fn generate_advanced_claude_md(config: &Config, project_root: &std::path::Path) -> Result<String> {
-    let basic = generate_basic_claude_md(config, project_root)?;
+fn generate_advanced_claude_md(config: &Config, project_root: &std::path::Path) -> String {
+    let basic = generate_basic_claude_md(config, project_root);
 
     let advanced_section = r#"
 ## Advanced Features
@@ -525,7 +524,7 @@ vibe-ticket check --detailed
 ```
 "#.to_string();
 
-    Ok(format!("{basic}\n{advanced_section}"))
+    format!("{basic}\n{advanced_section}")
 }
 
 /// Format a JSON value for display
@@ -539,7 +538,7 @@ fn format_value(value: &serde_json::Value) -> String {
             format!("[{}]", items.join(", "))
         },
         serde_json::Value::Null => "null".to_string(),
-        _ => value.to_string(),
+        serde_json::Value::Object(_) => value.to_string(),
     }
 }
 

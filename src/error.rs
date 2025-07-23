@@ -49,7 +49,7 @@ pub enum VibeTicketError {
     ProjectNotInitialized,
 
     /// Project already initialized
-    #[error("Project already initialized at {path:?}")]
+    #[error("Project already initialized at {}", path.display())]
     ProjectAlreadyInitialized { path: PathBuf },
 
     /// No active ticket
@@ -69,7 +69,7 @@ pub enum VibeTicketError {
     DuplicateTicket { slug: String },
 
     /// File operation error
-    #[error("File operation failed for {path:?}: {message}")]
+    #[error("File operation failed for {}: {message}", path.display())]
     FileOperation { path: PathBuf, message: String },
 
     /// Permission denied

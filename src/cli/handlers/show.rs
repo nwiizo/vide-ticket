@@ -36,22 +36,22 @@ use chrono::{DateTime, Local, Utc};
 /// - The project is not initialized
 /// - The ticket is not found
 pub fn handle_show_command(
-    ticket_ref: String,
+    ticket_ref: &str,
     show_tasks: bool,
     show_history: bool,
     markdown: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
     let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Resolve ticket ID
-    let ticket_id = resolve_ticket_ref(&storage, &ticket_ref)?;
+    let ticket_id = resolve_ticket_ref(&storage, ticket_ref)?;
 
     // Load the ticket
     let ticket = storage.load(&ticket_id)?;
@@ -192,22 +192,16 @@ fn output_plain(
     if !ticket.metadata.is_empty() {
         output.info("");
         output.info("Metadata:");
-        for (key, value) in &ticket.metadata {
-            if key == "close_message" {
-                if let Some(msg) = value.as_str() {
-                    output.info(&format!("  Close message: {msg}"));
-                }
-            } else if key == "archived" {
-                if let Some(archived) = value.as_bool() {
-                    if archived {
-                        output.info("  Status: Archived");
-                        if let Some(archived_at) = ticket.metadata.get("archived_at") {
-                            if let Some(date_str) = archived_at.as_str() {
-                                output.info(&format!("  Archived at: {date_str}"));
-                            }
-                        }
-                    }
-                }
+        // Show close message if present
+        if let Some(msg) = ticket.metadata.get("close_message").and_then(|v| v.as_str()) {
+            output.info(&format!("  Close message: {msg}"));
+        }
+        
+        // Show archived status if present
+        if ticket.metadata.get("archived").and_then(|v| v.as_bool()).unwrap_or(false) {
+            output.info("  Status: Archived");
+            if let Some(date_str) = ticket.metadata.get("archived_at").and_then(|v| v.as_str()) {
+                output.info(&format!("  Archived at: {date_str}"));
             }
         }
     }

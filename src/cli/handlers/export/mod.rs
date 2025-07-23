@@ -31,10 +31,10 @@ pub trait Exporter {
 ///
 /// Exports tickets to various formats using the appropriate exporter
 pub fn handle_export_command(
-    format: String,
+    format: &str,
     output_path: Option<String>,
     include_archived: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Get exporter for the format
@@ -68,8 +68,8 @@ pub fn handle_export_command(
 }
 
 /// Load tickets from storage
-fn load_tickets(project_dir: Option<String>, include_archived: bool) -> Result<Vec<Ticket>> {
-    let project_root = find_project_root(project_dir.as_deref())?;
+fn load_tickets(project_dir: Option<&str>, include_archived: bool) -> Result<Vec<Ticket>> {
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
     let storage = FileStorage::new(&vibe_ticket_dir);
 

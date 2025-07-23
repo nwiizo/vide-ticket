@@ -61,7 +61,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             description,
             force,
             claude_md,
-        } => handle_init(name, description, force, claude_md, formatter),
+        } => handle_init(name.as_deref(), description.as_deref(), force, claude_md, formatter),
 
         Commands::New {
             slug,
@@ -73,13 +73,13 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
         } => {
             use vibe_ticket::cli::handlers::handle_new_command;
             handle_new_command(
-                slug,
+                &slug,
                 title,
                 description,
-                priority,
+                &priority,
                 tags,
                 start,
-                cli.project,
+                cli.project.as_deref(),
                 formatter,
             )
         },
@@ -101,14 +101,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 status,
                 priority,
                 assignee,
-                sort,
+                &sort,
                 reverse,
                 limit,
                 archived,
                 open,
                 since,
                 until,
-                cli.project,
+                cli.project.as_deref(),
                 formatter,
             )
         },
@@ -124,14 +124,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 None, // status
                 None, // priority
                 None, // assignee
-                sort,
+                &sort,
                 reverse,
                 limit,
                 false, // archived
                 true,  // open
                 None,  // since
                 None,  // until
-                cli.project,
+                cli.project.as_deref(),
                 formatter,
             )
         },
@@ -160,12 +160,12 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             pr,
         } => {
             use vibe_ticket::cli::handlers::handle_close_command;
-            handle_close_command(ticket, message, archive, pr, cli.project, formatter)
+            handle_close_command(ticket, message, archive, pr, cli.project.as_deref(), formatter)
         },
 
         Commands::Check { detailed, stats } => {
             use vibe_ticket::cli::handlers::handle_check_command;
-            handle_check_command(detailed, stats, cli.project, formatter)
+            handle_check_command(detailed, stats, cli.project.as_deref(), formatter)
         },
 
         Commands::Edit {
@@ -188,7 +188,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 add_tags,
                 remove_tags,
                 editor,
-                cli.project,
+                cli.project.as_deref(),
                 formatter,
             )
         },
@@ -200,7 +200,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             markdown,
         } => {
             use vibe_ticket::cli::handlers::handle_show_command;
-            handle_show_command(ticket, tasks, history, markdown, cli.project, formatter)
+            handle_show_command(&ticket, tasks, history, markdown, cli.project.as_deref(), formatter)
         },
 
         Commands::Task { command } => match command {
@@ -236,7 +236,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
 
         Commands::Archive { ticket, unarchive } => {
             use vibe_ticket::cli::handlers::handle_archive_command;
-            handle_archive_command(ticket, unarchive, cli.project, formatter)
+            handle_archive_command(&ticket, unarchive, cli.project.as_deref(), formatter)
         },
 
         Commands::Search {
@@ -248,12 +248,12 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
         } => {
             use vibe_ticket::cli::handlers::handle_search_command;
             handle_search_command(
-                query,
+                &query,
                 title,
                 description,
                 tags,
                 regex,
-                cli.project,
+                cli.project.as_deref(),
                 formatter,
             )
         },
@@ -264,7 +264,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             include_archived,
         } => {
             use vibe_ticket::cli::handlers::handle_export_command;
-            handle_export_command(format, output, include_archived, cli.project, formatter)
+            handle_export_command(&format, output, include_archived, cli.project.as_deref(), formatter)
         },
 
         Commands::Import {
@@ -275,18 +275,18 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
         } => {
             use vibe_ticket::cli::handlers::handle_import_command;
             handle_import_command(
-                file,
-                format,
+                &file,
+                format.as_deref(),
                 skip_validation,
                 dry_run,
-                cli.project,
+                cli.project.as_deref(),
                 formatter,
             )
         },
 
         Commands::Config { command } => {
             use vibe_ticket::cli::handlers::handle_config_command;
-            handle_config_command(command, cli.project, formatter)
+            handle_config_command(command, cli.project.as_deref(), formatter)
         },
 
         Commands::Spec { command } => match command {

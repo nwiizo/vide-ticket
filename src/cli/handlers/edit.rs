@@ -47,11 +47,11 @@ pub fn handle_edit_command(
     add_tags: Option<String>,
     remove_tags: Option<String>,
     editor: bool,
-    project_dir: Option<String>,
+    project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
     // Ensure project is initialized
-    let project_root = find_project_root(project_dir.as_deref())?;
+    let project_root = find_project_root(project_dir)?;
     let vibe_ticket_dir = project_root.join(".vibe-ticket");
 
     // Initialize storage
@@ -82,7 +82,7 @@ pub fn handle_edit_command(
     // Update title if provided
     if let Some(new_title) = title {
         let old_title = ticket.title.clone();
-        ticket.title = new_title.clone();
+        ticket.title.clone_from(&new_title);
         changes.push(format!("Title: {old_title} → {new_title}"));
     }
 
