@@ -125,12 +125,12 @@ impl OutputFormatter {
         println!(
             "{:<12} {}",
             "Status:".bright_black(),
-            self.format_status(&ticket.status)
+            self.format_status(ticket.status)
         );
         println!(
             "{:<12} {}",
             "Priority:".bright_black(),
-            self.format_priority(&ticket.priority)
+            self.format_priority(ticket.priority)
         );
 
         if let Some(assignee) = &ticket.assignee {
@@ -220,8 +220,8 @@ impl OutputFormatter {
             println!(
                 "{:<8} {:<10} {:<10} {:<40} {}",
                 ticket.id.short(),
-                self.format_status(&ticket.status),
-                self.format_priority(&ticket.priority),
+                self.format_status(ticket.status),
+                self.format_priority(ticket.priority),
                 truncate(&ticket.title, 40),
                 tasks
             );
