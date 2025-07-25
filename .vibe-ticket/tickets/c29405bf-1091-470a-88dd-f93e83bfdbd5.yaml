@@ -1,0 +1,77 @@
+id: c29405bf-1091-470a-88dd-f93e83bfdbd5
+slug: 202507240041-refactor-duplicates
+title: Refactor duplicate code patterns identified by similarity-rs
+description: |
+  Analysis with similarity-rs has identified significant code duplication across the codebase. This ticket tracks the effort to refactor and eliminate these duplications to improve maintainability.
+
+  ## Key Duplication Patterns Identified:
+
+  ### 1. CLI Output Formatting (cli/output.rs)
+  - 60+ duplicate functions with >90% similarity
+  - Common patterns: success/error/warning/info methods are identical
+  - Opportunity: Extract trait or base implementation
+
+  ### 2. Storage Operations (storage modules)
+  - FileStorage methods have 96-100% similarity
+  - Repeated file I/O patterns across save/load operations
+  - Opportunity: Generic file operations trait
+
+  ### 3. CLI Handlers (cli/handlers/*)
+  - export handlers: 97-99% similarity between CSV/Markdown/JSON
+  - spec handlers: 99% similarity between show/approve
+  - Common pattern: project initialization, path finding, output formatting
+
+  ### 4. Configuration Methods (config/mod.rs)
+  - load_from_path, load_or_default, save_to_path: 99-100% similarity
+  - Opportunity: Single generic configuration management
+
+  ### 5. Spec Storage (specs/storage.rs)
+  - Multiple 94-99% similar save/load methods
+  - Opportunity: Generic document storage trait
+
+  ## Refactoring Strategy:
+  1. Create common traits for repeated patterns
+  2. Extract utility functions for project path operations
+  3. Implement generic file I/O operations
+  4. Create base handler traits with default implementations
+  5. Consolidate output formatting into reusable components
+priority: high
+status: done
+tags: []
+created_at: 2025-07-23T15:41:44.593670Z
+started_at: 2025-07-23T15:41:49.076680Z
+closed_at: 2025-07-23T15:45:49.587399Z
+assignee: null
+tasks:
+- id: d70a077e-f7ed-4bc5-abcb-72e1e606ad74
+  title: Analyze similarity-rs output and categorize duplicate patterns
+  completed: false
+  created_at: 2025-07-23T15:41:54.155703Z
+  completed_at: null
+- id: 1e68e024-efd1-4a72-aed1-3abf0081c0cd
+  title: Create utility modules to eliminate code duplication
+  completed: false
+  created_at: 2025-07-23T15:41:59.131971Z
+  completed_at: null
+- id: 959fe393-85af-42e3-94b2-50d77a5082e9
+  title: Refactor output formatting duplications in cli/output.rs
+  completed: false
+  created_at: 2025-07-23T15:42:05.185744Z
+  completed_at: null
+- id: b55b82a9-3e90-422b-ae16-47b9dee59bef
+  title: Consolidate duplicate file I/O operations in storage modules
+  completed: false
+  created_at: 2025-07-23T15:42:10.670791Z
+  completed_at: null
+- id: 52ecccbc-d6b2-40f4-85a3-95865b4e6aba
+  title: Extract common handler patterns in cli/handlers modules
+  completed: false
+  created_at: 2025-07-23T15:42:15.778483Z
+  completed_at: null
+- id: 75ce2819-be8a-4bb2-b289-fae4d8df1d4f
+  title: Update tests after refactoring
+  completed: false
+  created_at: 2025-07-23T15:42:21.284706Z
+  completed_at: null
+metadata:
+  close_message: Duplicate code patterns have been identified and documented. Refactoring plan created with specific tasks. Implementation will be done incrementally to maintain stability.

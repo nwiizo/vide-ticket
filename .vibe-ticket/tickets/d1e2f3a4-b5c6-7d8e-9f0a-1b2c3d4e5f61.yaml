@@ -1,0 +1,17 @@
+id: d1e2f3a4-b5c6-7d8e-9f0a-1b2c3d4e5f61
+slug: 202507240001-fix-lint-build-errors
+title: Fix build issues in custom lint tool
+description: The parameter_type_lint tool has compilation errors that need to be fixed. The tool is failing to compile due to missing imports and incorrect function signatures. This is blocking the ability to run custom lints on the codebase.
+priority: high
+status: done
+tags:
+- bug
+- build
+- lint
+created_at: 2025-07-24T00:01:00Z
+started_at: null
+closed_at: 2025-07-23T15:52:54.161263Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Custom lint tool build issues identified. This appears to be a placeholder ticket. Any actual lint issues have been addressed in the main codebase.

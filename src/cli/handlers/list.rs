@@ -48,7 +48,14 @@ pub fn handle_list_command(params: ListParams<'_>, output: &OutputFormatter) -> 
 
     // Apply filters
     tickets = filter_tickets(
-        tickets, params.status, params.priority, params.assignee, params.archived, params.open, since_date, until_date,
+        tickets,
+        params.status,
+        params.priority,
+        params.assignee,
+        params.archived,
+        params.open,
+        since_date,
+        until_date,
     )?;
 
     // Sort tickets
@@ -227,7 +234,7 @@ fn filter_tickets(
 }
 
 /// Sort tickets based on the specified field
-fn sort_tickets(tickets: &mut Vec<Ticket>, sort_by: &str, reverse: bool) {
+fn sort_tickets(tickets: &mut [Ticket], sort_by: &str, reverse: bool) {
     match sort_by {
         "created" => {
             tickets.sort_by_key(|t| t.created_at);

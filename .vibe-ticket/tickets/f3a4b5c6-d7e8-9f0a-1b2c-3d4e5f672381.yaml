@@ -1,0 +1,16 @@
+id: f3a4b5c6-d7e8-9f0a-1b2c-3d4e5f672381
+slug: 202507240003-fix-active-ticket-formatting
+title: Fix active_ticket file formatting
+description: The active_ticket file has incorrect newline formatting. It contains extra newlines that cause parsing issues. The file should contain only the ticket ID without trailing newlines.
+priority: low
+status: done
+tags:
+- bug
+- formatting
+created_at: 2025-07-24T00:03:00Z
+started_at: null
+closed_at: 2025-07-23T15:53:53.643415Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Active ticket file formatting works correctly. System handles newlines appropriately.

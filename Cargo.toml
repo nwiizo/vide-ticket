@@ -48,6 +48,9 @@ uuid = { version = "1.10", features = ["v4", "serde"] }
 # Path utilities
 directories = "5.0"
 
+# Fuzzy search
+fuzzy-matcher = "0.3"
+
 # Terminal output
 colored = "2.1"
 indicatif = "0.17"
@@ -99,6 +102,18 @@ optional = true
 version = "0.8"
 features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"]
 optional = true
+
+[[bench]]
+name = "ticket_operations"
+harness = false
+
+[[bench]]
+name = "storage_operations"
+harness = false
+
+[[bench]]
+name = "cli_operations"
+harness = false
 
 [profile.release]
 lto = true

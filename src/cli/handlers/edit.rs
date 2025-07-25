@@ -4,7 +4,7 @@
 //! including title, description, priority, status, and tags.
 
 use crate::cli::{find_project_root, OutputFormatter};
-use crate::core::{Priority, Status, TicketId};
+use crate::core::{Priority, Status, Ticket, TicketId};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
@@ -61,8 +61,8 @@ pub fn handle_edit_command(params: EditParams<'_>, output: &OutputFormatter) -> 
     let storage = FileStorage::new(&vibe_ticket_dir);
 
     // Get the active ticket if no ticket specified
-    let ticket_id = if let Some(ref_str) = params.ticket_ref {
-        resolve_ticket_ref(&storage, &ref_str)?
+    let ticket_id = if let Some(ref ref_str) = params.ticket_ref {
+        resolve_ticket_ref(&storage, ref_str)?
     } else {
         // Get active ticket
         storage
@@ -82,78 +82,8 @@ pub fn handle_edit_command(params: EditParams<'_>, output: &OutputFormatter) -> 
         return Ok(());
     }
 
-    // Update title if provided
-    if let Some(new_title) = params.title {
-        let old_title = ticket.title.clone();
-        ticket.title.clone_from(&new_title);
-        changes.push(format!("Title: {old_title} → {new_title}"));
-    }
-
-    // Update description if provided
-    if let Some(new_description) = params.description {
-        ticket.description = new_description;
-        changes.push("Description updated".to_string());
-    }
-
-    // Update priority if provided
-    if let Some(priority_str) = params.priority {
-        let new_priority = Priority::try_from(priority_str.as_str()).map_err(|_| {
-            VibeTicketError::InvalidPriority {
-                priority: priority_str,
-            }
-        })?;
-        let old_priority = ticket.priority;
-        ticket.priority = new_priority;
-        changes.push(format!("Priority: {old_priority} → {new_priority}"));
-    }
-
-    // Update status if provided
-    if let Some(status_str) = params.status {
-        let new_status = Status::try_from(status_str.as_str())
-            .map_err(|_| VibeTicketError::InvalidStatus { status: status_str })?;
-        let old_status = ticket.status;
-        ticket.status = new_status;
-        changes.push(format!("Status: {old_status} → {new_status}"));
-
-        // Update timestamps based on status changes
-        match (old_status, new_status) {
-            (Status::Todo, Status::Doing) => {
-                ticket.started_at = Some(chrono::Utc::now());
-            },
-            (_, Status::Done) if old_status != Status::Done => {
-                ticket.closed_at = Some(chrono::Utc::now());
-            },
-            _ => {},
-        }
-    }
-
-    // Add tags if provided
-    if let Some(tags_str) = params.add_tags {
-        let new_tags: Vec<String> = tags_str
-            .split(',')
-            .map(|s| s.trim().to_string())
-            .filter(|s| !s.is_empty())
-            .collect();
-
-        for tag in new_tags {
-            if !ticket.tags.contains(&tag) {
-                ticket.tags.push(tag);
-            }
-        }
-        changes.push("Tags added".to_string());
-    }
-
-    // Remove tags if provided
-    if let Some(tags_str) = params.remove_tags {
-        let tags_to_remove: Vec<String> = tags_str
-            .split(',')
-            .map(|s| s.trim().to_string())
-            .filter(|s| !s.is_empty())
-            .collect();
-
-        ticket.tags.retain(|tag| !tags_to_remove.contains(tag));
-        changes.push("Tags removed".to_string());
-    }
+    // Apply updates
+    update_ticket_fields(&mut ticket, &params, &mut changes)?;
 
     // Check if any changes were made
     if changes.is_empty() {
@@ -165,37 +95,108 @@ pub fn handle_edit_command(params: EditParams<'_>, output: &OutputFormatter) -> 
     storage.save(&ticket)?;
 
     // Output results
+    output_edit_results(output, &ticket, &changes)?;
+
+    Ok(())
+}
+
+/// Update ticket fields based on parameters
+fn update_ticket_fields(
+    ticket: &mut Ticket,
+    params: &EditParams<'_>,
+    changes: &mut Vec<String>,
+) -> Result<()> {
+    // Update title
+    if let Some(new_title) = &params.title {
+        changes.push(format!("title: {} → {}", ticket.title, new_title));
+        ticket.title = new_title.clone();
+    }
+
+    // Update description
+    if let Some(new_desc) = &params.description {
+        let old_desc = if ticket.description.is_empty() {
+            "(empty)"
+        } else if ticket.description.len() > 50 {
+            &format!("{}...", &ticket.description[..50])
+        } else {
+            &ticket.description
+        };
+        changes.push(format!("description: {} → {}", old_desc, new_desc));
+        ticket.description = new_desc.clone();
+    }
+
+    // Update priority
+    if let Some(priority_str) = &params.priority {
+        let new_priority = Priority::try_from(priority_str.as_str())
+            .map_err(|_| VibeTicketError::InvalidPriority {
+                priority: priority_str.clone(),
+            })?;
+        if new_priority != ticket.priority {
+            changes.push(format!(
+                "priority: {} → {}",
+                ticket.priority, new_priority
+            ));
+            ticket.priority = new_priority;
+        }
+    }
+
+    // Update status
+    if let Some(status_str) = &params.status {
+        let new_status = Status::try_from(status_str.as_str())
+            .map_err(|_| VibeTicketError::InvalidStatus {
+                status: status_str.clone(),
+            })?;
+        if new_status != ticket.status {
+            changes.push(format!("status: {} → {}", ticket.status, new_status));
+            ticket.status = new_status;
+        }
+    }
+
+    // Add tags
+    if let Some(add_tags_str) = &params.add_tags {
+        let tags_to_add = super::parse_tags(Some(add_tags_str.clone()));
+        for tag in tags_to_add {
+            if !ticket.tags.contains(&tag) {
+                ticket.tags.push(tag.clone());
+                changes.push(format!("added tag: {}", tag));
+            }
+        }
+    }
+
+    // Remove tags
+    if let Some(remove_tags_str) = &params.remove_tags {
+        let tags_to_remove = super::parse_tags(Some(remove_tags_str.clone()));
+        for tag in &tags_to_remove {
+            if let Some(pos) = ticket.tags.iter().position(|t| t == tag) {
+                ticket.tags.remove(pos);
+                changes.push(format!("removed tag: {}", tag));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Output edit results in the appropriate format
+fn output_edit_results(
+    output: &OutputFormatter,
+    ticket: &Ticket,
+    changes: &[String],
+) -> Result<()> {
     if output.is_json() {
         output.print_json(&serde_json::json!({
-            "status": "success",
-            "ticket": {
-                "id": ticket.id.to_string(),
-                "slug": ticket.slug,
-                "title": ticket.title,
-                "description": ticket.description,
-                "status": ticket.status.to_string(),
-                "priority": ticket.priority.to_string(),
-                "tags": ticket.tags,
-            },
+            "success": true,
+            "message": "Updated ticket",
+            "ticket": ticket,
             "changes": changes,
         }))?;
     } else {
         output.success(&format!("Updated ticket: {}", ticket.slug));
-        for change in &changes {
-            output.info(&format!("  • {change}"));
-        }
-
-        // Show current state
         output.info("");
-        output.info("Current state:");
-        output.info(&format!("  Title: {}", ticket.title));
-        output.info(&format!("  Status: {}", ticket.status));
-        output.info(&format!("  Priority: {}", ticket.priority));
-        if !ticket.tags.is_empty() {
-            output.info(&format!("  Tags: {}", ticket.tags.join(", ")));
+        for change in changes {
+            output.info(&format!("  • {}", change));
         }
     }
-
     Ok(())
 }
 

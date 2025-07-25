@@ -33,7 +33,7 @@ struct StatusVisual {
 
 impl Status {
     /// Returns the visual properties for this status
-    const fn visual(&self) -> StatusVisual {
+    const fn visual(self) -> StatusVisual {
         match self {
             Self::Todo => StatusVisual {
                 display: "Todo",
@@ -75,27 +75,27 @@ impl Status {
     }
 
     /// Returns whether the status represents active work
-    pub const fn is_active(&self) -> bool {
+    pub const fn is_active(self) -> bool {
         matches!(self, Self::Doing | Self::Review)
     }
 
     /// Returns whether the status represents completed work
-    pub const fn is_completed(&self) -> bool {
+    pub const fn is_completed(self) -> bool {
         matches!(self, Self::Done)
     }
 
     /// Returns whether the status allows starting work
-    pub const fn can_start(&self) -> bool {
+    pub const fn can_start(self) -> bool {
         matches!(self, Self::Todo | Self::Blocked)
     }
 
     /// Returns the emoji representation of the status
-    pub const fn emoji(&self) -> &'static str {
+    pub const fn emoji(self) -> &'static str {
         self.visual().emoji
     }
 
     /// Returns the color code for terminal output
-    pub const fn color(&self) -> &'static str {
+    pub const fn color(self) -> &'static str {
         self.visual().color
     }
 }

@@ -30,7 +30,7 @@ struct PriorityProperties {
 
 impl Priority {
     /// Returns all properties for this priority
-    const fn properties(&self) -> PriorityProperties {
+    const fn properties(self) -> PriorityProperties {
         match self {
             Self::Low => PriorityProperties {
                 display: "Low",
@@ -65,22 +65,22 @@ impl Priority {
     }
 
     /// Returns the numeric value for sorting (higher = more urgent)
-    pub const fn value(&self) -> u8 {
+    pub const fn value(self) -> u8 {
         self.properties().value
     }
 
     /// Returns the emoji representation of the priority
-    pub const fn emoji(&self) -> &'static str {
+    pub const fn emoji(self) -> &'static str {
         self.properties().emoji
     }
 
     /// Returns the color code for terminal output
-    pub const fn color(&self) -> &'static str {
+    pub const fn color(self) -> &'static str {
         self.properties().color
     }
 
     /// Returns whether this priority requires immediate attention
-    pub const fn is_urgent(&self) -> bool {
+    pub const fn is_urgent(self) -> bool {
         matches!(self, Self::High | Self::Critical)
     }
 }

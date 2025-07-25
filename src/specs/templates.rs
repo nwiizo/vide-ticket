@@ -89,8 +89,23 @@ impl SpecTemplate {
     pub fn content(&self) -> String {
         match self {
             Self::Requirements { title, description } => {
-                format!(
-                    r"# 要件定義書 / Requirements Definition
+                Self::requirements_template(title, description)
+            },
+            Self::Design {
+                title,
+                requirements_summary,
+            } => Self::design_template(title, requirements_summary),
+            Self::Tasks {
+                title,
+                design_summary,
+            } => Self::tasks_template(title, design_summary),
+        }
+    }
+
+    /// Generate requirements document template
+    fn requirements_template(title: &str, description: &str) -> String {
+        format!(
+            r"# 要件定義書 / Requirements Definition
 
 **タイトル / Title**: {title}
 **作成日 / Date**: {{{{date}}}}
@@ -100,7 +115,26 @@ impl SpecTemplate {
 
 {description}
 
-## 2. 背景と目的 / Background and Purpose
+{}
+
+{}
+
+{}
+
+{}
+
+{}",
+            Self::requirements_background_section(),
+            Self::requirements_scope_section(),
+            Self::requirements_functional_section(),
+            Self::requirements_nonfunctional_section(),
+            Self::requirements_footer_section()
+        )
+    }
+
+    /// Background and purpose section for requirements
+    const fn requirements_background_section() -> &'static str {
+        r"## 2. 背景と目的 / Background and Purpose
 
 ### 2.1 背景 / Background
 <!-- プロジェクトの背景、なぜこの機能が必要なのかを記述 -->
@@ -109,17 +143,23 @@ impl SpecTemplate {
 <!-- この仕様で達成したい具体的な目標を記述 -->
 
 ### 2.3 成功基準 / Success Criteria
-<!-- 成功と判断できる具体的な基準を記述 -->
+<!-- 成功と判断できる具体的な基準を記述 -->"
+    }
 
-## 3. スコープ / Scope
+    /// Scope section for requirements
+    const fn requirements_scope_section() -> &'static str {
+        r"## 3. スコープ / Scope
 
 ### 3.1 対象範囲 / In Scope
 <!-- この仕様に含まれる機能や要件 -->
 
 ### 3.2 対象外 / Out of Scope
-<!-- この仕様に含まれない機能や要件 -->
+<!-- この仕様に含まれない機能や要件 -->"
+    }
 
-## 4. 機能要件 / Functional Requirements
+    /// Functional requirements section
+    const fn requirements_functional_section() -> &'static str {
+        r"## 4. 機能要件 / Functional Requirements
 
 ### 4.1 ユーザーストーリー / User Stories
 <!-- As a [role], I want [feature] so that [benefit] 形式で記述 -->
@@ -128,9 +168,12 @@ impl SpecTemplate {
 <!-- 実装すべき機能のリスト -->
 
 ### 4.3 画面/インターフェース要件 / UI/Interface Requirements
-<!-- ユーザーインターフェースやAPIインターフェースの要件 -->
+<!-- ユーザーインターフェースやAPIインターフェースの要件 -->"
+    }
 
-## 5. 非機能要件 / Non-Functional Requirements
+    /// Non-functional requirements section
+    const fn requirements_nonfunctional_section() -> &'static str {
+        r"## 5. 非機能要件 / Non-Functional Requirements
 
 ### 5.1 パフォーマンス要件 / Performance Requirements
 <!-- 応答時間、処理速度、同時接続数などの要件 -->
@@ -142,9 +185,12 @@ impl SpecTemplate {
 <!-- 可用性、エラー処理、データ整合性などの要件 -->
 
 ### 5.4 保守性要件 / Maintainability Requirements
-<!-- コードの保守性、拡張性、ドキュメントなどの要件 -->
+<!-- コードの保守性、拡張性、ドキュメントなどの要件 -->"
+    }
 
-## 6. 制約事項 / Constraints
+    /// Footer sections for requirements (constraints, assumptions, etc.)
+    const fn requirements_footer_section() -> &'static str {
+        r"## 6. 制約事項 / Constraints
 
 ### 6.1 技術的制約 / Technical Constraints
 <!-- 使用すべき技術、プラットフォーム、言語などの制約 -->
@@ -162,17 +208,13 @@ impl SpecTemplate {
 <!-- プロジェクト固有の用語の定義 -->
 
 ## 10. 参考資料 / References
-<!-- 参考にした資料やドキュメントのリンク -->
-"
-                )
-            },
+<!-- 参考にした資料やドキュメントのリンク -->"
+    }
 
-            Self::Design {
-                title,
-                requirements_summary,
-            } => {
-                format!(
-                    r"# 技術設計書 / Technical Design Document
+    /// Generate design document template
+    fn design_template(title: &str, requirements_summary: &str) -> String {
+        format!(
+            r"# 技術設計書 / Technical Design Document
 
 **タイトル / Title**: {title}
 **作成日 / Date**: {{{{date}}}}
@@ -186,7 +228,26 @@ impl SpecTemplate {
 ### 1.2 設計方針 / Design Principles
 <!-- この設計で重視する原則や方針 -->
 
-## 2. アーキテクチャ / Architecture
+{}
+
+{}
+
+{}
+
+{}
+
+{}",
+            Self::design_architecture_section(),
+            Self::design_detailed_section(),
+            Self::design_implementation_section(),
+            Self::design_quality_section(),
+            Self::design_deployment_section()
+        )
+    }
+
+    /// Architecture section for design document
+    const fn design_architecture_section() -> &'static str {
+        r"## 2. アーキテクチャ / Architecture
 
 ### 2.1 全体構成図 / System Architecture
 <!-- システム全体のアーキテクチャ図 -->
@@ -201,9 +262,12 @@ impl SpecTemplate {
 <!-- 各コンポーネントの責務と相互作用 -->
 
 ### 2.3 データフロー / Data Flow
-<!-- データの流れと処理の順序 -->
+<!-- データの流れと処理の順序 -->"
+    }
 
-## 3. 詳細設計 / Detailed Design
+    /// Detailed design section
+    const fn design_detailed_section() -> &'static str {
+        r"## 3. 詳細設計 / Detailed Design
 
 ### 3.1 モジュール構成 / Module Structure
 ```
@@ -221,9 +285,12 @@ src/
 <!-- API、関数、クラスなどのインターフェース -->
 
 ### 3.3 データモデル / Data Model
-<!-- データ構造、スキーマ、エンティティの定義 -->
+<!-- データ構造、スキーマ、エンティティの定義 -->"
+    }
 
-## 4. 実装詳細 / Implementation Details
+    /// Implementation details section
+    const fn design_implementation_section() -> &'static str {
+        r"## 4. 実装詳細 / Implementation Details
 
 ### 4.1 主要アルゴリズム / Key Algorithms
 <!-- 重要なアルゴリズムやロジックの説明 -->
@@ -232,9 +299,12 @@ src/
 <!-- エラーの種類と処理方法 -->
 
 ### 4.3 ロギングとモニタリング / Logging and Monitoring
-<!-- ログ出力とモニタリングの設計 -->
+<!-- ログ出力とモニタリングの設計 -->"
+    }
 
-## 5. セキュリティ設計 / Security Design
+    /// Quality aspects section (security, performance, extensibility)
+    const fn design_quality_section() -> &'static str {
+        r"## 5. セキュリティ設計 / Security Design
 
 ### 5.1 認証・認可 / Authentication & Authorization
 <!-- 認証と認可の仕組み -->
@@ -264,9 +334,12 @@ src/
 <!-- 単体テストの方針とカバレッジ目標 -->
 
 ### 8.2 統合テスト / Integration Testing
-<!-- 統合テストの方針と重点項目 -->
+<!-- 統合テストの方針と重点項目 -->"
+    }
 
-## 9. デプロイメント / Deployment
+    /// Deployment and decisions section
+    const fn design_deployment_section() -> &'static str {
+        r"## 9. デプロイメント / Deployment
 
 ### 9.1 デプロイ構成 / Deployment Configuration
 <!-- デプロイ環境と構成 -->
@@ -280,17 +353,13 @@ src/
 <!-- 使用する技術とその選定理由 -->
 
 ### 10.2 トレードオフ / Trade-offs
-<!-- 設計上のトレードオフと判断理由 -->
-"
-                )
-            },
+<!-- 設計上のトレードオフと判断理由 -->"
+    }
 
-            Self::Tasks {
-                title,
-                design_summary,
-            } => {
-                format!(
-                    r"# 実装計画書 / Implementation Plan
+    /// Generate tasks/implementation plan template
+    fn tasks_template(title: &str, design_summary: &str) -> String {
+        format!(
+            r"# 実装計画書 / Implementation Plan
 
 **タイトル / Title**: {title}
 **作成日 / Date**: {{{{date}}}}
@@ -304,7 +373,26 @@ src/
 ### 1.2 実装方針 / Implementation Strategy
 <!-- 実装の進め方と優先順位 -->
 
-## 2. マイルストーン / Milestones
+{}
+
+{}
+
+{}
+
+{}
+
+{}",
+            Self::tasks_milestones_section(),
+            Self::tasks_detailed_section(),
+            Self::tasks_risks_section(),
+            Self::tasks_dependencies_section(),
+            Self::tasks_completion_section()
+        )
+    }
+
+    /// Milestones section for tasks document
+    const fn tasks_milestones_section() -> &'static str {
+        r"## 2. マイルストーン / Milestones
 
 ### Phase 1: 基盤実装 / Foundation (推定: X日)
 - [ ] 開発環境のセットアップ
@@ -319,9 +407,12 @@ src/
 ### Phase 3: 品質向上 / Quality Enhancement (推定: Z日)
 - [ ] テストの実装
 - [ ] ドキュメントの作成
-- [ ] パフォーマンス最適化
+- [ ] パフォーマンス最適化"
+    }
 
-## 3. タスク詳細 / Detailed Tasks
+    /// Detailed tasks section
+    const fn tasks_detailed_section() -> &'static str {
+        r"## 3. タスク詳細 / Detailed Tasks
 
 ### 3.1 セットアップタスク / Setup Tasks
 | タスク | 説明 | 見積もり | 担当者 | 状態 |
@@ -346,9 +437,12 @@ src/
 | タスク | 説明 | 見積もり | 前提タスク | 状態 |
 |--------|------|----------|------------|------|
 | T301 | APIドキュメント作成 | 2h | T103 | Todo |
-| T302 | ユーザーガイド作成 | 3h | T103 | Todo |
+| T302 | ユーザーガイド作成 | 3h | T103 | Todo |"
+    }
 
-## 4. リスクと対策 / Risks and Mitigations
+    /// Risks and mitigations section
+    const fn tasks_risks_section() -> &'static str {
+        r"## 4. リスクと対策 / Risks and Mitigations
 
 ### 4.1 技術的リスク / Technical Risks
 | リスク | 影響度 | 発生確率 | 対策 |
@@ -358,9 +452,12 @@ src/
 ### 4.2 スケジュールリスク / Schedule Risks
 | リスク | 影響度 | 発生確率 | 対策 |
 |--------|--------|----------|------|
-| 見積もりの甘さ | 中 | 高 | バッファ時間の確保 |
+| 見積もりの甘さ | 中 | 高 | バッファ時間の確保 |"
+    }
 
-## 5. 依存関係 / Dependencies
+    /// Dependencies section
+    const fn tasks_dependencies_section() -> &'static str {
+        r"## 5. 依存関係 / Dependencies
 
 ### 5.1 外部依存 / External Dependencies
 - ライブラリA (バージョン x.y.z)
@@ -368,9 +465,12 @@ src/
 
 ### 5.2 内部依存 / Internal Dependencies
 - 既存モジュールC
-- 共通ライブラリD
+- 共通ライブラリD"
+    }
 
-## 6. 完了条件 / Definition of Done
+    /// Completion criteria and summary section
+    const fn tasks_completion_section() -> &'static str {
+        r"## 6. 完了条件 / Definition of Done
 
 ### 6.1 コード完了条件 / Code Completion Criteria
 - [ ] すべての機能が実装されている
@@ -394,11 +494,7 @@ src/
 - **推定完了日 / Estimated Completion Date**: YYYY-MM-DD
 
 ## 8. 備考 / Notes
-<!-- その他の注意事項や申し送り事項 -->
-"
-                )
-            },
-        }
+<!-- その他の注意事項や申し送り事項 -->"
     }
 }
 

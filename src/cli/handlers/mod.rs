@@ -49,7 +49,7 @@ pub use import::handle_import_command;
 pub use init::handle_init;
 pub use list::{handle_list_command, ListParams};
 pub use new::{handle_new_command, NewParams};
-pub use search::handle_search_command;
+pub use search::{handle_search_command, SearchParams};
 pub use show::handle_show_command;
 pub use spec::{
     handle_spec_activate, handle_spec_approve, handle_spec_delete, handle_spec_design,
@@ -112,9 +112,10 @@ pub fn get_active_ticket() -> Result<String> {
     ensure_project_initialized()?;
 
     let storage = FileStorage::new(".vibe-ticket");
-    storage
-        .get_active_ticket()?
-        .map_or_else(|| Err(VibeTicketError::NoActiveTicket), |ticket_id| Ok(ticket_id.to_string()))
+    storage.get_active_ticket()?.map_or_else(
+        || Err(VibeTicketError::NoActiveTicket),
+        |ticket_id| Ok(ticket_id.to_string()),
+    )
 }
 
 /// Helper function to resolve a ticket identifier

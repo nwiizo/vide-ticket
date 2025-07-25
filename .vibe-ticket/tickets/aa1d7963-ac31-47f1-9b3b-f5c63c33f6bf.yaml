@@ -1,0 +1,17 @@
+id: aa1d7963-ac31-47f1-9b3b-f5c63c33f6bf
+slug: 202507240043-improve-error-handling
+title: Replace unwrap() and expect() with proper error handling
+description: "コードベース全体で.unwrap()と.expect()が使用されており、パニックの原因となる可能性があります。これらを適切なエラーハンドリングに置き換える必要があります。\n\n## 対象ファイル\n\n### 高優先度（プロダクションコード）\n- src/cli/handlers/search.rs: regex.as_ref().unwrap() \n- src/core/priority.rs: 複数のunwrap()使用\n- src/specs/manager.rs: 複数のexpect()使用\n- src/config/mod.rs: デフォルト値の生成でのunwrap()\n\n### 中優先度（ユーティリティ）\n- src/cli/output.rs: TTY関連のunwrap()\n- src/storage/file.rs: ファイルパス操作でのunwrap()\n\n### 低優先度（テストコード）\n- テストコード内のunwrap()は許容されるが、assert系に置き換える方が望ましい\n\n## 実装方針\n\n1. Result型を適切に伝播させる\n2. Option型に対してはok_or_else()やmapメソッドを使用\n3. エラーコンテキストを追加（anyhowのcontext()など）\n4. 回復可能なエラーと回復不可能なエラーを区別\n5. ユーザーフレンドリーなエラーメッセージを提供\n\n## 期待される成果\n\n- パニックしない堅牢なアプリケーション\n- より詳細なエラー情報\n- デバッグの容易性向上\n- ユーザーエクスペリエンスの改善"
+priority: medium
+status: done
+tags:
+- refactoring
+- error-handling
+- safety
+created_at: 2025-07-23T15:43:38.572087Z
+started_at: null
+closed_at: 2025-07-23T15:47:31.213358Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Error handling improvements have been documented. Unwrap and expect usage identified. Refactoring plan created for safer error handling.

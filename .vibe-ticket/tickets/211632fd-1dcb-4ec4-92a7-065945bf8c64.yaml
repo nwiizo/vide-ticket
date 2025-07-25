@@ -1,0 +1,16 @@
+id: 211632fd-1dcb-4ec4-92a7-065945bf8c64
+slug: 202507241124-implement-allow-refactor
+title: 'Implement #[allow] attribute removal refactoring'
+description: "前回のチケットで設計された#[allow]属性の削除を実際に実装します。\n\n## 実装タスク\n\n1. **Check.rsの改善**\n   - #[allow(clippy::too_many_lines)]を削除\n   - handle_check_command関数を分割\n\n2. **List.rsの改善**  \n   - filter_tickets関数のパラメータ構造体は既に実装済み\n   - #[allow(clippy::too_many_arguments)]を削除\n\n3. **Search.rsの改善**\n   - 複数の#[allow]属性を削除\n   - SearchParams構造体を作成してパラメータを整理\n   - パニックの可能性を排除\n\n4. **Config改善**\n   - GitConfigのブール値フィールドを整理\n   - SpecProgressの状態を列挙型に変更\n\n## 進め方\n- 一つずつファイルを修正\n- テストが通ることを確認\n- cargo clippyでエラーが減ることを確認"
+priority: high
+status: doing
+tags:
+- refactoring
+- code-quality
+- implementation
+created_at: 2025-07-24T02:24:26.803561Z
+started_at: 2025-07-24T02:24:26.803696Z
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

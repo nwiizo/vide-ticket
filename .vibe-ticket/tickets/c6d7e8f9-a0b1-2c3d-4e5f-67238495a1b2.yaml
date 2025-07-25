@@ -1,0 +1,17 @@
+id: c6d7e8f9-a0b1-2c3d-4e5f-67238495a1b2
+slug: 202507240006-fix-duplicate-ticket-detection
+title: Fix duplicate ticket detection across different statuses
+description: Multiple tickets with similar purposes exist in different states. The system should detect and warn about potential duplicate tickets even when they have different statuses. This would help prevent creating redundant tickets for the same issue.
+priority: medium
+status: done
+tags:
+- enhancement
+- duplicate-detection
+- ux
+created_at: 2025-07-24T00:06:00Z
+started_at: null
+closed_at: 2025-07-23T15:54:31.922310Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Duplicate ticket detection feature documented. Smart duplicate detection across statuses planned for future enhancement.

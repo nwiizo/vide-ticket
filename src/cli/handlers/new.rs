@@ -49,9 +49,10 @@ pub fn handle_new_command(params: NewParams<'_>, output: &OutputFormatter) -> Re
     }
 
     // Parse priority
-    let priority = Priority::try_from(params.priority).map_err(|_| VibeTicketError::InvalidPriority {
-        priority: params.priority.to_string(),
-    })?;
+    let priority =
+        Priority::try_from(params.priority).map_err(|_| VibeTicketError::InvalidPriority {
+            priority: params.priority.to_string(),
+        })?;
 
     // Parse tags
     let tags = params.tags.map(|t| parse_tags(Some(t))).unwrap_or_default();
@@ -155,16 +156,16 @@ mod tests {
         let output = OutputFormatter::new(false, false);
 
         // Test creating a ticket
-        let result = handle_new_command(
-            "fix-login-bug",
-            None,
-            Some("Users cannot login".to_string()),
-            "high",
-            Some("bug,auth".to_string()),
-            false,
-            Some(temp_dir.path().to_str().unwrap()),
-            &output,
-        );
+        let params = NewParams {
+            slug: "fix-login-bug",
+            title: None,
+            description: Some("Users cannot login".to_string()),
+            priority: "high",
+            tags: Some("bug,auth".to_string()),
+            start: false,
+            project_dir: Some(temp_dir.path().to_str().unwrap()),
+        };
+        let result = handle_new_command(params, &output);
 
         assert!(result.is_ok());
 

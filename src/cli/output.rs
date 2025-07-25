@@ -232,7 +232,7 @@ impl OutputFormatter {
     }
 
     /// Formats status with color
-    fn format_status(&self, status: &Status) -> ColoredString {
+    fn format_status(&self, status: Status) -> ColoredString {
         match status {
             Status::Todo => "Todo".blue(),
             Status::Doing => "Doing".yellow(),
@@ -243,7 +243,7 @@ impl OutputFormatter {
     }
 
     /// Formats priority with color
-    fn format_priority(&self, priority: &Priority) -> ColoredString {
+    fn format_priority(&self, priority: Priority) -> ColoredString {
         match priority {
             Priority::Low => "Low".green(),
             Priority::Medium => "Medium".yellow(),

@@ -264,17 +264,19 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             description,
             tags,
             regex,
+            fuzzy,
         } => {
-            use vibe_ticket::cli::handlers::handle_search_command;
-            handle_search_command(
-                &query,
-                title,
-                description,
-                tags,
-                regex,
-                cli.project.as_deref(),
-                formatter,
-            )
+            use vibe_ticket::cli::handlers::{handle_search_command, SearchParams};
+            let params = SearchParams {
+                query: &query,
+                title_only: title,
+                description_only: description,
+                tags_only: tags,
+                use_regex: regex,
+                use_fuzzy: fuzzy,
+                project_dir: cli.project.as_deref(),
+            };
+            handle_search_command(&params, formatter)
         },
 
         Commands::Export {

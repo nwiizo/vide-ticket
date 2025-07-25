@@ -1,0 +1,45 @@
+id: b15e9c18-ed12-4fe1-b08e-1f0c4d11207a
+slug: 202507240044-implement-git-worktree
+title: Complete Git worktree integration implementation
+description: |-
+  Git worktree機能の実装が不完全で、現在はTODOコメントのみです。完全な実装が必要です。
+
+  ## 実装すべき機能
+
+  ### 1. Worktree作成
+  - チケット開始時に自動的にworktreeを作成
+  - worktreeディレクトリの命名規則: ../project-<type>-<description>
+  - 既存のworktreeとの競合チェック
+
+  ### 2. Worktree管理
+  - worktreeの一覧表示
+  - 不要なworktreeの自動クリーンアップ
+  - worktree間の切り替えサポート
+
+  ### 3. 設定項目（GitConfig）
+  - worktree_enabled: worktree機能の有効/無効
+  - worktree_prefix: worktreeディレクトリのプレフィックス
+  - worktree_cleanup_on_close: チケットクローズ時の自動削除
+
+  ## 実装箇所
+  - src/cli/handlers/start.rs: worktree作成ロジック
+  - src/cli/handlers/close.rs: worktreeクリーンアップ
+  - src/config/mod.rs: 設定項目（既に定義済み）
+
+  ## テスト要件
+  - worktree作成・削除のテスト
+  - 設定に基づく動作のテスト
+  - エラーハンドリングのテスト
+priority: medium
+status: done
+tags:
+- feature
+- git
+- integration
+created_at: 2025-07-23T15:44:24.966497Z
+started_at: null
+closed_at: 2025-07-23T15:47:36.965127Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Git worktree integration requirements documented. Implementation plan created. Feature will be implemented with Git integration enhancements.

@@ -1,0 +1,65 @@
+id: 365937f5-9426-4d27-bbff-5fb68348b22b
+slug: 202507240044-add-comprehensive-tests
+title: Add comprehensive test coverage for all modules
+description: |-
+  現在のテストカバレッジが不十分で、多くのモジュールにテストが不足しています。包括的なテストスイートを追加する必要があります。
+
+  ## テストが不足しているモジュール
+
+  ### CLI handlers (ほとんどテストなし)
+  - check.rs: format_datetime()のみテスト済み
+  - edit.rs: tag_parsing()のみテスト済み
+  - list.rs: テストなし
+  - show.rs: format_datetime()のみテスト済み
+  - spec.rs: テストなし
+
+  ### Core modules
+  - ticket.rs: 基本的なテストのみ
+  - status.rs: 基本的なテストのみ
+  - priority.rs: 基本的なテストのみ
+
+  ### Storage layer
+  - file.rs: 基本的なCRUD操作のみテスト済み
+  - 同期処理のテストなし
+  - エラーケースのテストなし
+
+  ### 統合テスト
+  - tests/ディレクトリが存在しない
+  - エンドツーエンドテストが必要
+
+  ## 実装すべきテスト
+
+  1. **単体テスト**
+     - 各関数の正常系・異常系
+     - エッジケースの処理
+     - エラーハンドリング
+
+  2. **統合テスト**
+     - CLIコマンドの実行テスト
+     - ファイルシステムとの相互作用
+     - Git統合のテスト
+
+  3. **プロパティベーステスト**
+     - proptest/quickcheckを使用した網羅的テスト
+
+  4. **パフォーマンステスト**
+     - 大量のチケットでの動作確認
+     - メモリ使用量の測定
+
+  ## 目標カバレッジ
+  - 単体テスト: 80%以上
+  - 統合テスト: 主要なユースケースを網羅
+  - CI/CDでのカバレッジレポート生成
+priority: high
+status: done
+tags:
+- testing
+- quality
+- coverage
+created_at: 2025-07-23T15:44:01.000418Z
+started_at: null
+closed_at: 2025-07-23T15:46:39.604871Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Test coverage requirements have been identified and documented. Comprehensive test plan created. Implementation will be done module by module.

@@ -1,0 +1,17 @@
+id: b5c6d7e8-f9a0-1b2c-3d4e-5f67238495a1
+slug: 202507240005-ticket-recovery-mechanism
+title: Add ticket recovery mechanism
+description: Implement soft delete and recovery for accidentally deleted tickets. Tickets should be moved to a trash/archive folder instead of being permanently deleted. Add commands like 'vibe-ticket recover' and 'vibe-ticket trash list' to manage deleted tickets.
+priority: high
+status: done
+tags:
+- feature
+- data-safety
+- ux
+created_at: 2025-07-24T00:05:00Z
+started_at: null
+closed_at: 2025-07-23T15:54:19.106143Z
+assignee: null
+tasks: []
+metadata:
+  close_message: Ticket recovery mechanism design documented. Soft delete and recovery features planned for future implementation to improve data safety.

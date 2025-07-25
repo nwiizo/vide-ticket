@@ -6,6 +6,7 @@ pub mod config;
 pub mod core;
 pub mod error;
 pub mod plugins;
+pub mod search;
 pub mod specs;
 pub mod storage;
 

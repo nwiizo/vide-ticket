@@ -1,0 +1,36 @@
+id: f4a5b6c7-d8e9-0f1a-2b3c-4d5e6f784a92
+slug: improve-ticket-search
+title: Add fuzzy search capability for better ticket discovery
+description: Implement fuzzy search functionality to make finding tickets easier when users don't remember exact titles or keywords. This will improve user experience by allowing approximate matches and typo tolerance in search queries.
+priority: medium
+status: doing
+tags:
+- feature
+- search
+- ux
+created_at: 2025-07-24T15:27:00Z
+started_at: 2025-07-24T00:21:00Z
+closed_at: null
+assignee: null
+tasks:
+- description: Research and select fuzzy search library (recommend fuzzy-matcher)
+  completed: false
+- description: Add fuzzy-matcher dependency to Cargo.toml
+  completed: false
+- description: Create fuzzy search module in src/search/fuzzy.rs
+  completed: false
+- description: Implement FuzzyMatcher struct with scoring algorithm
+  completed: false
+- description: Add --fuzzy flag to search command CLI arguments
+  completed: false
+- description: Integrate fuzzy matching into search_tickets function
+  completed: false
+- description: Implement score-based sorting for fuzzy matches
+  completed: false
+- description: Add match quality indicators to output format
+  completed: false
+- description: Write comprehensive unit tests for fuzzy matching
+  completed: false
+- description: Update search command documentation and examples
+  completed: false
+metadata: {}

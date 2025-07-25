@@ -266,6 +266,10 @@ pub enum Commands {
         /// Use regex
         #[arg(short, long)]
         regex: bool,
+
+        /// Use fuzzy matching for better discovery
+        #[arg(long)]
+        fuzzy: bool,
     },
 
     /// Export tickets
