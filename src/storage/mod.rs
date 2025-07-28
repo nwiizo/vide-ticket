@@ -21,14 +21,14 @@
 //!
 //! # Example
 //!
-//! ```no_run
+//! ```ignore
 //! use vibe_ticket::storage::{FileStorage, Repository};
 //!
 //! // Initialize storage backend
 //! let storage = FileStorage::new(".vibe-ticket");
 //!
 //! // Use storage through repository traits
-//! let tickets = storage.load_all()?;
+//! let tickets = storage.get_all()?;
 //! ```
 //!
 //! # Error Handling

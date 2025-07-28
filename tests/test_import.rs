@@ -98,7 +98,7 @@ fn test_import_json_array() {
     assert!(result.is_ok());
 
     // Verify tickets were imported
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     let tickets = storage.load_all_tickets().unwrap();
     assert_eq!(tickets.len(), 2);
 
@@ -161,7 +161,7 @@ fn test_import_json_object() {
     assert!(result.is_ok());
 
     // Verify ticket was imported
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     let ticket = storage
         .find_ticket_by_slug("json-obj-test")
         .unwrap()
@@ -211,7 +211,7 @@ fn test_import_yaml() {
     assert!(result.is_ok());
 
     // Verify ticket was imported
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     let ticket = storage.find_ticket_by_slug("yaml-test-1").unwrap().unwrap();
     assert_eq!(ticket.title, "YAML Test Ticket");
     assert_eq!(ticket.priority, Priority::Critical);
@@ -248,7 +248,7 @@ fn test_import_csv() {
     assert!(result.is_ok());
 
     // Verify tickets were imported
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     let tickets = storage.load_all_tickets().unwrap();
     assert_eq!(tickets.len(), 2);
 
@@ -305,7 +305,7 @@ fn test_dry_run_import() {
     assert!(result.is_ok());
 
     // Verify no tickets were actually imported
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     let tickets = storage.load_all_tickets().unwrap();
     assert_eq!(tickets.len(), 0);
 }
@@ -331,7 +331,7 @@ fn test_skip_existing_tickets() {
         metadata: std::collections::HashMap::new(),
     };
 
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     storage.save(&existing_ticket).unwrap();
 
     // Create JSON with duplicate slug
@@ -604,7 +604,7 @@ fn test_import_with_complex_metadata() {
     assert!(result.is_ok());
 
     // Verify ticket with metadata was imported
-    let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
+    let storage = FileStorage::new(temp_dir.path().join(".vibe-ticket"));
     let ticket = storage
         .find_ticket_by_slug("metadata-test")
         .unwrap()

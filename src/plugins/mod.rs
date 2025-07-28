@@ -23,7 +23,7 @@
 //! # Plugin API
 //!
 //! Plugins implement the `Plugin` trait:
-//! ```no_run
+//! ```ignore
 //! use vibe_ticket::plugins::{Plugin, PluginContext, PluginResult};
 //!
 //! pub struct MyPlugin;

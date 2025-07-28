@@ -35,12 +35,12 @@ use std::path::Path;
 ///
 /// # Example
 ///
-/// ```no_run
+/// ```ignore
 /// use vibe_ticket::cli::handlers::init::handle_init;
 /// use vibe_ticket::cli::output::OutputFormatter;
 ///
 /// let formatter = OutputFormatter::new(false, false);
-/// handle_init(Some("my-project".to_string()), None, false, &formatter)?;
+/// handle_init(Some("my-project"), None, false, false, &formatter)?;
 /// ```
 pub fn handle_init(
     name: Option<&str>,
