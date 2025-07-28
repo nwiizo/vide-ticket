@@ -129,9 +129,13 @@ pub enum Commands {
         #[arg(long)]
         branch_name: Option<String>,
 
-        /// Create a Git worktree instead of just a branch
-        #[arg(long)]
+        /// Create a Git worktree (use --no-worktree to disable)
+        #[arg(long, default_value = "true")]
         worktree: bool,
+        
+        /// Disable worktree creation and only create a branch
+        #[arg(long = "no-worktree", conflicts_with = "worktree")]
+        no_worktree: bool,
     },
 
     /// Show open tickets (alias for list --open)
@@ -312,11 +316,11 @@ pub enum Commands {
         #[command(subcommand)]
         command: SpecCommands,
     },
-    // /// Manage Git worktrees for tickets
-    // Worktree {
-    //     #[command(subcommand)]
-    //     command: WorktreeCommands,
-    // },
+    /// Manage Git worktrees for tickets
+    Worktree {
+        #[command(subcommand)]
+        command: WorktreeCommands,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -566,49 +570,49 @@ pub enum SpecCommands {
     },
 }
 
-// #[derive(Subcommand, Debug)]
-// pub enum WorktreeCommands {
-//     /// List all worktrees for vibe-ticket
-//     List {
-//         /// Show worktrees for all tickets
-//         #[arg(short, long)]
-//         all: bool,
+#[derive(Subcommand, Debug)]
+pub enum WorktreeCommands {
+    /// List all worktrees for vibe-ticket
+    List {
+        /// Show worktrees for all tickets
+        #[arg(short, long)]
+        all: bool,
 
-//         /// Filter by status (active, stale, orphaned)
-//         #[arg(short, long)]
-//         status: Option<String>,
+        /// Filter by status (active, stale, orphaned)
+        #[arg(short, long)]
+        status: Option<String>,
 
-//         /// Show detailed information
-//         #[arg(short, long)]
-//         verbose: bool,
-//     },
+        /// Show detailed information
+        #[arg(short, long)]
+        verbose: bool,
+    },
 
-//     /// Remove a worktree
-//     Remove {
-//         /// Worktree path or ticket ID/slug
-//         worktree: String,
+    /// Remove a worktree
+    Remove {
+        /// Worktree path or ticket ID/slug
+        worktree: String,
 
-//         /// Force removal even if there are uncommitted changes
-//         #[arg(short, long)]
-//         force: bool,
+        /// Force removal even if there are uncommitted changes
+        #[arg(short, long)]
+        force: bool,
 
-//         /// Keep the branch associated with the worktree
-//         #[arg(long)]
-//         keep_branch: bool,
-//     },
+        /// Keep the branch associated with the worktree
+        #[arg(long)]
+        keep_branch: bool,
+    },
 
-//     /// Prune stale worktrees
-//     Prune {
-//         /// Remove worktrees without confirmation
-//         #[arg(short, long)]
-//         force: bool,
+    /// Prune stale worktrees
+    Prune {
+        /// Remove worktrees without confirmation
+        #[arg(short, long)]
+        force: bool,
 
-//         /// Dry run - show what would be removed
-//         #[arg(short, long)]
-//         dry_run: bool,
+        /// Dry run - show what would be removed
+        #[arg(short, long)]
+        dry_run: bool,
 
-//         /// Remove branches for pruned worktrees
-//         #[arg(long)]
-//         remove_branches: bool,
-//     },
-// }
+        /// Remove branches for pruned worktrees
+        #[arg(long)]
+        remove_branches: bool,
+    },
+}

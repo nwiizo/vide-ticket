@@ -14,13 +14,8 @@
 //!
 //! # Example
 //!
-//! ```no_run
-//! use vibe_ticket::cli::handlers::init::handle_init;
-//! use vibe_ticket::cli::output::OutputFormatter;
-//!
-//! let formatter = OutputFormatter::new(false, false);
-//! handle_init(Some("my-project".to_string()), None, false, &formatter)?;
-//! ```
+//! Handlers are typically called from the main CLI entry point and handle
+//! specific commands like `init`, `new`, `list`, etc.
 
 mod archive;
 mod check;
@@ -37,6 +32,7 @@ mod show;
 mod spec;
 mod start;
 mod task;
+mod worktree;
 
 // Re-export handlers
 pub use archive::handle_archive_command;
@@ -61,6 +57,7 @@ pub use task::{
     handle_task_add, handle_task_complete, handle_task_list, handle_task_remove,
     handle_task_uncomplete,
 };
+pub use worktree::{handle_worktree_list, handle_worktree_prune, handle_worktree_remove};
 
 use crate::cli::output::OutputFormatter;
 use crate::error::Result;
@@ -167,6 +164,8 @@ pub fn resolve_ticket_id(ticket_ref: Option<String>) -> Result<String> {
 /// # Example
 ///
 /// ```
+/// use vibe_ticket::cli::handlers::parse_tags;
+/// 
 /// let tags = parse_tags(Some("bug, ui, urgent".to_string()));
 /// assert_eq!(tags, vec!["bug", "ui", "urgent"]);
 /// ```

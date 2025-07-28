@@ -108,3 +108,8 @@ TODO.md
 .vibe-ticket/backups/
 .vibe-ticket/tmp/
 .vibe-ticket/*.log
+.vibe-ticket/active_ticket
+.vibe-ticket/tickets/
+
+# Release artifacts
+release/

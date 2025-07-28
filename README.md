@@ -6,6 +6,7 @@ A high-performance ticket management system for Vibe Coding environment, built w
 
 - **Fast Performance**: Built with Rust for maximum speed and reliability
 - **Git Integration**: Automatic branch creation and management
+- **Git Worktree Support**: Parallel development with automatic worktree creation (default)
 - **Flexible Storage**: YAML-based storage with efficient file handling
 - **Rich CLI**: Intuitive command-line interface with comprehensive options
 - **Task Management**: Built-in task tracking within tickets
@@ -129,7 +130,7 @@ Options:
 ```
 
 #### `start`
-Start working on a ticket (sets status to "In Progress" and creates Git branch).
+Start working on a ticket (sets status to "In Progress" and creates Git worktree by default).
 
 ```bash
 vibe-ticket start [TICKET] [OPTIONS]
@@ -138,8 +139,10 @@ Arguments:
   [TICKET]                      Ticket ID or slug (defaults to active ticket)
 
 Options:
-  -b, --branch                  Create Git branch
+  -b, --branch                  Create Git branch (default: true)
   --branch-name <NAME>          Custom branch name (default: ticket slug)
+  --worktree                    Create Git worktree (default: true)
+  --no-worktree                 Disable worktree creation (only create branch)
 ```
 
 #### `close`
@@ -409,7 +412,10 @@ git:
   enabled: true
   auto_branch: true
   branch_prefix: "ticket/"
-  remote: "origin"
+  worktree_enabled: true
+  worktree_default: true
+  worktree_prefix: "../{project}-ticket-"
+  worktree_cleanup_on_close: false
 
 ui:
   theme: "auto"
@@ -435,10 +441,52 @@ export:
 - `git.enabled`: Enable Git integration
 - `git.auto_branch`: Automatically create branches when starting tickets
 - `git.branch_prefix`: Prefix for Git branches
+- `git.worktree_enabled`: Enable Git worktree integration
+- `git.worktree_default`: Use worktree by default when starting tickets
+- `git.worktree_prefix`: Worktree directory naming pattern (use {project} placeholder)
+- `git.worktree_cleanup_on_close`: Automatically remove worktree when closing ticket
 - `ui.emoji`: Enable emoji in output
 - `ui.page_size`: Number of items per page in lists
 - `archive.auto_archive`: Automatically archive completed tickets
 - `archive.archive_after_days`: Days before auto-archiving
+
+## Git Worktree Support
+
+vibe-ticket now creates Git worktrees by default when starting tickets, enabling parallel development workflows:
+
+### Benefits
+- Work on multiple tickets simultaneously without branch switching
+- Keep uncommitted changes isolated between tickets
+- Each ticket gets its own working directory
+- No more stashing/unstashing when switching tasks
+
+### Usage
+```bash
+# Start a ticket (creates worktree by default)
+vibe-ticket start fix-login-bug
+# Creates: ../my-project-ticket-fix-login-bug/
+
+# Start without worktree (traditional branch only)
+vibe-ticket start fix-login-bug --no-worktree
+
+# List all ticket worktrees
+vibe-ticket worktree list
+
+# Remove a worktree
+vibe-ticket worktree remove fix-login-bug
+
+# Prune stale worktrees
+vibe-ticket worktree prune
+```
+
+### Configuration
+```yaml
+git:
+  worktree_enabled: true              # Enable worktree support
+  worktree_default: true              # Create worktree by default
+  worktree_prefix: "../{project}-ticket-"  # Directory naming pattern
+  worktree_cleanup_on_close: false   # Auto-remove when closing ticket
+```
 
 ## File Structure
 
