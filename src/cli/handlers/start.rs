@@ -116,7 +116,7 @@ pub fn handle_start_command(
                 let worktree_prefix = config.git.worktree_prefix.replace("{project}", &config.project.name);
                 output.info(&format!(
                     "Git worktree created: ../{}{}",
-                    worktree_prefix.trim_end_matches('-'), ticket.slug
+                    worktree_prefix.trim_start_matches("../"), ticket.slug
                 ));
                 output.info(&format!("Branch: {branch}"));
             } else {
@@ -241,7 +241,7 @@ fn create_git_worktree(
     // Construct the worktree path using config settings
     let project_name = config.project.name.as_str();
     let worktree_prefix = config.git.worktree_prefix.replace("{project}", project_name);
-    let worktree_dir_name = format!("{}{}", worktree_prefix.trim_end_matches('-'), ticket_slug);
+    let worktree_dir_name = format!("{}{}", worktree_prefix.trim_start_matches("../"), ticket_slug);
     let worktree_path = parent_dir.join(&worktree_dir_name);
 
     // Check if worktree directory already exists
