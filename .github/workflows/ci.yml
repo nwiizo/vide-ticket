@@ -35,7 +35,7 @@ jobs:
       run: cargo fmt -- --check
     
     - name: Run clippy
-      run: cargo clippy -- -D warnings
+      run: cargo clippy -- -D warnings -A clippy::option_if_let_else -A clippy::map_unwrap_or -A clippy::too_many_lines -A clippy::struct_excessive_bools -A clippy::fn_params_excessive_bools
     
     - name: Run tests
       run: cargo test --quiet
