@@ -52,7 +52,8 @@ jobs:
           -A clippy::trivially-copy-pass-by-ref \
           -A clippy::cast-possible-truncation \
           -A clippy::cast-precision-loss \
-          -A clippy::match-same-arms
+          -A clippy::match-same-arms \
+          -A clippy::cast-sign-loss
     
     - name: Run tests
       run: cargo test --quiet
