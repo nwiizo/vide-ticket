@@ -16,8 +16,12 @@ vibe-ticket new fix-bug --title "Fix login issue" --priority high
 # List all tickets
 vibe-ticket list
 
-# Start working on a ticket
+# Start working on a ticket (creates worktree by default)
 vibe-ticket start fix-bug
+# This creates: ../vibe-ticket-ticket-fix-bug/
+
+# Start without worktree (branch only)
+vibe-ticket start fix-bug --no-worktree
 
 # Show current status
 vibe-ticket check
@@ -54,6 +58,21 @@ vibe-ticket list --status doing
 vibe-ticket list --priority high
 ```
 
+### Git Worktree Management
+```bash
+# List all worktrees for tickets
+vibe-ticket worktree list
+
+# List all worktrees (including non-ticket ones)
+vibe-ticket worktree list --all
+
+# Remove a worktree
+vibe-ticket worktree remove fix-bug
+
+# Prune stale worktrees
+vibe-ticket worktree prune
+```
+
 ### Configuration
 ```bash
 # View configuration
@@ -62,6 +81,7 @@ vibe-ticket config show
 # Set configuration values
 vibe-ticket config set project.default_priority medium
 vibe-ticket config set git.auto_branch true
+vibe-ticket config set git.worktree_default false  # Disable default worktree creation
 
 # Generate this file
 vibe-ticket config claude
@@ -71,13 +91,26 @@ vibe-ticket config claude
 
 The project has been initialized with default settings. You can customize them using the config commands above.
 
+### Git Worktree Configuration
+```yaml
+git:
+  worktree_enabled: true              # Enable worktree support
+  worktree_default: true              # Create worktree by default when starting tickets
+  worktree_prefix: "../{project}-ticket-"  # Directory naming pattern
+  worktree_cleanup_on_close: false   # Auto-remove worktree when closing ticket
+```
+
 ## Workflow Guidelines
 
 1. Create a ticket before starting any work
 2. Use descriptive ticket slugs (e.g., fix-login-bug, add-search-feature)
-3. Break down complex work into tasks within tickets
-4. Keep ticket status updated as work progresses
-5. Close tickets with meaningful completion messages
+3. When starting a ticket, a Git worktree is created automatically
+   - Work in the worktree directory: `../vibe-ticket-ticket-<slug>/`
+   - Each ticket has its own isolated working directory
+4. Break down complex work into tasks within tickets
+5. Keep ticket status updated as work progresses
+6. Close tickets with meaningful completion messages
+7. Remove worktrees when done: `vibe-ticket worktree remove <ticket>`
 
 ## Best Practices for This Project
 
