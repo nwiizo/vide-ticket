@@ -24,8 +24,8 @@ missing-docs-in-crate-items = true
 # Style preferences
 enum-variant-name-threshold = 3
 struct-field-name-threshold = 3
-max-struct-bools = 3
-max-fn-params-bools = 3
+max-struct-bools = 10
+max-fn-params-bools = 10
 max-include-file-size = 1000000
 literal-representation-threshold = 16
 trivial-copy-size-limit = 8
