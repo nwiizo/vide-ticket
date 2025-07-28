@@ -1,5 +1,10 @@
 # vibe-ticket
 
+[![Crates.io](https://img.shields.io/crates/v/vibe-ticket.svg)](https://crates.io/crates/vibe-ticket)
+[![Documentation](https://docs.rs/vibe-ticket/badge.svg)](https://docs.rs/vibe-ticket)
+[![CI](https://github.com/nwiizo/vibe-ticket/workflows/CI/badge.svg)](https://github.com/nwiizo/vibe-ticket/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A high-performance ticket management system for developers, built with Rust. Features Git worktree integration for parallel development workflows.
 
 ## Quick Start
