@@ -101,6 +101,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             open,
             since,
             until,
+            include_done,
         } => {
             use vibe_ticket::cli::handlers::handle_list_command;
             handle_list_command(
@@ -114,6 +115,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 open,
                 since,
                 until,
+                include_done,
                 cli.project.as_deref(),
                 formatter,
             )
@@ -137,6 +139,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 true,  // open
                 None,  // since
                 None,  // until
+                false, // include_done
                 cli.project.as_deref(),
                 formatter,
             )

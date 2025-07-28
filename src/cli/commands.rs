@@ -114,6 +114,10 @@ pub enum Commands {
         /// Filter tickets created until (e.g., "today", "1 week ago", "2025-07-20")
         #[arg(long)]
         until: Option<String>,
+
+        /// Include done tickets (by default they are hidden)
+        #[arg(long)]
+        include_done: bool,
     },
 
     /// Start working on a ticket
