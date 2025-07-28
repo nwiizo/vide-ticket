@@ -1,0 +1,17 @@
+id: f2345678-1234-5678-9012-345678901234
+slug: test-manual-import-1
+title: Manual Import Test 1
+description: Testing import functionality manually
+priority: high
+status: todo
+tags:
+- manual-test
+- import
+created_at: 2025-07-28T10:00:00Z
+started_at: null
+closed_at: null
+assignee: null
+tasks: []
+metadata:
+  archived: true
+  archived_at: 2025-07-28T02:58:08.022381+00:00
