@@ -298,3 +298,238 @@ impl std::fmt::Display for SpecPhase {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_spec_metadata_new() {
+        let metadata = SpecMetadata::new(
+            "Test Spec".to_string(),
+            "Test Description".to_string()
+        );
+        
+        assert_eq!(metadata.title, "Test Spec");
+        assert_eq!(metadata.description, "Test Description");
+        assert!(metadata.ticket_id.is_none());
+        assert!(metadata.tags.is_empty());
+        assert_eq!(metadata.progress.current_phase, SpecPhase::Initial);
+        assert_eq!(metadata.version.to_string(), "0.1.0");
+    }
+
+    #[test]
+    fn test_spec_metadata_update_phase() {
+        let mut metadata = SpecMetadata::new(
+            "Test".to_string(),
+            "Description".to_string()
+        );
+        
+        // Initial phase
+        assert_eq!(metadata.progress.current_phase, SpecPhase::Initial);
+        
+        // Complete requirements
+        metadata.progress.requirements_completed = true;
+        metadata.update_phase();
+        assert_eq!(metadata.progress.current_phase, SpecPhase::Design);
+        
+        // Complete design
+        metadata.progress.design_completed = true;
+        metadata.update_phase();
+        assert_eq!(metadata.progress.current_phase, SpecPhase::Implementation);
+        
+        // Complete tasks
+        metadata.progress.tasks_completed = true;
+        metadata.update_phase();
+        assert_eq!(metadata.progress.current_phase, SpecPhase::Completed);
+    }
+
+    #[test]
+    fn test_specification_new() {
+        let spec = Specification::new(
+            "Test Spec".to_string(),
+            "Description".to_string(),
+            Some("ticket-123".to_string()),
+            vec!["tag1".to_string(), "tag2".to_string()]
+        );
+        
+        assert_eq!(spec.metadata.title, "Test Spec");
+        assert_eq!(spec.metadata.description, "Description");
+        assert_eq!(spec.metadata.ticket_id, Some("ticket-123".to_string()));
+        assert_eq!(spec.metadata.tags, vec!["tag1".to_string(), "tag2".to_string()]);
+        assert!(spec.requirements.is_none());
+        assert!(spec.design.is_none());
+        assert!(spec.tasks.is_none());
+    }
+
+    #[test]
+    fn test_spec_progress_default() {
+        let progress = SpecProgress::default();
+        
+        assert!(!progress.requirements_completed);
+        assert!(!progress.design_completed);
+        assert!(!progress.tasks_completed);
+        assert!(!progress.requirements_approved);
+        assert!(!progress.design_approved);
+        assert!(!progress.tasks_approved);
+        assert_eq!(progress.current_phase, SpecPhase::Initial);
+        assert!(progress.approval_status.is_none());
+    }
+
+    #[test]
+    fn test_spec_progress_current_phase() {
+        let progress = SpecProgress::default();
+        assert_eq!(progress.current_phase(), SpecPhase::Initial);
+    }
+
+    #[test]
+    fn test_spec_version_default() {
+        let version = SpecVersion::default();
+        assert_eq!(version.major, 0);
+        assert_eq!(version.minor, 1);
+        assert_eq!(version.patch, 0);
+        assert_eq!(version.to_string(), "0.1.0");
+    }
+
+    #[test]
+    fn test_spec_version_bump() {
+        let mut version = SpecVersion::default();
+        
+        // Bump patch
+        version.bump_patch();
+        assert_eq!(version.to_string(), "0.1.1");
+        
+        // Bump minor (resets patch)
+        version.bump_minor();
+        assert_eq!(version.to_string(), "0.2.0");
+        
+        // Bump major (resets minor and patch)
+        version.bump_major();
+        assert_eq!(version.to_string(), "1.0.0");
+    }
+
+    #[test]
+    fn test_spec_document_type_file_name() {
+        assert_eq!(SpecDocumentType::Requirements.file_name(), "requirements.md");
+        assert_eq!(SpecDocumentType::Design.file_name(), "design.md");
+        assert_eq!(SpecDocumentType::Tasks.file_name(), "tasks.md");
+    }
+
+    #[test]
+    fn test_spec_document_type_display_name() {
+        assert_eq!(SpecDocumentType::Requirements.display_name(), "Requirements Definition");
+        assert_eq!(SpecDocumentType::Design.display_name(), "Technical Design");
+        assert_eq!(SpecDocumentType::Tasks.display_name(), "Implementation Plan");
+    }
+
+    #[test]
+    fn test_spec_phase_display() {
+        assert_eq!(SpecPhase::Initial.to_string(), "Initial");
+        assert_eq!(SpecPhase::Requirements.to_string(), "Requirements Definition");
+        assert_eq!(SpecPhase::Design.to_string(), "Technical Design");
+        assert_eq!(SpecPhase::Implementation.to_string(), "Implementation Planning");
+        assert_eq!(SpecPhase::Tasks.to_string(), "Tasks");
+        assert_eq!(SpecPhase::Completed.to_string(), "Completed");
+    }
+
+    #[test]
+    fn test_spec_phase_equality() {
+        assert_eq!(SpecPhase::Initial, SpecPhase::Initial);
+        assert_ne!(SpecPhase::Initial, SpecPhase::Requirements);
+        assert_ne!(SpecPhase::Tasks, SpecPhase::Implementation);
+    }
+
+    #[test]
+    fn test_spec_progress_with_approval_status() {
+        let mut progress = SpecProgress::default();
+        
+        // Add approval status
+        let mut approval_status = HashMap::new();
+        approval_status.insert(
+            "approved_by".to_string(),
+            serde_json::json!("reviewer@example.com")
+        );
+        approval_status.insert(
+            "approved_at".to_string(),
+            serde_json::json!("2024-01-01T00:00:00Z")
+        );
+        
+        progress.approval_status = Some(approval_status);
+        
+        assert!(progress.approval_status.is_some());
+        let status = progress.approval_status.as_ref().unwrap();
+        assert_eq!(
+            status.get("approved_by").unwrap(),
+            &serde_json::json!("reviewer@example.com")
+        );
+    }
+
+    #[test]
+    fn test_spec_metadata_with_all_fields() {
+        let mut metadata = SpecMetadata::new(
+            "Complete Spec".to_string(),
+            "Full test".to_string()
+        );
+        
+        metadata.ticket_id = Some("ticket-456".to_string());
+        metadata.tags = vec!["backend".to_string(), "api".to_string()];
+        metadata.version.bump_minor();
+        
+        // Complete all phases
+        metadata.progress.requirements_completed = true;
+        metadata.progress.requirements_approved = true;
+        metadata.progress.design_completed = true;
+        metadata.progress.design_approved = true;
+        metadata.progress.tasks_completed = true;
+        metadata.progress.tasks_approved = true;
+        metadata.update_phase();
+        
+        assert_eq!(metadata.progress.current_phase, SpecPhase::Completed);
+        assert_eq!(metadata.version.to_string(), "0.2.0");
+        assert_eq!(metadata.tags.len(), 2);
+    }
+
+    #[test]
+    fn test_spec_serialization() {
+        let spec = Specification::new(
+            "Serialization Test".to_string(),
+            "Test serialization".to_string(),
+            None,
+            vec![]
+        );
+        
+        // Serialize to JSON
+        let json = serde_json::to_string(&spec).unwrap();
+        
+        // Deserialize back
+        let deserialized: Specification = serde_json::from_str(&json).unwrap();
+        
+        assert_eq!(spec.metadata.id, deserialized.metadata.id);
+        assert_eq!(spec.metadata.title, deserialized.metadata.title);
+        assert_eq!(spec.metadata.description, deserialized.metadata.description);
+    }
+
+    #[test]
+    fn test_spec_with_documents() {
+        let mut spec = Specification::new(
+            "Doc Test".to_string(),
+            "Test with documents".to_string(),
+            None,
+            vec![]
+        );
+        
+        // Add documents
+        spec.requirements = Some("# Requirements\n\nTest requirements".to_string());
+        spec.design = Some("# Design\n\nTest design".to_string());
+        spec.tasks = Some("# Tasks\n\n- [ ] Task 1\n- [ ] Task 2".to_string());
+        
+        assert!(spec.requirements.is_some());
+        assert!(spec.design.is_some());
+        assert!(spec.tasks.is_some());
+        
+        assert!(spec.requirements.as_ref().unwrap().contains("Requirements"));
+        assert!(spec.design.as_ref().unwrap().contains("Design"));
+        assert!(spec.tasks.as_ref().unwrap().contains("Task 1"));
+    }
+}
