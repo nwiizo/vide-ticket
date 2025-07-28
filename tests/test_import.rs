@@ -3,11 +3,11 @@
 //! This module tests the import functionality with various file formats
 //! and edge cases to ensure robust importing of tickets.
 
+use std::fs;
+use tempfile::TempDir;
 use vibe_ticket::cli::{handlers::handle_import_command, OutputFormatter};
 use vibe_ticket::core::{Priority, Status, Ticket, TicketId};
 use vibe_ticket::storage::{FileStorage, TicketRepository};
-use tempfile::TempDir;
-use std::fs;
 
 /// Create a test environment with an initialized project
 fn setup_test_project() -> (TempDir, OutputFormatter) {
@@ -34,7 +34,7 @@ fn setup_test_project() -> (TempDir, OutputFormatter) {
 #[test]
 fn test_import_json_array() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create test JSON file with array of tickets
     let json_content = r#"[
         {
@@ -118,7 +118,7 @@ fn test_import_json_array() {
 #[test]
 fn test_import_json_object() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create test JSON file with object containing tickets field
     let json_content = r#"{
         "export_date": "2025-07-28T12:00:00Z",
@@ -162,7 +162,10 @@ fn test_import_json_object() {
 
     // Verify ticket was imported
     let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
-    let ticket = storage.find_ticket_by_slug("json-obj-test").unwrap().unwrap();
+    let ticket = storage
+        .find_ticket_by_slug("json-obj-test")
+        .unwrap()
+        .unwrap();
     assert_eq!(ticket.title, "JSON Object Test");
     assert_eq!(ticket.status, Status::Blocked);
 }
@@ -170,7 +173,7 @@ fn test_import_json_object() {
 #[test]
 fn test_import_yaml() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create test YAML file
     let yaml_content = r#"tickets:
   - id: "750e8400-e29b-41d4-a716-446655440001"
@@ -219,7 +222,7 @@ fn test_import_yaml() {
 #[test]
 fn test_import_csv() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create test CSV file
     let csv_content = r#"ID,Slug,Title,Status,Priority,Assignee,Tags,Created At,Started At,Closed At,Tasks Total,Tasks Completed,Description
 850e8400-e29b-41d4-a716-446655440001,csv-test-1,CSV Test Ticket 1,todo,high,,"csv, test",2025-07-28T10:00:00Z,,,0,0,Testing CSV import functionality
@@ -263,7 +266,7 @@ fn test_import_csv() {
 #[test]
 fn test_dry_run_import() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create test JSON file
     let json_content = r#"[
         {
@@ -310,7 +313,7 @@ fn test_dry_run_import() {
 #[test]
 fn test_skip_existing_tickets() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create an existing ticket
     let existing_ticket = Ticket {
         id: TicketId::parse_str("a50e8400-e29b-41d4-a716-446655440001").unwrap(),
@@ -388,7 +391,10 @@ fn test_skip_existing_tickets() {
     assert_eq!(tickets.len(), 2); // 1 existing + 1 new
 
     // Verify the existing ticket wasn't overwritten
-    let existing = storage.find_ticket_by_slug("existing-ticket").unwrap().unwrap();
+    let existing = storage
+        .find_ticket_by_slug("existing-ticket")
+        .unwrap()
+        .unwrap();
     assert_eq!(existing.title, "Existing Ticket"); // Original title preserved
 
     // Verify the new ticket was imported
@@ -399,7 +405,7 @@ fn test_skip_existing_tickets() {
 #[test]
 fn test_validation_duplicate_ids() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create JSON with duplicate IDs (validation should fail)
     let json_content = r#"[
         {
@@ -457,7 +463,7 @@ fn test_validation_duplicate_ids() {
 #[test]
 fn test_invalid_json_format() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create invalid JSON file
     let json_content = r#"{ invalid json content"#;
 
@@ -480,7 +486,7 @@ fn test_invalid_json_format() {
 #[test]
 fn test_auto_format_detection() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Test JSON detection by extension
     let json_content = r#"[{"id": "d50e8400-e29b-41d4-a716-446655440001", "slug": "test", "title": "Test", "description": "", "priority": "medium", "status": "todo", "tags": [], "created_at": "2025-07-28T10:00:00Z", "started_at": null, "closed_at": null, "assignee": null, "tasks": [], "metadata": {}}]"#;
     let json_file = temp_dir.path().join("data.json");
@@ -515,7 +521,7 @@ tickets:
     assignee: null
     tasks: []
     metadata: {}"#;
-    
+
     let unknown_file = temp_dir.path().join("unknown.txt");
     fs::write(&unknown_file, yaml_content).unwrap();
 
@@ -536,7 +542,7 @@ tickets:
 #[test]
 fn test_import_with_complex_metadata() {
     let (temp_dir, formatter) = setup_test_project();
-    
+
     // Create JSON with complex metadata
     let json_content = r#"[
         {
@@ -599,12 +605,15 @@ fn test_import_with_complex_metadata() {
 
     // Verify ticket with metadata was imported
     let storage = FileStorage::new(&temp_dir.path().join(".vibe-ticket"));
-    let ticket = storage.find_ticket_by_slug("metadata-test").unwrap().unwrap();
-    
+    let ticket = storage
+        .find_ticket_by_slug("metadata-test")
+        .unwrap()
+        .unwrap();
+
     assert_eq!(ticket.tasks.len(), 2);
     assert!(ticket.tasks[0].completed);
     assert!(!ticket.tasks[1].completed);
-    
+
     // Verify metadata
     assert!(ticket.metadata.contains_key("custom_field"));
     assert!(ticket.metadata.contains_key("nested"));

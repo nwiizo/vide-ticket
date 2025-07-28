@@ -193,12 +193,21 @@ fn output_plain(
         output.info("");
         output.info("Metadata:");
         // Show close message if present
-        if let Some(msg) = ticket.metadata.get("close_message").and_then(|v| v.as_str()) {
+        if let Some(msg) = ticket
+            .metadata
+            .get("close_message")
+            .and_then(|v| v.as_str())
+        {
             output.info(&format!("  Close message: {msg}"));
         }
-        
+
         // Show archived status if present
-        if ticket.metadata.get("archived").and_then(|v| v.as_bool()).unwrap_or(false) {
+        if ticket
+            .metadata
+            .get("archived")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
             output.info("  Status: Archived");
             if let Some(date_str) = ticket.metadata.get("archived_at").and_then(|v| v.as_str()) {
                 output.info(&format!("  Archived at: {date_str}"));

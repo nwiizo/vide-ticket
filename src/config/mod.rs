@@ -122,7 +122,7 @@ pub struct GitConfig {
 
     /// Enable Git worktree integration
     pub worktree_enabled: bool,
-    
+
     /// Use worktree by default when starting tickets
     pub worktree_default: bool,
 

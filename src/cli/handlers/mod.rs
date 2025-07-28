@@ -165,7 +165,7 @@ pub fn resolve_ticket_id(ticket_ref: Option<String>) -> Result<String> {
 ///
 /// ```
 /// use vibe_ticket::cli::handlers::parse_tags;
-/// 
+///
 /// let tags = parse_tags(Some("bug, ui, urgent".to_string()));
 /// assert_eq!(tags, vec!["bug", "ui", "urgent"]);
 /// ```

@@ -7,7 +7,8 @@
 use clap::Parser;
 use std::process;
 use vibe_ticket::cli::{
-    handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands, WorktreeCommands,
+    handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands,
+    WorktreeCommands,
 };
 use vibe_ticket::error::Result;
 
@@ -50,8 +51,7 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
 
     // Change to project directory if specified
     if let Some(project_path) = &cli.project {
-        std::env::set_current_dir(project_path)
-            .map_err(vibe_ticket::error::VibeTicketError::Io)?;
+        std::env::set_current_dir(project_path).map_err(vibe_ticket::error::VibeTicketError::Io)?;
     }
 
     // Dispatch to command handler
@@ -61,7 +61,13 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             description,
             force,
             claude_md,
-        } => handle_init(name.as_deref(), description.as_deref(), force, claude_md, formatter),
+        } => handle_init(
+            name.as_deref(),
+            description.as_deref(),
+            force,
+            claude_md,
+            formatter,
+        ),
 
         Commands::New {
             slug,
@@ -163,7 +169,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             pr,
         } => {
             use vibe_ticket::cli::handlers::handle_close_command;
-            handle_close_command(ticket, message, archive, pr, cli.project.as_deref(), formatter)
+            handle_close_command(
+                ticket,
+                message,
+                archive,
+                pr,
+                cli.project.as_deref(),
+                formatter,
+            )
         },
 
         Commands::Check { detailed, stats } => {
@@ -203,7 +216,14 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             markdown,
         } => {
             use vibe_ticket::cli::handlers::handle_show_command;
-            handle_show_command(&ticket, tasks, history, markdown, cli.project.as_deref(), formatter)
+            handle_show_command(
+                &ticket,
+                tasks,
+                history,
+                markdown,
+                cli.project.as_deref(),
+                formatter,
+            )
         },
 
         Commands::Task { command } => match command {
@@ -267,7 +287,13 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             include_archived,
         } => {
             use vibe_ticket::cli::handlers::handle_export_command;
-            handle_export_command(&format, output, include_archived, cli.project.as_deref(), formatter)
+            handle_export_command(
+                &format,
+                output,
+                include_archived,
+                cli.project.as_deref(),
+                formatter,
+            )
         },
 
         Commands::Import {
@@ -372,15 +398,27 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             },
         },
         Commands::Worktree { command } => match command {
-            WorktreeCommands::List { all, status, verbose } => {
+            WorktreeCommands::List {
+                all,
+                status,
+                verbose,
+            } => {
                 use vibe_ticket::cli::handlers::handle_worktree_list;
                 handle_worktree_list(all, status, verbose, formatter)
             },
-            WorktreeCommands::Remove { worktree, force, keep_branch } => {
+            WorktreeCommands::Remove {
+                worktree,
+                force,
+                keep_branch,
+            } => {
                 use vibe_ticket::cli::handlers::handle_worktree_remove;
                 handle_worktree_remove(&worktree, force, keep_branch, formatter)
             },
-            WorktreeCommands::Prune { force, dry_run, remove_branches } => {
+            WorktreeCommands::Prune {
+                force,
+                dry_run,
+                remove_branches,
+            } => {
                 use vibe_ticket::cli::handlers::handle_worktree_prune;
                 handle_worktree_prune(force, dry_run, remove_branches, formatter)
             },

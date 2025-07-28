@@ -132,7 +132,7 @@ pub enum Commands {
         /// Create a Git worktree (use --no-worktree to disable)
         #[arg(long, default_value = "true")]
         worktree: bool,
-        
+
         /// Disable worktree creation and only create a branch
         #[arg(long = "no-worktree", conflicts_with = "worktree")]
         no_worktree: bool,

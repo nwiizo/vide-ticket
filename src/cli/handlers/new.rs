@@ -6,6 +6,7 @@ use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 use super::parse_tags;
 
 /// Handler for the `new` command
+#[allow(clippy::too_many_arguments)]
 pub fn handle_new_command(
     slug: &str,
     title: Option<String>,
@@ -40,8 +41,9 @@ pub fn handle_new_command(
     }
 
     // Parse priority
-    let priority = Priority::try_from(priority)
-        .map_err(|_| VibeTicketError::InvalidPriority { priority: priority.to_string() })?;
+    let priority = Priority::try_from(priority).map_err(|_| VibeTicketError::InvalidPriority {
+        priority: priority.to_string(),
+    })?;
 
     // Parse tags
     let tags = tags.map(|t| parse_tags(Some(t))).unwrap_or_default();

@@ -48,7 +48,7 @@ pub fn handle_search_command(
 
     // Compile regex if needed
     let regex = if use_regex {
-        Some(Regex::new(&query).map_err(|e| {
+        Some(Regex::new(query).map_err(|e| {
             crate::error::VibeTicketError::custom(format!("Invalid regex pattern: {e}"))
         })?)
     } else {
@@ -140,9 +140,9 @@ pub fn handle_search_command(
             "query": query,
             "regex": use_regex,
             "search_fields": {
-                "title": title_only || (!title_only && !description_only && !tags_only),
-                "description": description_only || (!title_only && !description_only && !tags_only),
-                "tags": tags_only || (!title_only && !description_only && !tags_only),
+                "title": title_only || !description_only && !tags_only,
+                "description": description_only || !title_only && !tags_only,
+                "tags": tags_only || !title_only && !description_only,
             },
             "results": matches.iter().map(|(ticket, locations)| serde_json::json!({
                 "id": ticket.id.to_string(),
@@ -188,7 +188,7 @@ pub fn handle_search_command(
             // Show matching context for description
             if locations.contains(&"description".to_string()) && !description_only {
                 let excerpt =
-                    get_match_excerpt(&ticket.description, &query, use_regex, regex.as_ref());
+                    get_match_excerpt(&ticket.description, query, use_regex, regex.as_ref());
                 if let Some(excerpt) = excerpt {
                     output.info(&format!("   Description: ...{excerpt}..."));
                 }

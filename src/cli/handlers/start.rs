@@ -72,13 +72,14 @@ pub fn handle_start_command(
 
     // Set as active ticket
     storage.set_active(&ticket_id)?;
-    
+
     // Load configuration to get worktree settings
     let config = Config::load_or_default()?;
 
     // Create Git branch or worktree if requested
     let (branch_name_final, worktree_created) = if create_branch {
-        let branch_name = branch_name.unwrap_or_else(|| format!("{}{}", config.git.branch_prefix, ticket.slug));
+        let branch_name =
+            branch_name.unwrap_or_else(|| format!("{}{}", config.git.branch_prefix, ticket.slug));
 
         if create_worktree {
             create_git_worktree(&project_root, &branch_name, &ticket.slug, &config, output)?;
@@ -113,10 +114,14 @@ pub fn handle_start_command(
 
         if let Some(branch) = branch_name_final {
             if worktree_created {
-                let worktree_prefix = config.git.worktree_prefix.replace("{project}", &config.project.name);
+                let worktree_prefix = config
+                    .git
+                    .worktree_prefix
+                    .replace("{project}", &config.project.name);
                 output.info(&format!(
                     "Git worktree created: ../{}{}",
-                    worktree_prefix.trim_start_matches("../"), ticket.slug
+                    worktree_prefix.trim_start_matches("../"),
+                    ticket.slug
                 ));
                 output.info(&format!("Branch: {branch}"));
             } else {
@@ -240,8 +245,15 @@ fn create_git_worktree(
 
     // Construct the worktree path using config settings
     let project_name = config.project.name.as_str();
-    let worktree_prefix = config.git.worktree_prefix.replace("{project}", project_name);
-    let worktree_dir_name = format!("{}{}", worktree_prefix.trim_start_matches("../"), ticket_slug);
+    let worktree_prefix = config
+        .git
+        .worktree_prefix
+        .replace("{project}", project_name);
+    let worktree_dir_name = format!(
+        "{}{}",
+        worktree_prefix.trim_start_matches("../"),
+        ticket_slug
+    );
     let worktree_path = parent_dir.join(&worktree_dir_name);
 
     // Check if worktree directory already exists
@@ -310,7 +322,11 @@ mod tests {
         let ticket_slug = "fix-login-bug";
         let project_name = "my-project";
         let worktree_prefix = "../{project}-ticket-".replace("{project}", project_name);
-        let worktree_dir_name = format!("{}{}", worktree_prefix.trim_start_matches("../").trim_end_matches('-'), ticket_slug);
+        let worktree_dir_name = format!(
+            "{}{}",
+            worktree_prefix.trim_start_matches("../"),
+            ticket_slug
+        );
         assert_eq!(worktree_dir_name, "my-project-ticket-fix-login-bug");
     }
 }

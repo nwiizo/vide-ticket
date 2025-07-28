@@ -5,6 +5,7 @@ use crate::storage::{FileStorage, TicketRepository};
 use chrono::{DateTime, Duration, Local, NaiveDate, Utc};
 
 /// Handler for the `list` command
+#[allow(clippy::too_many_arguments)]
 pub fn handle_list_command(
     status: Option<String>,
     priority: Option<String>,
@@ -39,7 +40,7 @@ pub fn handle_list_command(
     )?;
 
     // Sort tickets
-    sort_tickets(&mut tickets, &sort, reverse);
+    sort_tickets(&mut tickets, sort, reverse);
 
     // Apply limit
     if let Some(limit) = limit {
@@ -151,6 +152,7 @@ fn parse_date_filter(date_str: &str) -> Result<DateTime<Utc>> {
 }
 
 /// Filter tickets based on criteria
+#[allow(clippy::too_many_arguments)]
 fn filter_tickets(
     tickets: Vec<Ticket>,
     status: Option<String>,
@@ -214,7 +216,7 @@ fn filter_tickets(
 }
 
 /// Sort tickets based on the specified field
-fn sort_tickets(tickets: &mut Vec<Ticket>, sort_by: &str, reverse: bool) {
+fn sort_tickets(tickets: &mut [Ticket], sort_by: &str, reverse: bool) {
     match sort_by {
         "created" => {
             tickets.sort_by_key(|t| t.created_at);
@@ -239,8 +241,11 @@ fn sort_tickets(tickets: &mut Vec<Ticket>, sort_by: &str, reverse: bool) {
                 order(&a.status).cmp(&order(&b.status))
             });
         },
-        "slug" | _ => {
+        "slug" => {
             // Default to slug sort (which will be chronological due to timestamp prefix)
+            tickets.sort_by(|a, b| a.slug.cmp(&b.slug));
+        },
+        _ => {
             tickets.sort_by(|a, b| a.slug.cmp(&b.slug));
         },
     }

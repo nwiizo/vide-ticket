@@ -38,6 +38,7 @@ use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 /// - No ticket is specified and there's no active ticket
 /// - The ticket is not found
 /// - Invalid priority or status values are provided
+#[allow(clippy::too_many_arguments)]
 pub fn handle_edit_command(
     ticket_ref: Option<String>,
     title: Option<String>,

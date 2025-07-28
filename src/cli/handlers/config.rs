@@ -287,10 +287,7 @@ fn handle_claude(
     let config = Config::load_from_path(config_path)?;
 
     // Determine output path
-    let claude_path = output_path.map_or_else(
-        || project_root.join("CLAUDE.md"),
-        PathBuf::from
-    );
+    let claude_path = output_path.map_or_else(|| project_root.join("CLAUDE.md"), PathBuf::from);
 
     // Generate content based on template
     let content = match template {
@@ -522,7 +519,8 @@ vibe-ticket --verbose <command>
 # Check project status
 vibe-ticket check --detailed
 ```
-"#.to_string();
+"#
+    .to_string();
 
     format!("{basic}\n{advanced_section}")
 }
