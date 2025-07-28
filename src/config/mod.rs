@@ -107,6 +107,7 @@ pub struct UiConfig {
 
 /// Git integration configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct GitConfig {
     /// Enable Git integration
     pub enabled: bool,

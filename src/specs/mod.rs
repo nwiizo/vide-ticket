@@ -63,6 +63,7 @@ pub struct SpecMetadata {
 
 /// Progress tracking for spec documents
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct SpecProgress {
     /// Requirements definition completed
     pub requirements_completed: bool,
