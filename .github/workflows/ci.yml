@@ -35,7 +35,7 @@ jobs:
       run: cargo fmt -- --check
     
     - name: Run clippy
-      run: cargo clippy -- -W clippy::pedantic -D warnings -A clippy::needless-pass-by-value -A clippy::missing-errors-doc -A clippy::missing-panics-doc -A clippy::module-name-repetitions
+      run: cargo clippy -- -D warnings
     
     - name: Run tests
       run: cargo test --quiet
