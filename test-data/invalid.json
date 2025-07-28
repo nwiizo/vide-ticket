@@ -1,0 +1,6 @@
+{ 
+  "tickets": [
+    {
+      "this is invalid json",
+    }
+  ]
