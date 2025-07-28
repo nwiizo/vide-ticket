@@ -4,6 +4,7 @@
 //! including Git branch creation and status updates.
 
 use crate::cli::{find_project_root, OutputFormatter};
+use crate::config::Config;
 use crate::core::{Status, TicketId};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
@@ -71,13 +72,16 @@ pub fn handle_start_command(
 
     // Set as active ticket
     storage.set_active(&ticket_id)?;
+    
+    // Load configuration to get worktree settings
+    let config = Config::load_or_default()?;
 
     // Create Git branch or worktree if requested
     let (branch_name_final, worktree_created) = if create_branch {
-        let branch_name = branch_name.unwrap_or_else(|| format!("ticket/{}", ticket.slug));
+        let branch_name = branch_name.unwrap_or_else(|| format!("{}{}", config.git.branch_prefix, ticket.slug));
 
         if create_worktree {
-            create_git_worktree(&project_root, &branch_name, &ticket.slug, output)?;
+            create_git_worktree(&project_root, &branch_name, &ticket.slug, &config, output)?;
             (Some(branch_name), true)
         } else {
             create_git_branch(&project_root, &branch_name, output)?;
@@ -109,9 +113,10 @@ pub fn handle_start_command(
 
         if let Some(branch) = branch_name_final {
             if worktree_created {
+                let worktree_prefix = config.git.worktree_prefix.replace("{project}", &config.project.name);
                 output.info(&format!(
-                    "Git worktree created: ../project-ticket-{}",
-                    ticket.slug
+                    "Git worktree created: ../{}{}",
+                    worktree_prefix.trim_end_matches('-'), ticket.slug
                 ));
                 output.info(&format!("Branch: {branch}"));
             } else {
@@ -211,6 +216,7 @@ fn create_git_worktree(
     project_root: &std::path::Path,
     branch_name: &str,
     ticket_slug: &str,
+    config: &Config,
     output: &OutputFormatter,
 ) -> Result<()> {
     use std::process::Command;
@@ -232,8 +238,10 @@ fn create_git_worktree(
         .parent()
         .ok_or_else(|| VibeTicketError::custom("Cannot find parent directory for worktree"))?;
 
-    // Construct the worktree path
-    let worktree_dir_name = format!("project-ticket-{ticket_slug}");
+    // Construct the worktree path using config settings
+    let project_name = config.project.name.as_str();
+    let worktree_prefix = config.git.worktree_prefix.replace("{project}", project_name);
+    let worktree_dir_name = format!("{}{}", worktree_prefix.trim_end_matches('-'), ticket_slug);
     let worktree_path = parent_dir.join(&worktree_dir_name);
 
     // Check if worktree directory already exists
@@ -300,7 +308,9 @@ mod tests {
     #[test]
     fn test_worktree_path_generation() {
         let ticket_slug = "fix-login-bug";
-        let worktree_dir_name = format!("project-ticket-{ticket_slug}");
-        assert_eq!(worktree_dir_name, "project-ticket-fix-login-bug");
+        let project_name = "my-project";
+        let worktree_prefix = "../{project}-ticket-".replace("{project}", project_name);
+        let worktree_dir_name = format!("{}{}", worktree_prefix.trim_start_matches("../").trim_end_matches('-'), ticket_slug);
+        assert_eq!(worktree_dir_name, "my-project-ticket-fix-login-bug");
     }
 }

@@ -7,7 +7,7 @@
 use clap::Parser;
 use std::process;
 use vibe_ticket::cli::{
-    handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands,
+    handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands, WorktreeCommands,
 };
 use vibe_ticket::error::Result;
 
@@ -141,13 +141,16 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             branch,
             branch_name,
             worktree,
+            no_worktree,
         } => {
             use vibe_ticket::cli::handlers::handle_start_command;
+            // If no_worktree is true, override worktree to false
+            let use_worktree = if no_worktree { false } else { worktree };
             handle_start_command(
                 ticket,
                 branch,
                 branch_name,
-                worktree,
+                use_worktree,
                 cli.project,
                 formatter,
             )
@@ -366,6 +369,20 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             SpecCommands::Activate { spec } => {
                 use vibe_ticket::cli::handlers::handle_spec_activate;
                 handle_spec_activate(spec, cli.project, formatter)
+            },
+        },
+        Commands::Worktree { command } => match command {
+            WorktreeCommands::List { all, status, verbose } => {
+                use vibe_ticket::cli::handlers::handle_worktree_list;
+                handle_worktree_list(all, status, verbose, formatter)
+            },
+            WorktreeCommands::Remove { worktree, force, keep_branch } => {
+                use vibe_ticket::cli::handlers::handle_worktree_remove;
+                handle_worktree_remove(&worktree, force, keep_branch, formatter)
+            },
+            WorktreeCommands::Prune { force, dry_run, remove_branches } => {
+                use vibe_ticket::cli::handlers::handle_worktree_prune;
+                handle_worktree_prune(force, dry_run, remove_branches, formatter)
             },
         },
     }

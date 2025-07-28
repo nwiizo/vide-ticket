@@ -31,6 +31,6 @@ pub mod handlers;
 mod output;
 mod utils;
 
-pub use commands::{Cli, Commands, ConfigCommands, SpecCommands, TaskCommands};
+pub use commands::{Cli, Commands, ConfigCommands, SpecCommands, TaskCommands, WorktreeCommands};
 pub use output::{OutputFormatter, ProgressBar};
 pub use utils::*;

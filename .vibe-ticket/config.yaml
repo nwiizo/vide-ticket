@@ -14,6 +14,7 @@ git:
   auto_branch: true
   commit_template: null
   worktree_enabled: true
+  worktree_default: true
   worktree_prefix: ../{project}-ticket-
   worktree_cleanup_on_close: false
 plugins:

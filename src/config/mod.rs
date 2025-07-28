@@ -26,12 +26,16 @@
 //! ```no_run
 //! use vibe_ticket::config::Config;
 //!
-//! // Load configuration from all sources
-//! let config = Config::load()?;
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     // Load configuration from all sources
+//!     let config = Config::load()?;
 //!
-//! // Access configuration values
-//! println!("Database: {}", config.database.url);
-//! println!("API Port: {}", config.api.port);
+//!     // Access configuration values
+//!     println!("Project name: {}", config.project.default_priority);
+//!     println!("Git enabled: {}", config.git.enabled);
+//!     
+//!     Ok(())
+//! }
 //! ```
 //!
 //! # File Format
@@ -118,6 +122,9 @@ pub struct GitConfig {
 
     /// Enable Git worktree integration
     pub worktree_enabled: bool,
+    
+    /// Use worktree by default when starting tickets
+    pub worktree_default: bool,
 
     /// Worktree directory prefix (use {project} as placeholder)
     pub worktree_prefix: String,
@@ -157,6 +164,7 @@ impl Default for Config {
                 auto_branch: true,
                 commit_template: None,
                 worktree_enabled: true,
+                worktree_default: true,
                 worktree_prefix: "../{project}-ticket-".to_string(),
                 worktree_cleanup_on_close: false,
             },
