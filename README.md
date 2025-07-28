@@ -16,7 +16,7 @@ vibe-ticket new fix-bug --title "Fix login issue" --priority high
 vibe-ticket start fix-bug  # Creates Git worktree by default
 
 # Work in the worktree
-cd ../my-project-ticket-fix-bug/
+cd ./my-project-vibeticket-fix-bug/
 
 # Track progress
 vibe-ticket task add "Fix null check"
@@ -50,7 +50,7 @@ vibe-ticket worktree list       # List all worktrees
 # .vibe-ticket/config.yaml
 git:
   worktree_default: true        # Create worktrees by default
-  worktree_prefix: "../{project}-ticket-"
+  worktree_prefix: "./{project}-vibeticket-"
 project:
   default_priority: medium
 ```

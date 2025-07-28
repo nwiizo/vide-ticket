@@ -18,7 +18,7 @@ vibe-ticket list
 
 # Start working on a ticket (creates worktree by default)
 vibe-ticket start fix-bug
-# This creates: ../vibe-ticket-ticket-fix-bug/
+# This creates: ./vibe-ticket-vibeticket-fix-bug/
 
 # Start without worktree (branch only)
 vibe-ticket start fix-bug --no-worktree
@@ -96,7 +96,7 @@ The project has been initialized with default settings. You can customize them u
 git:
   worktree_enabled: true              # Enable worktree support
   worktree_default: true              # Create worktree by default when starting tickets
-  worktree_prefix: "../{project}-ticket-"  # Directory naming pattern
+  worktree_prefix: "./{project}-vibeticket-"  # Directory naming pattern
   worktree_cleanup_on_close: false   # Auto-remove worktree when closing ticket
 ```
 
@@ -105,7 +105,7 @@ git:
 1. Create a ticket before starting any work
 2. Use descriptive ticket slugs (e.g., fix-login-bug, add-search-feature)
 3. When starting a ticket, a Git worktree is created automatically
-   - Work in the worktree directory: `../vibe-ticket-ticket-<slug>/`
+   - Work in the worktree directory: `./vibe-ticket-vibeticket-<slug>/`
    - Each ticket has its own isolated working directory
 4. Break down complex work into tasks within tickets
 5. Keep ticket status updated as work progresses

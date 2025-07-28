@@ -242,7 +242,10 @@ fn extract_ticket_slug(path: &Path, config: &Config) -> Result<Option<String>> {
     // Check if this follows our worktree naming pattern
     if let Some(file_name) = path.file_name() {
         let name = file_name.to_string_lossy();
-        let prefix_cleaned = prefix.trim_start_matches("../").trim_end_matches('-');
+        let prefix_cleaned = prefix
+            .trim_start_matches("../")
+            .trim_start_matches("./")
+            .trim_end_matches('-');
 
         if name.starts_with(prefix_cleaned) {
             let slug = name
@@ -320,13 +323,24 @@ fn resolve_worktree_path(
         .git
         .worktree_prefix
         .replace("{project}", project_name);
-    let worktree_name = format!("{}{}", prefix.trim_end_matches('-'), worktree_ref);
 
-    let parent_dir = project_root
-        .parent()
-        .ok_or_else(|| VibeTicketError::custom("Cannot find parent directory"))?;
+    // Determine base directory based on prefix
+    let (base_dir, clean_prefix) = if prefix.starts_with("../") {
+        // Parent directory
+        let parent = project_root
+            .parent()
+            .ok_or_else(|| VibeTicketError::custom("Cannot find parent directory"))?;
+        (parent.to_path_buf(), prefix.trim_start_matches("../"))
+    } else if prefix.starts_with("./") {
+        // Current directory
+        (project_root.to_path_buf(), prefix.trim_start_matches("./"))
+    } else {
+        // Default to current directory
+        (project_root.to_path_buf(), prefix.as_str())
+    };
 
-    let worktree_path = parent_dir.join(&worktree_name);
+    let worktree_name = format!("{}{}", clean_prefix.trim_end_matches('-'), worktree_ref);
+    let worktree_path = base_dir.join(&worktree_name);
     if worktree_path.exists() {
         return Ok(worktree_path);
     }

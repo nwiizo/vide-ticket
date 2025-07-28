@@ -111,3 +111,6 @@ TODO.md
 
 # Release artifacts
 release/
+
+# vibe-ticket worktree directories
+*-vibeticket-*/

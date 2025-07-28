@@ -165,7 +165,7 @@ impl Default for Config {
                 commit_template: None,
                 worktree_enabled: true,
                 worktree_default: true,
-                worktree_prefix: "../{project}-ticket-".to_string(),
+                worktree_prefix: "./{project}-vibeticket-".to_string(),
                 worktree_cleanup_on_close: false,
             },
             plugins: PluginsConfig {

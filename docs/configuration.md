@@ -15,7 +15,7 @@ git:
   branch_prefix: "ticket/"
   worktree_enabled: true
   worktree_default: true
-  worktree_prefix: "../{project}-ticket-"
+  worktree_prefix: "./{project}-vibeticket-"
   worktree_cleanup_on_close: false
 
 ui:

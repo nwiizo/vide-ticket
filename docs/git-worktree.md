@@ -14,7 +14,7 @@ vibe-ticket creates Git worktrees by default when starting tickets, enabling par
 ```bash
 # Start a ticket (creates worktree by default)
 vibe-ticket start fix-login-bug
-# Creates: ../my-project-ticket-fix-login-bug/
+# Creates: ./my-project-vibeticket-fix-login-bug/
 
 # Start without worktree (traditional branch only)
 vibe-ticket start fix-login-bug --no-worktree
@@ -35,7 +35,7 @@ vibe-ticket worktree prune
 git:
   worktree_enabled: true              # Enable worktree support
   worktree_default: true              # Create worktree by default
-  worktree_prefix: "../{project}-ticket-"  # Directory naming pattern
+  worktree_prefix: "./{project}-vibeticket-"  # Directory naming pattern
   worktree_cleanup_on_close: false   # Auto-remove when closing ticket
 ```
 
@@ -49,7 +49,7 @@ git:
 2. **Start working (creates worktree)**
    ```bash
    vibe-ticket start implement-auth
-   cd ../my-project-ticket-implement-auth/
+   cd ./my-project-vibeticket-implement-auth/
    ```
 
 3. **Work in isolated environment**
@@ -61,7 +61,7 @@ git:
    ```bash
    # Start another ticket
    vibe-ticket start fix-bug
-   cd ../my-project-ticket-fix-bug/
+   cd ./my-project-vibeticket-fix-bug/
    
    # Original work remains in the other worktree
    ```

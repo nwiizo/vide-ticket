@@ -238,23 +238,36 @@ fn create_git_worktree(
         return Err(VibeTicketError::custom("Not in a Git repository"));
     }
 
-    // Get the parent directory of the project root
-    let parent_dir = project_root
-        .parent()
-        .ok_or_else(|| VibeTicketError::custom("Cannot find parent directory for worktree"))?;
-
     // Construct the worktree path using config settings
     let project_name = config.project.name.as_str();
     let worktree_prefix = config
         .git
         .worktree_prefix
         .replace("{project}", project_name);
-    let worktree_dir_name = format!(
-        "{}{}",
-        worktree_prefix.trim_start_matches("../"),
-        ticket_slug
-    );
-    let worktree_path = parent_dir.join(&worktree_dir_name);
+
+    // Determine base directory based on prefix
+    let (base_dir, clean_prefix) = if worktree_prefix.starts_with("../") {
+        // Parent directory
+        let parent = project_root
+            .parent()
+            .ok_or_else(|| VibeTicketError::custom("Cannot find parent directory for worktree"))?;
+        (
+            parent.to_path_buf(),
+            worktree_prefix.trim_start_matches("../"),
+        )
+    } else if worktree_prefix.starts_with("./") {
+        // Current directory
+        (
+            project_root.to_path_buf(),
+            worktree_prefix.trim_start_matches("./"),
+        )
+    } else {
+        // Default to current directory
+        (project_root.to_path_buf(), worktree_prefix.as_str())
+    };
+
+    let worktree_dir_name = format!("{}{}", clean_prefix.trim_end_matches('-'), ticket_slug);
+    let worktree_path = base_dir.join(&worktree_dir_name);
 
     // Check if worktree directory already exists
     if worktree_path.exists() {
@@ -302,7 +315,16 @@ fn create_git_worktree(
         "Created worktree at '{}'",
         worktree_path.display()
     ));
-    output.info(&format!("You can now cd to '../{worktree_dir_name}'"));
+
+    // Show appropriate cd command based on location
+    let cd_path = if worktree_prefix.starts_with("../") {
+        format!("../{}", worktree_dir_name)
+    } else if worktree_prefix.starts_with("./") {
+        format!("./{}", worktree_dir_name)
+    } else {
+        worktree_dir_name.clone()
+    };
+    output.info(&format!("You can now cd to '{}'", cd_path));
 
     Ok(())
 }

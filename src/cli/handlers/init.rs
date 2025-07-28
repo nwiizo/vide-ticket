@@ -238,6 +238,9 @@ fn create_gitignore(project_dir: &Path) -> Result<()> {
         ".vibe-ticket/tmp/",
         ".vibe-ticket/*.log",
         "",
+        "# vibe-ticket worktree directories",
+        "*-vibeticket-*/",
+        "",
     ];
 
     if gitignore_path.exists() {
