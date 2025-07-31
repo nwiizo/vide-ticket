@@ -115,3 +115,6 @@ release/
 # vibe-ticket worktree directories
 *-vibeticket-*/
 vibe-ticket-vibeticket*/
+
+# Serena MCP cache and configuration
+.serena/
