@@ -13,14 +13,14 @@ use std::path::PathBuf;
 
 #[cfg(feature = "mcp")]
 pub fn handle_mcp_serve(
-    config: Config,
+    _config: Config,
     host: Option<String>,
     port: Option<u16>,
     daemon: bool,
     project_path: Option<&str>,
     formatter: &OutputFormatter,
 ) -> anyhow::Result<()> {
-    use tracing::{error, info};
+    use tracing::error;
     
     // Create MCP configuration
     let mut mcp_config = McpConfig::default();
@@ -37,7 +37,7 @@ pub fn handle_mcp_serve(
     let storage_path = if let Some(path) = project_path {
         PathBuf::from(path).join(".vibe-ticket")
     } else {
-        config.storage_path()
+        PathBuf::from(".vibe-ticket")
     };
     
     mcp_config.storage_path = storage_path.clone();

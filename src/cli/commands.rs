@@ -795,6 +795,7 @@ mod tests {
                 open,
                 since,
                 until,
+                ..
             } => {
                 assert!(status.is_none());
                 assert!(priority.is_none());

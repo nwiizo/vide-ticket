@@ -1,7 +1,7 @@
 /// Tests for concurrent access to storage
 #[cfg(test)]
 mod tests {
-    use crate::storage::{FileStorage, lock::LockInfo};
+    use crate::storage::FileStorage;
     use crate::core::{Priority, Status, Ticket};
     use std::sync::{Arc, Barrier};
     use std::thread;

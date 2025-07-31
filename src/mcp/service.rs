@@ -10,6 +10,7 @@ use std::sync::Arc;
 /// MCP service implementation
 #[derive(Clone)]
 pub struct VibeTicketService {
+    #[allow(dead_code)]
     storage: Arc<FileStorage>,
 }
 

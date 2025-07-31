@@ -465,7 +465,7 @@ mod tests {
         (temp_dir, storage, formatter)
     }
 
-    fn create_test_ticket(storage: &FileStorage) -> (TicketId, Ticket) {
+    fn create_test_ticket(storage: &FileStorage) -> (crate::core::TicketId, Ticket) {
         let ticket = Ticket::new("test-ticket".to_string(), "Test Ticket".to_string());
         let ticket_id = ticket.id.clone();
         storage.save(&ticket).unwrap();

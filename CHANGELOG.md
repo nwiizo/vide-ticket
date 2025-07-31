@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-07-31
+
+### Added
+- Model Context Protocol (MCP) support for AI assistant integration
+- `vibe-ticket mcp serve` command to run as MCP server
+- rmcp 0.3.2 integration with stdio transport
+- File locking mechanism for concurrent access protection
+- Concurrent operation tests for storage layer
+
+### Changed
+- Enhanced storage layer with proper file locking
+- Improved error handling for concurrent operations
+
+### Fixed
+- Race conditions in file storage operations
+- Concurrent access issues when multiple processes access tickets
+
 ## [0.1.4] - 2025-07-28
 
 ### Added

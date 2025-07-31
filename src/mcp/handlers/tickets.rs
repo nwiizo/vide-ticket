@@ -24,6 +24,7 @@ pub fn register_tools() -> Vec<Tool> {
             name: Cow::Borrowed("vibe-ticket.list"),
             description: Some(Cow::Borrowed("List tickets")),
             input_schema: Arc::new(schema),
+            annotations: None,
         },
     ]
 }
