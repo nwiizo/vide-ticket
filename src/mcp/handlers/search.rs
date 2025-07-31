@@ -15,7 +15,7 @@ pub fn register_tools() -> Vec<Tool> {
     vec![
         // Search tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.search"),
+            name: Cow::Borrowed("vibe-ticket_search"),
             description: Some(Cow::Borrowed("Search tickets by keyword")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -43,7 +43,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Export tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.export"),
+            name: Cow::Borrowed("vibe-ticket_export"),
             description: Some(Cow::Borrowed("Export tickets in various formats")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -64,7 +64,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Import tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.import"),
+            name: Cow::Borrowed("vibe-ticket_import"),
             description: Some(Cow::Borrowed("Import tickets from JSON or YAML")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -107,7 +107,7 @@ pub async fn handle_search(service: &VibeTicketService, arguments: Value) -> Res
 
     let tickets = service
         .storage
-        .list()
+        .load_all()
         .map_err(|e| format!("Failed to list tickets: {}", e))?;
 
     let mut results = Vec::new();
@@ -116,17 +116,17 @@ pub async fn handle_search(service: &VibeTicketService, arguments: Value) -> Res
         let mut matches = Vec::new();
 
         // Search in title
-        if search_all || args.in_title.unwrap_or(false) {
-            if ticket.title.to_lowercase().contains(&query) {
-                matches.push("title");
-            }
+        if (search_all || args.in_title.unwrap_or(false))
+            && ticket.title.to_lowercase().contains(&query)
+        {
+            matches.push("title");
         }
 
         // Search in description
-        if search_all || args.in_description.unwrap_or(false) {
-            if ticket.description.to_lowercase().contains(&query) {
-                matches.push("description");
-            }
+        if (search_all || args.in_description.unwrap_or(false))
+            && ticket.description.to_lowercase().contains(&query)
+        {
+            matches.push("description");
         }
 
         // Search in tasks
@@ -198,7 +198,7 @@ pub async fn handle_export(service: &VibeTicketService, arguments: Value) -> Res
         // Export all tickets
         service
             .storage
-            .list()
+            .load_all()
             .map_err(|e| format!("Failed to list tickets: {}", e))?
     };
 
@@ -249,7 +249,7 @@ pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Res
         // Check if ticket already exists
         if service
             .storage
-            .list()
+            .load_all()
             .map(|existing| {
                 existing
                     .iter()
@@ -282,7 +282,7 @@ pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Res
 
 /// Export tickets to CSV format
 fn export_to_csv(tickets: &[Ticket]) -> Result<String, String> {
-    use std::io::Write;
+    use std::io::Write as IoWrite;
 
     let mut csv_data = Vec::new();
 
@@ -326,7 +326,7 @@ fn export_to_csv(tickets: &[Ticket]) -> Result<String, String> {
 
 /// Export tickets to Markdown format
 fn export_to_markdown(tickets: &[Ticket]) -> String {
-    use std::fmt::Write;
+    use std::fmt::Write as FmtWrite;
 
     let mut md = String::new();
 

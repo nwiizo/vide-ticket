@@ -14,7 +14,7 @@ pub fn register_tools() -> Vec<Tool> {
     vec![
         // Add spec tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.spec.add"),
+            name: Cow::Borrowed("vibe-ticket_spec_add"),
             description: Some(Cow::Borrowed("Add specifications to a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -39,7 +39,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Update spec tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.spec.update"),
+            name: Cow::Borrowed("vibe-ticket_spec_update"),
             description: Some(Cow::Borrowed("Update specifications for a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -64,7 +64,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Check spec tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.spec.check"),
+            name: Cow::Borrowed("vibe-ticket_spec_check"),
             description: Some(Cow::Borrowed("Check specification status for a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",

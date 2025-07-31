@@ -64,20 +64,11 @@ pub enum TransportType {
 }
 
 /// Authentication configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AuthConfig {
     /// Enable authentication
     pub enabled: bool,
 
     /// API key for authentication
     pub api_key: Option<String>,
-}
-
-impl Default for AuthConfig {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            api_key: None,
-        }
-    }
 }

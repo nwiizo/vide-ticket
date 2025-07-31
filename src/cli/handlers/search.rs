@@ -250,6 +250,6 @@ mod tests {
     #[test]
     fn test_regex_validation() {
         assert!(Regex::new("test.*pattern").is_ok());
-        assert!(Regex::new("[invalid").is_err());
+        assert!(Regex::new(r"[invalid").is_err());
     }
 }

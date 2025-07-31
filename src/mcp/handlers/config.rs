@@ -33,7 +33,7 @@ pub fn register_tools() -> Vec<Tool> {
     vec![
         // Show config tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.config.show"),
+            name: Cow::Borrowed("vibe-ticket_config_show"),
             description: Some(Cow::Borrowed("Show current configuration")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -48,7 +48,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Set config tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.config.set"),
+            name: Cow::Borrowed("vibe-ticket_config_set"),
             description: Some(Cow::Borrowed("Set a configuration value")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",

@@ -15,7 +15,7 @@ pub fn register_tools() -> Vec<Tool> {
     vec![
         // New ticket tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.new"),
+            name: Cow::Borrowed("vibe-ticket_new"),
             description: Some(Cow::Borrowed("Create a new ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -54,7 +54,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // List tickets tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.list"),
+            name: Cow::Borrowed("vibe-ticket_list"),
             description: Some(Cow::Borrowed("List tickets with optional filters")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -92,7 +92,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Show ticket tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.show"),
+            name: Cow::Borrowed("vibe-ticket_show"),
             description: Some(Cow::Borrowed("Show detailed information about a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -108,7 +108,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Edit ticket tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.edit"),
+            name: Cow::Borrowed("vibe-ticket_edit"),
             description: Some(Cow::Borrowed("Edit ticket properties")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -151,7 +151,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Close ticket tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.close"),
+            name: Cow::Borrowed("vibe-ticket_close"),
             description: Some(Cow::Borrowed("Close a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -171,7 +171,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Start ticket tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.start"),
+            name: Cow::Borrowed("vibe-ticket_start"),
             description: Some(Cow::Borrowed("Start working on a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -192,7 +192,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Check status tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.check"),
+            name: Cow::Borrowed("vibe-ticket_check"),
             description: Some(Cow::Borrowed("Check current ticket status")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -216,7 +216,7 @@ pub async fn resolve_ticket_ref(
     // Otherwise, search by slug
     let tickets = service
         .storage
-        .list()
+        .load_all()
         .map_err(|e| format!("Failed to list tickets: {}", e))?;
 
     for ticket in tickets {
@@ -301,7 +301,7 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
 
     let mut tickets = service
         .storage
-        .list()
+        .load_all()
         .map_err(|e| format!("Failed to list tickets: {}", e))?;
 
     // Apply filters
@@ -624,7 +624,7 @@ pub async fn handle_check(service: &VibeTicketService, _arguments: Value) -> Res
 
     let ticket_count = service
         .storage
-        .list()
+        .load_all()
         .map(|tickets| tickets.len())
         .unwrap_or(0);
 

@@ -44,15 +44,16 @@
 //!
 //! # Example Usage
 //!
-//! ```no_run
+//! ```ignore
 //! #[cfg(feature = "api")]
-//! use vibe_ticket::api::Server;
+//! use vibe_ticket::api::start_server;
+//! use vibe_ticket::config::Config;
 //!
 //! #[cfg(feature = "api")]
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let server = Server::new(config)?;
-//!     server.run().await?;
+//!     let config = Config::load()?;
+//!     start_server(config).await?;
 //!     Ok(())
 //! }
 //! ```

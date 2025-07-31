@@ -1,17 +1,11 @@
 //! MCP server command handler
 
-#[cfg(feature = "mcp")]
 use crate::cli::output::OutputFormatter;
-#[cfg(feature = "mcp")]
 use crate::config::Config;
-#[cfg(feature = "mcp")]
 use crate::mcp::{McpConfig, McpServer};
-#[cfg(feature = "mcp")]
 use crate::storage::FileStorage;
-#[cfg(feature = "mcp")]
 use std::path::PathBuf;
 
-#[cfg(feature = "mcp")]
 pub fn handle_mcp_serve(
     _config: Config,
     host: Option<String>,
@@ -68,17 +62,4 @@ pub fn handle_mcp_serve(
         }
         Ok(())
     })
-}
-
-#[cfg(not(feature = "mcp"))]
-pub fn handle_mcp_serve(
-    _config: crate::config::Config,
-    _host: Option<String>,
-    _port: Option<u16>,
-    _daemon: bool,
-    _project_path: Option<&str>,
-    formatter: &crate::cli::output::OutputFormatter,
-) -> anyhow::Result<()> {
-    formatter.error("MCP support is not enabled. Rebuild with --features mcp");
-    Err(anyhow::anyhow!("MCP feature not enabled"))
 }

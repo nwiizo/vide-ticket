@@ -80,7 +80,7 @@ harness = false
 
 # Optional features
 [features]
-default = []
+default = ["mcp"]
 api = ["axum", "tower", "tower-http"]
 database = ["sqlx"]
 mcp = ["rmcp", "tokio-util", "async-trait"]

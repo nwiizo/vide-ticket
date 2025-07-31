@@ -47,6 +47,7 @@ impl VibeTicketService {
 }
 
 // Implement ServerHandler trait for MCP protocol
+#[allow(refining_impl_trait_reachable)]
 impl ServerHandler for VibeTicketService {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
@@ -60,18 +61,15 @@ impl ServerHandler for VibeTicketService {
         }
     }
 
-    fn list_tools(
+    async fn list_tools(
         &self,
         _pagination: Option<rmcp::model::PaginatedRequestParam>,
         _ctx: RequestContext<RoleServer>,
-    ) -> impl Future<Output = Result<rmcp::model::ListToolsResult, rmcp::ErrorData>> + Send + '_
-    {
-        async move {
-            Ok(rmcp::model::ListToolsResult {
-                tools: Self::get_tools(),
-                next_cursor: None,
-            })
-        }
+    ) -> Result<rmcp::model::ListToolsResult, rmcp::ErrorData> {
+        Ok(rmcp::model::ListToolsResult {
+            tools: Self::get_tools(),
+            next_cursor: None,
+        })
     }
 
     fn call_tool(
@@ -92,80 +90,80 @@ impl ServerHandler for VibeTicketService {
         Box::pin(async move {
             let result = match name.as_ref() {
                 // Ticket operations
-                "vibe-ticket.new" => {
+                "vibe-ticket_new" => {
                     crate::mcp::handlers::tickets::handle_new(&service, arguments).await
                 },
-                "vibe-ticket.list" => {
+                "vibe-ticket_list" => {
                     crate::mcp::handlers::tickets::handle_list(&service, arguments).await
                 },
-                "vibe-ticket.show" => {
+                "vibe-ticket_show" => {
                     crate::mcp::handlers::tickets::handle_show(&service, arguments).await
                 },
-                "vibe-ticket.edit" => {
+                "vibe-ticket_edit" => {
                     crate::mcp::handlers::tickets::handle_edit(&service, arguments).await
                 },
-                "vibe-ticket.close" => {
+                "vibe-ticket_close" => {
                     crate::mcp::handlers::tickets::handle_close(&service, arguments).await
                 },
-                "vibe-ticket.start" => {
+                "vibe-ticket_start" => {
                     crate::mcp::handlers::tickets::handle_start(&service, arguments).await
                 },
-                "vibe-ticket.check" => {
+                "vibe-ticket_check" => {
                     crate::mcp::handlers::tickets::handle_check(&service, arguments).await
                 },
 
                 // Task operations
-                "vibe-ticket.task.add" => {
+                "vibe-ticket_task_add" => {
                     crate::mcp::handlers::tasks::handle_add(&service, arguments).await
                 },
-                "vibe-ticket.task.complete" => {
+                "vibe-ticket_task_complete" => {
                     crate::mcp::handlers::tasks::handle_complete(&service, arguments).await
                 },
-                "vibe-ticket.task.list" => {
+                "vibe-ticket_task_list" => {
                     crate::mcp::handlers::tasks::handle_list(&service, arguments).await
                 },
-                "vibe-ticket.task.remove" => {
+                "vibe-ticket_task_remove" => {
                     crate::mcp::handlers::tasks::handle_remove(&service, arguments).await
                 },
 
                 // Worktree operations
-                "vibe-ticket.worktree.list" => {
+                "vibe-ticket_worktree_list" => {
                     crate::mcp::handlers::worktree::handle_list(&service, arguments).await
                 },
-                "vibe-ticket.worktree.remove" => {
+                "vibe-ticket_worktree_remove" => {
                     crate::mcp::handlers::worktree::handle_remove(&service, arguments).await
                 },
-                "vibe-ticket.worktree.prune" => {
+                "vibe-ticket_worktree_prune" => {
                     crate::mcp::handlers::worktree::handle_prune(&service, arguments).await
                 },
 
                 // Search and export
-                "vibe-ticket.search" => {
+                "vibe-ticket_search" => {
                     crate::mcp::handlers::search::handle_search(&service, arguments).await
                 },
-                "vibe-ticket.export" => {
+                "vibe-ticket_export" => {
                     crate::mcp::handlers::search::handle_export(&service, arguments).await
                 },
-                "vibe-ticket.import" => {
+                "vibe-ticket_import" => {
                     crate::mcp::handlers::search::handle_import(&service, arguments).await
                 },
 
                 // Config operations
-                "vibe-ticket.config.show" => {
+                "vibe-ticket_config_show" => {
                     crate::mcp::handlers::config::handle_show(&service, arguments).await
                 },
-                "vibe-ticket.config.set" => {
+                "vibe-ticket_config_set" => {
                     crate::mcp::handlers::config::handle_set(&service, arguments).await
                 },
 
                 // Spec operations
-                "vibe-ticket.spec.add" => {
+                "vibe-ticket_spec_add" => {
                     crate::mcp::handlers::spec::handle_add(&service, arguments).await
                 },
-                "vibe-ticket.spec.update" => {
+                "vibe-ticket_spec_update" => {
                     crate::mcp::handlers::spec::handle_update(&service, arguments).await
                 },
-                "vibe-ticket.spec.check" => {
+                "vibe-ticket_spec_check" => {
                     crate::mcp::handlers::spec::handle_check(&service, arguments).await
                 },
 
@@ -181,7 +179,7 @@ impl ServerHandler for VibeTicketService {
                     is_error: None,
                 }),
                 Err(e) => Err(ErrorData {
-                    code: rmcp::model::ErrorCode::from(-32603), // Internal error code
+                    code: rmcp::model::ErrorCode(-32603), // Internal error code
                     message: Cow::Borrowed("Internal error"),
                     data: Some(serde_json::json!({ "error": e })),
                 }),

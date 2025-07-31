@@ -129,7 +129,7 @@ pub enum Commands {
         #[arg(short, long, default_value = "true")]
         branch: bool,
 
-        /// Custom branch name (default: ticket-<slug>)
+        /// Custom branch name (default: ticket-{slug})
         #[arg(long)]
         branch_name: Option<String>,
 
@@ -326,7 +326,6 @@ pub enum Commands {
         command: WorktreeCommands,
     },
 
-    #[cfg(feature = "mcp")]
     /// Model Context Protocol (MCP) server
     Mcp {
         #[command(subcommand)]
@@ -581,7 +580,6 @@ pub enum SpecCommands {
     },
 }
 
-#[cfg(feature = "mcp")]
 #[derive(Subcommand, Debug)]
 pub enum McpCommands {
     /// Start MCP server

@@ -2,6 +2,7 @@
 
 use crate::mcp::handlers::schema_helper::json_to_schema;
 use crate::mcp::service::VibeTicketService;
+use crate::storage::TicketRepository;
 use rmcp::model::Tool;
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -13,7 +14,7 @@ pub fn register_tools() -> Vec<Tool> {
     vec![
         // List worktrees tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.worktree.list"),
+            name: Cow::Borrowed("vibe-ticket_worktree_list"),
             description: Some(Cow::Borrowed("List Git worktrees")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -28,7 +29,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Remove worktree tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.worktree.remove"),
+            name: Cow::Borrowed("vibe-ticket_worktree_remove"),
             description: Some(Cow::Borrowed("Remove a Git worktree")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -48,7 +49,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Prune worktrees tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.worktree.prune"),
+            name: Cow::Borrowed("vibe-ticket_worktree_prune"),
             description: Some(Cow::Borrowed("Remove stale worktree information")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -90,16 +91,16 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
     let mut current_worktree = json!({});
 
     for line in output_str.lines() {
-        if line.starts_with("worktree ") {
+        if let Some(path) = line.strip_prefix("worktree ") {
             if !current_worktree.as_object().unwrap().is_empty() {
                 worktrees.push(current_worktree);
                 current_worktree = json!({});
             }
-            current_worktree["path"] = json!(line[9..].trim());
-        } else if line.starts_with("HEAD ") {
-            current_worktree["head"] = json!(line[5..].trim());
-        } else if line.starts_with("branch ") {
-            current_worktree["branch"] = json!(line[7..].trim());
+            current_worktree["path"] = json!(path.trim());
+        } else if let Some(head) = line.strip_prefix("HEAD ") {
+            current_worktree["head"] = json!(head.trim());
+        } else if let Some(branch) = line.strip_prefix("branch ") {
+            current_worktree["branch"] = json!(branch.trim());
         } else if line == "detached" {
             current_worktree["detached"] = json!(true);
         }
@@ -161,8 +162,7 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
     let mut worktree_path = None;
 
     for line in output_str.lines() {
-        if line.starts_with("worktree ") {
-            let path = &line[9..];
+        if let Some(path) = line.strip_prefix("worktree ") {
             if path.contains(&worktree_pattern) {
                 worktree_path = Some(path.to_string());
                 break;

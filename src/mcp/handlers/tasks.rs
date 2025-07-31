@@ -15,7 +15,7 @@ pub fn register_tools() -> Vec<Tool> {
     vec![
         // Add task tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.task.add"),
+            name: Cow::Borrowed("vibe-ticket_task_add"),
             description: Some(Cow::Borrowed("Add a task to a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -35,7 +35,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Complete task tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.task.complete"),
+            name: Cow::Borrowed("vibe-ticket_task_complete"),
             description: Some(Cow::Borrowed("Mark a task as completed")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -55,7 +55,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // List tasks tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.task.list"),
+            name: Cow::Borrowed("vibe-ticket_task_list"),
             description: Some(Cow::Borrowed("List tasks in a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
@@ -78,7 +78,7 @@ pub fn register_tools() -> Vec<Tool> {
         },
         // Remove task tool
         Tool {
-            name: Cow::Borrowed("vibe-ticket.task.remove"),
+            name: Cow::Borrowed("vibe-ticket_task_remove"),
             description: Some(Cow::Borrowed("Remove a task from a ticket")),
             input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
