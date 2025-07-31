@@ -321,6 +321,13 @@ pub enum Commands {
         #[command(subcommand)]
         command: WorktreeCommands,
     },
+    
+    /// Run MCP server (Model Context Protocol)
+    #[cfg(feature = "mcp")]
+    Mcp {
+        #[command(subcommand)]
+        command: McpCommands,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -614,5 +621,28 @@ pub enum WorktreeCommands {
         /// Remove branches for pruned worktrees
         #[arg(long)]
         remove_branches: bool,
+    },
+}
+
+#[cfg(feature = "mcp")]
+#[derive(Subcommand, Debug)]
+pub enum McpCommands {
+    /// Start the MCP server
+    Serve {
+        /// Configuration file path
+        #[arg(short, long)]
+        config: Option<String>,
+        
+        /// Host to bind to
+        #[arg(long)]
+        host: Option<String>,
+        
+        /// Port to listen on
+        #[arg(long)]
+        port: Option<u16>,
+        
+        /// Run in daemon mode
+        #[arg(short, long)]
+        daemon: bool,
     },
 }

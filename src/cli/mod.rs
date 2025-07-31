@@ -32,5 +32,7 @@ mod output;
 mod utils;
 
 pub use commands::{Cli, Commands, ConfigCommands, SpecCommands, TaskCommands, WorktreeCommands};
+#[cfg(feature = "mcp")]
+pub use commands::McpCommands;
 pub use output::{OutputFormatter, ProgressBar};
 pub use utils::*;

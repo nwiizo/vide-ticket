@@ -423,6 +423,22 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
                 handle_worktree_prune(force, dry_run, remove_branches, formatter)
             },
         },
+        
+        #[cfg(feature = "mcp")]
+        Commands::Mcp { command } => {
+            use vibe_ticket::cli::McpCommands;
+            use vibe_ticket::cli::handlers::handle_mcp_serve;
+            match command {
+                McpCommands::Serve {
+                    config,
+                    host,
+                    port,
+                    daemon,
+                } => {
+                    handle_mcp_serve(config, host, port, daemon, cli.project.as_deref(), formatter)
+                }
+            }
+        },
     }
 }
 

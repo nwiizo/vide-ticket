@@ -13,6 +13,9 @@ pub mod storage;
 #[cfg(feature = "api")]
 pub mod api;
 
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
 #[cfg(test)]
 pub mod test_utils;
 
