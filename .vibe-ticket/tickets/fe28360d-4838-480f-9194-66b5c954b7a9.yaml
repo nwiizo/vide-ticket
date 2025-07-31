@@ -1,0 +1,15 @@
+id: fe28360d-4838-480f-9194-66b5c954b7a9
+slug: 202507281513-test-coverage
+title: Improve test coverage to 80%
+description: Implement comprehensive unit and integration tests based on spec 93f94ec7
+priority: high
+status: doing
+tags:
+- testing
+- quality
+created_at: 2025-07-28T06:13:21.056494Z
+started_at: 2025-07-28T06:23:09.356928Z
+closed_at: null
+assignee: null
+tasks: []
+metadata: {}

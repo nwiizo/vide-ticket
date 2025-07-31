@@ -17,6 +17,7 @@ pub fn handle_list_command(
     open: bool,
     since: Option<String>,
     until: Option<String>,
+    include_done: bool,
     project_dir: Option<&str>,
     output: &OutputFormatter,
 ) -> Result<()> {
@@ -36,7 +37,15 @@ pub fn handle_list_command(
 
     // Apply filters
     tickets = filter_tickets(
-        tickets, status, priority, assignee, archived, open, since_date, until_date,
+        tickets,
+        status,
+        priority,
+        assignee,
+        archived,
+        open,
+        since_date,
+        until_date,
+        include_done,
     )?;
 
     // Sort tickets
@@ -162,6 +171,7 @@ fn filter_tickets(
     open: bool,
     since: Option<DateTime<Utc>>,
     until: Option<DateTime<Utc>>,
+    include_done: bool,
 ) -> Result<Vec<Ticket>> {
     let mut filtered = tickets;
 
@@ -170,6 +180,9 @@ fn filter_tickets(
         let status = Status::try_from(status_str.as_str())
             .map_err(|_| VibeTicketError::InvalidStatus { status: status_str })?;
         filtered.retain(|t| t.status == status);
+    } else if !include_done {
+        // If no status filter is provided and include_done is false, exclude DONE tickets
+        filtered.retain(|t| t.status != Status::Done);
     }
 
     // Filter by priority

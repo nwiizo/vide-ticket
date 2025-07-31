@@ -3,13 +3,13 @@ slug: 202507201230-test-check-command
 title: Updated check command test
 description: This is an updated description for the check command test
 priority: critical
-status: review
+status: done
 tags:
 - bug
 - urgent
 created_at: 2025-07-20T03:30:10.987308Z
 started_at: 2025-07-20T03:30:16.049954Z
-closed_at: null
+closed_at: 2025-07-28T06:25:22.131699Z
 assignee: null
 tasks:
 - id: 9d877f9c-b19a-4091-a3de-ca661af3b734
@@ -27,4 +27,5 @@ tasks:
   completed: false
   created_at: 2025-07-20T03:56:21.363958Z
   completed_at: null
-metadata: {}
+metadata:
+  close_message: Testing partial UUID with close command

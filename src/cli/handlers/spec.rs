@@ -770,3 +770,159 @@ fn open_in_editor(path: &Path) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    fn create_test_formatter() -> OutputFormatter {
+        OutputFormatter::new(false, false)
+    }
+
+    #[test]
+    fn test_spec_init() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_dir = temp_dir.path().join(".vibe-ticket");
+        std::fs::create_dir_all(&project_dir).unwrap();
+        
+        std::env::set_current_dir(temp_dir.path()).unwrap();
+        
+        let formatter = create_test_formatter();
+        let result = handle_spec_init(
+            "Test Spec".to_string(),
+            Some("Test description".to_string()),
+            None,
+            Some("test,spec".to_string()),
+            None,
+            &formatter,
+        );
+        
+        assert!(result.is_ok());
+        
+        // Verify spec was created
+        let specs_dir = project_dir.join("specs");
+        assert!(specs_dir.exists());
+        
+        // Check that at least one spec directory was created
+        let entries: Vec<_> = std::fs::read_dir(&specs_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .collect();
+        assert!(!entries.is_empty());
+    }
+
+    #[test]
+    fn test_spec_init_no_project() {
+        let temp_dir = TempDir::new().unwrap();
+        std::env::set_current_dir(temp_dir.path()).unwrap();
+        
+        let formatter = create_test_formatter();
+        let result = handle_spec_init(
+            "Test Spec".to_string(),
+            None,
+            None,
+            None,
+            None,
+            &formatter,
+        );
+        
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), VibeTicketError::ProjectNotInitialized));
+    }
+
+    #[test]
+    fn test_get_active_spec() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_dir = temp_dir.path().join(".vibe-ticket");
+        std::fs::create_dir_all(&project_dir).unwrap();
+        
+        // Test no active spec
+        let result = get_active_spec(&project_dir).unwrap_err();
+        assert!(matches!(result, VibeTicketError::NoActiveSpec));
+        
+        // Test with active spec
+        let active_spec_path = project_dir.join(".active_spec");
+        std::fs::write(&active_spec_path, "test-spec-id").unwrap();
+        
+        let active_spec = get_active_spec(&project_dir).unwrap();
+        assert_eq!(active_spec, "test-spec-id");
+    }
+
+    #[test]
+    fn test_spec_lifecycle() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_dir = temp_dir.path().join(".vibe-ticket");
+        std::fs::create_dir_all(&project_dir).unwrap();
+        
+        std::env::set_current_dir(temp_dir.path()).unwrap();
+        
+        let formatter = create_test_formatter();
+        
+        // Initialize spec
+        let result = handle_spec_init(
+            "Lifecycle Test".to_string(),
+            Some("Testing spec lifecycle".to_string()),
+            None,
+            None,
+            None,
+            &formatter,
+        );
+        assert!(result.is_ok());
+        
+        // List specs
+        let list_result = handle_spec_list(None, None, false, None, &formatter);
+        assert!(list_result.is_ok());
+        
+        // Test status command (should fail without active spec)
+        let status_result = handle_spec_status(None, false, None, &formatter);
+        assert!(status_result.is_err());
+    }
+
+    #[test]
+    fn test_spec_delete_without_force() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_dir = temp_dir.path().join(".vibe-ticket");
+        std::fs::create_dir_all(&project_dir).unwrap();
+        
+        std::env::set_current_dir(temp_dir.path()).unwrap();
+        
+        let formatter = create_test_formatter();
+        
+        // Try delete without force (should just show warning)
+        let result = handle_spec_delete("test-spec".to_string(), false, None, &formatter);
+        assert!(result.is_ok()); // Doesn't actually delete without force
+    }
+
+    #[test]
+    fn test_spec_approve_invalid_phase() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_dir = temp_dir.path().join(".vibe-ticket");
+        std::fs::create_dir_all(&project_dir).unwrap();
+        
+        std::env::set_current_dir(temp_dir.path()).unwrap();
+        
+        let formatter = create_test_formatter();
+        
+        // Create a spec first
+        handle_spec_init(
+            "Approve Test".to_string(),
+            None,
+            None,
+            None,
+            None,
+            &formatter,
+        ).unwrap();
+        
+        // Try to approve with invalid phase
+        let result = handle_spec_approve(
+            "test-spec".to_string(),
+            "invalid-phase".to_string(),
+            None,
+            None,
+            &formatter,
+        );
+        
+        assert!(result.is_err());
+    }
+}

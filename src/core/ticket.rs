@@ -198,4 +198,191 @@ mod tests {
         assert_eq!(ticket.completed_tasks_count(), 1);
         assert_eq!(ticket.completion_percentage(), 100.0);
     }
+
+    #[test]
+    fn test_with_id() {
+        let id = TicketId::new();
+        let ticket = Ticket::with_id(id.clone(), "custom-slug", "Custom Title");
+        assert_eq!(ticket.id, id);
+        assert_eq!(ticket.slug, "custom-slug");
+        assert_eq!(ticket.title, "Custom Title");
+        assert_eq!(ticket.description, "");
+        assert_eq!(ticket.priority, Priority::default());
+        assert_eq!(ticket.status, Status::default());
+        assert!(ticket.tags.is_empty());
+        assert!(ticket.assignee.is_none());
+        assert!(ticket.tasks.is_empty());
+        assert!(ticket.metadata.is_empty());
+    }
+
+    #[test]
+    fn test_complete_nonexistent_task() {
+        let mut ticket = Ticket::new("test", "Test");
+        let fake_id = TaskId::new();
+        
+        let result = ticket.complete_task(&fake_id);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("not found"));
+    }
+
+    #[test]
+    fn test_completion_percentage_empty() {
+        let ticket = Ticket::new("test", "Test");
+        assert_eq!(ticket.completion_percentage(), 0.0);
+    }
+
+    #[test]
+    fn test_completion_percentage_partial() {
+        let mut ticket = Ticket::new("test", "Test");
+        let task1 = ticket.add_task("Task 1");
+        let _task2 = ticket.add_task("Task 2");
+        ticket.add_task("Task 3");
+        ticket.add_task("Task 4");
+        
+        ticket.complete_task(&task1).unwrap();
+        assert_eq!(ticket.completed_tasks_count(), 1);
+        assert_eq!(ticket.total_tasks_count(), 4);
+        assert_eq!(ticket.completion_percentage(), 25.0);
+    }
+
+    #[test]
+    fn test_duration() {
+        let mut ticket = Ticket::new("test", "Test");
+        let creation_time = ticket.created_at;
+        
+        // Test open ticket duration
+        let duration = ticket.duration();
+        assert!(duration.num_seconds() >= 0);
+        
+        // Test closed ticket duration
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        ticket.close();
+        let closed_duration = ticket.duration();
+        assert!(closed_duration.num_milliseconds() >= 10);
+        assert_eq!(closed_duration, ticket.closed_at.unwrap() - creation_time);
+    }
+
+    #[test]
+    fn test_working_duration() {
+        let mut ticket = Ticket::new("test", "Test");
+        
+        // No working duration before start
+        assert!(ticket.working_duration().is_none());
+        
+        // Start the ticket
+        ticket.start();
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        
+        // Working duration should exist
+        let working_duration = ticket.working_duration();
+        assert!(working_duration.is_some());
+        assert!(working_duration.unwrap().num_milliseconds() >= 10);
+        
+        // Close the ticket
+        ticket.close();
+        let final_duration = ticket.working_duration().unwrap();
+        assert_eq!(
+            final_duration,
+            ticket.closed_at.unwrap() - ticket.started_at.unwrap()
+        );
+    }
+
+    #[test]
+    fn test_ticket_with_tags_and_metadata() {
+        let mut ticket = Ticket::new("test", "Test");
+        
+        // Add tags
+        ticket.tags.push("bug".to_string());
+        ticket.tags.push("urgent".to_string());
+        assert_eq!(ticket.tags.len(), 2);
+        assert!(ticket.tags.contains(&"bug".to_string()));
+        
+        // Add metadata
+        ticket.metadata.insert(
+            "reporter".to_string(),
+            serde_json::json!("user@example.com")
+        );
+        ticket.metadata.insert(
+            "component".to_string(),
+            serde_json::json!("backend")
+        );
+        assert_eq!(ticket.metadata.len(), 2);
+        assert_eq!(
+            ticket.metadata.get("reporter").unwrap(),
+            &serde_json::json!("user@example.com")
+        );
+    }
+
+    #[test]
+    fn test_ticket_assignee() {
+        let mut ticket = Ticket::new("test", "Test");
+        assert!(ticket.assignee.is_none());
+        
+        ticket.assignee = Some("alice".to_string());
+        assert_eq!(ticket.assignee, Some("alice".to_string()));
+    }
+
+    #[test]
+    fn test_ticket_priority_and_status() {
+        let mut ticket = Ticket::new("test", "Test");
+        
+        // Test priority changes
+        ticket.priority = Priority::High;
+        assert_eq!(ticket.priority, Priority::High);
+        
+        ticket.priority = Priority::Critical;
+        assert_eq!(ticket.priority, Priority::Critical);
+        
+        // Test status changes
+        assert_eq!(ticket.status, Status::Todo);
+        
+        ticket.status = Status::Review;
+        assert_eq!(ticket.status, Status::Review);
+        
+        ticket.status = Status::Blocked;
+        assert_eq!(ticket.status, Status::Blocked);
+    }
+
+    #[test]
+    fn test_ticket_serde() {
+        let mut ticket = Ticket::new("test-serde", "Test Serialization");
+        ticket.description = "Testing serialization and deserialization".to_string();
+        ticket.priority = Priority::Medium;
+        ticket.tags.push("test".to_string());
+        ticket.assignee = Some("bob".to_string());
+        
+        let task_id = ticket.add_task("Serialize me");
+        ticket.complete_task(&task_id).unwrap();
+        
+        // Serialize
+        let json = serde_json::to_string(&ticket).unwrap();
+        
+        // Deserialize
+        let deserialized: Ticket = serde_json::from_str(&json).unwrap();
+        
+        // Verify
+        assert_eq!(ticket.id, deserialized.id);
+        assert_eq!(ticket.slug, deserialized.slug);
+        assert_eq!(ticket.title, deserialized.title);
+        assert_eq!(ticket.description, deserialized.description);
+        assert_eq!(ticket.priority, deserialized.priority);
+        assert_eq!(ticket.status, deserialized.status);
+        assert_eq!(ticket.tags, deserialized.tags);
+        assert_eq!(ticket.assignee, deserialized.assignee);
+        assert_eq!(ticket.tasks.len(), deserialized.tasks.len());
+        assert_eq!(ticket.tasks[0].completed, deserialized.tasks[0].completed);
+    }
+
+    #[test]
+    fn test_ticket_equality() {
+        let ticket1 = Ticket::new("test", "Test");
+        let mut ticket2 = ticket1.clone();
+        
+        // Should be equal after clone
+        assert_eq!(ticket1, ticket2);
+        
+        // Should not be equal after modification
+        ticket2.title = "Different".to_string();
+        assert_ne!(ticket1, ticket2);
+    }
 }
