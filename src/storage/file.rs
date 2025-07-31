@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
 
+use crate::cache::TicketCache;
 use crate::core::{Ticket, TicketId};
 use crate::error::{ErrorContext, Result, VibeTicketError};
 
@@ -11,6 +13,8 @@ use crate::error::{ErrorContext, Result, VibeTicketError};
 pub struct FileStorage {
     /// Base directory for storing ticket data
     base_dir: PathBuf,
+    /// Cache for improved performance
+    pub(crate) cache: Arc<TicketCache>,
 }
 
 impl FileStorage {
@@ -18,6 +22,7 @@ impl FileStorage {
     pub fn new(base_dir: impl Into<PathBuf>) -> Self {
         Self {
             base_dir: base_dir.into(),
+            cache: Arc::new(TicketCache::with_default_ttl()),
         }
     }
 
@@ -62,11 +67,19 @@ impl FileStorage {
         fs::write(&path, yaml)
             .with_context(|| format!("Failed to write ticket to {}", path.display()))?;
 
+        // Invalidate cache for this ticket
+        self.cache.invalidate_ticket(&ticket.id);
+
         Ok(())
     }
 
     /// Loads a ticket from storage by ID
     pub fn load_ticket(&self, id: &TicketId) -> Result<Ticket> {
+        // Check cache first
+        if let Some(ticket) = self.cache.get_ticket(id) {
+            return Ok(ticket);
+        }
+
         let path = self.ticket_path(id);
 
         if !path.exists() {
@@ -78,11 +91,19 @@ impl FileStorage {
 
         let ticket: Ticket = serde_yaml::from_str(&yaml).context("Failed to deserialize ticket")?;
 
+        // Cache the loaded ticket
+        self.cache.cache_ticket(&ticket);
+
         Ok(ticket)
     }
 
     /// Loads all tickets from storage
     pub fn load_all_tickets(&self) -> Result<Vec<Ticket>> {
+        // Check cache first
+        if let Some(tickets) = self.cache.get_all_tickets() {
+            return Ok(tickets);
+        }
+
         let tickets_dir = self.tickets_dir();
 
         if !tickets_dir.exists() {
@@ -112,6 +133,9 @@ impl FileStorage {
             }
         }
 
+        // Cache all loaded tickets
+        self.cache.cache_all_tickets(&tickets);
+
         Ok(tickets)
     }
 
@@ -125,6 +149,9 @@ impl FileStorage {
 
         fs::remove_file(&path)
             .with_context(|| format!("Failed to delete ticket at {}", path.display()))?;
+
+        // Invalidate cache for this ticket
+        self.cache.invalidate_ticket(id);
 
         Ok(())
     }
