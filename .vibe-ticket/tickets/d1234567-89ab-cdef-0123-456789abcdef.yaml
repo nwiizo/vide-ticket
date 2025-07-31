@@ -1,0 +1,17 @@
+id: d1234567-89ab-cdef-0123-456789abcdef
+slug: yaml-test-1
+title: YAML Import Test 1
+description: Testing YAML import functionality
+priority: critical
+status: review
+tags:
+- yaml
+- import-test
+created_at: 2025-07-28T15:20:00Z
+started_at: 2025-07-28T15:25:00Z
+closed_at: null
+assignee: yaml-tester
+tasks: []
+metadata:
+  format: yaml
+  version: '1.0'
