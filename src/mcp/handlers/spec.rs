@@ -99,10 +99,10 @@ pub async fn handle_add(service: &VibeTicketService, arguments: Value) -> Result
 
     // Store specification in metadata
     let spec_key = format!("spec_{}", args.spec_type);
-    ticket.metadata.insert(spec_key.clone(), serde_json::to_string(&args.content)
-        .map_err(|e| format!("Failed to serialize spec: {}", e))?);
+    ticket.metadata.insert(spec_key.clone(), Value::String(serde_json::to_string(&args.content)
+        .map_err(|e| format!("Failed to serialize spec: {}", e))?));
     
-    ticket.metadata.insert(format!("{}_updated_at", spec_key), chrono::Utc::now().to_rfc3339());
+    ticket.metadata.insert(format!("{}_updated_at", spec_key), Value::String(chrono::Utc::now().to_rfc3339()));
 
     service.storage.save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
@@ -144,7 +144,7 @@ pub async fn handle_check(service: &VibeTicketService, arguments: Value) -> Resu
             specs[spec_type] = json!({
                 "exists": true,
                 "updated_at": ticket.metadata.get(&format!("{}_updated_at", spec_key)),
-                "content": serde_json::from_str::<Value>(spec_json).ok()
+                "content": spec_json.as_str().and_then(|s| serde_json::from_str::<Value>(s).ok())
             });
         } else {
             specs[spec_type] = json!({

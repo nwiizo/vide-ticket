@@ -50,8 +50,6 @@ impl VibeTicketService {
 impl ServerHandler for VibeTicketService {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
-            name: Some("vibe-ticket".into()),
-            version: Some(env!("CARGO_PKG_VERSION").into()),
             instructions: Some(
                 "vibe-ticket MCP server provides comprehensive ticket management capabilities. \
                  Use the available tools to create, manage, and track tickets, tasks, and worktrees."
@@ -132,7 +130,7 @@ impl ServerHandler for VibeTicketService {
                     is_error: None,
                 }),
                 Err(e) => Err(ErrorData {
-                    code: -32603, // Internal error code
+                    code: rmcp::model::ErrorCode::from(-32603), // Internal error code
                     message: Cow::Borrowed("Internal error"),
                     data: Some(serde_json::json!({ "error": e })),
                 }),

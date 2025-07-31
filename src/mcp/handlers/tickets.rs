@@ -503,7 +503,7 @@ pub async fn handle_close(service: &VibeTicketService, arguments: Value) -> Resu
     ticket.closed_at = Some(chrono::Utc::now());
 
     if let Some(message) = args.message {
-        ticket.metadata.insert("closing_message".to_string(), message);
+        ticket.metadata.insert("closing_message".to_string(), Value::String(message));
     }
 
     service.storage.save(&ticket)
