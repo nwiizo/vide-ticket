@@ -80,6 +80,31 @@ vibe-ticket init --claude-md
 curl https://raw.githubusercontent.com/nwiizo/vibe-ticket/main/rules/agent.md >> CLAUDE.md
 ```
 
+## Best Practices
+
+### Ticket Management
+- Always create a ticket before starting work
+- Use meaningful ticket slugs that describe the task
+- Update ticket status as work progresses
+- Close tickets with descriptive completion messages
+
+### Git Worktree Workflow
+- Each ticket gets its own isolated worktree directory
+- Work in `./project-vibeticket-<slug>/` directories
+- Clean up worktrees after closing tickets: `vibe-ticket worktree remove <ticket>`
+- Use `vibe-ticket worktree list` to track active worktrees
+
+### Documentation Testing
+- Run `cargo test --doc` regularly to ensure examples work
+- Keep documentation examples up-to-date with code changes
+- Doc tests prevent documentation drift
+
+### Active Development Tips
+- Check current context with `vibe-ticket check`
+- Use `vibe-ticket list --status doing` to see active work
+- Break complex work into tasks within tickets
+- Conduct retrospectives after major tasks
+
 ## Installation
 
 ### From Source
