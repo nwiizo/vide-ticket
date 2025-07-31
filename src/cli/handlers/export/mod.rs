@@ -12,11 +12,33 @@ use crate::cli::{find_project_root, OutputFormatter};
 use crate::core::Ticket;
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
+use chrono::{DateTime, Utc};
+use serde::Serialize;
 
 pub use self::csv::CsvExporter;
 pub use self::json::JsonExporter;
 pub use self::markdown::MarkdownExporter;
 pub use self::yaml::YamlExporter;
+
+/// Common metadata structure for JSON and YAML exports
+#[derive(Debug, Serialize)]
+pub struct ExportMetadata {
+    pub tickets: Vec<Ticket>,
+    pub exported_at: DateTime<Utc>,
+    pub total: usize,
+}
+
+impl ExportMetadata {
+    /// Create new export metadata with the given tickets
+    pub fn new(tickets: Vec<Ticket>) -> Self {
+        let total = tickets.len();
+        Self {
+            tickets,
+            exported_at: Utc::now(),
+            total,
+        }
+    }
+}
 
 /// Trait for ticket exporters
 pub trait Exporter {
@@ -102,7 +124,7 @@ fn output_results(
 ) -> Result<()> {
     if let Some(path) = output_path {
         std::fs::write(&path, content)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to write to {path}: {e}")))?;
+            .map_err(|e| VibeTicketError::io_error("write", &std::path::Path::new(&path), e))?;
 
         output.success(&format!("Exported {ticket_count} tickets to {path}"));
         output.info(&format!("Format: {format_name}"));
@@ -143,39 +165,27 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_json_exporter() {
-        let tickets = vec![create_test_ticket()];
-        let exporter = JsonExporter;
-        let result = exporter.export(&tickets);
-        assert!(result.is_ok());
-        assert!(result.unwrap().contains("\"total\": 1"));
+    /// Test macro to reduce boilerplate for exporter tests
+    macro_rules! test_exporter {
+        ($name:ident, $exporter:expr, $contains:expr) => {
+            #[test]
+            fn $name() {
+                let tickets = vec![create_test_ticket()];
+                let result = $exporter.export(&tickets);
+                assert!(result.is_ok(), "Export should succeed");
+                let output = result.unwrap();
+                assert!(
+                    output.contains($contains), 
+                    "Expected output to contain '{}', but got: {}", 
+                    $contains, 
+                    output
+                );
+            }
+        };
     }
 
-    #[test]
-    fn test_csv_exporter() {
-        let tickets = vec![create_test_ticket()];
-        let exporter = CsvExporter;
-        let result = exporter.export(&tickets);
-        assert!(result.is_ok());
-        assert!(result.unwrap().contains("test-ticket"));
-    }
-
-    #[test]
-    fn test_yaml_exporter() {
-        let tickets = vec![create_test_ticket()];
-        let exporter = YamlExporter;
-        let result = exporter.export(&tickets);
-        assert!(result.is_ok());
-        assert!(result.unwrap().contains("total: 1"));
-    }
-
-    #[test]
-    fn test_markdown_exporter() {
-        let tickets = vec![create_test_ticket()];
-        let exporter = MarkdownExporter;
-        let result = exporter.export(&tickets);
-        assert!(result.is_ok());
-        assert!(result.unwrap().contains("# Ticket Export"));
-    }
+    test_exporter!(test_json_exporter, JsonExporter, "\"total\": 1");
+    test_exporter!(test_csv_exporter, CsvExporter, "test-ticket");
+    test_exporter!(test_yaml_exporter, YamlExporter, "total: 1");
+    test_exporter!(test_markdown_exporter, MarkdownExporter, "# Ticket Export");
 }

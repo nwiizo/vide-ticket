@@ -198,7 +198,7 @@ impl SpecManager {
         }
 
         std::fs::remove_dir_all(&spec_dir)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to delete specification: {e}")))?;
+            .map_err(|e| VibeTicketError::io_error("delete", &spec_dir, e))?;
 
         Ok(())
     }
@@ -216,7 +216,7 @@ impl SpecManager {
             .join(".active_spec");
 
         std::fs::write(&active_file, spec_id)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to set active spec: {e}")))?;
+            .map_err(|e| VibeTicketError::io_error("write", &active_file, e))?;
 
         Ok(())
     }
@@ -235,7 +235,7 @@ impl SpecManager {
         }
 
         let content = std::fs::read_to_string(&active_file)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to read active spec: {e}")))?;
+            .map_err(|e| VibeTicketError::io_error("read", &active_file, e))?;
 
         let spec_id = content.trim();
         if spec_id.is_empty() {

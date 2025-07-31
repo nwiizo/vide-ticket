@@ -41,7 +41,7 @@ pub fn handle_import_command(
 
     // Read file content
     let content = std::fs::read_to_string(file_path)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to read file {file_path}: {e}")))?;
+        .map_err(|e| VibeTicketError::io_error("read", &std::path::Path::new(&file_path), e))?;
 
     // Detect format if not specified
     let format = if let Some(fmt) = format {
@@ -183,7 +183,7 @@ fn detect_format(file_path: &str, content: &str) -> Result<String> {
 /// Import tickets from JSON
 fn import_json(content: &str) -> Result<Vec<Ticket>> {
     let json: serde_json::Value = serde_json::from_str(content)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to parse JSON: {e}")))?;
+        .map_err(|e| VibeTicketError::deserialization_error("JSON", e))?;
 
     // Handle both direct array and object with tickets field
     let tickets_value = if json.is_array() {
@@ -197,7 +197,7 @@ fn import_json(content: &str) -> Result<Vec<Ticket>> {
     };
 
     let tickets: Vec<Ticket> = serde_json::from_value(tickets_value.clone())
-        .map_err(|e| VibeTicketError::custom(format!("Failed to deserialize tickets: {e}")))?;
+        .map_err(|e| VibeTicketError::deserialization_error("tickets", e))?;
 
     Ok(tickets)
 }
@@ -232,7 +232,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
 
     for result in rdr.records() {
         let record = result
-            .map_err(|e| VibeTicketError::custom(format!("Failed to read CSV record: {e}")))?;
+            .map_err(|e| VibeTicketError::deserialization_error("CSV record", e))?;
 
         // Expected columns: ID, Slug, Title, Status, Priority, Assignee, Tags, Created At, Started At, Closed At, Tasks Total, Tasks Completed, Description
         if record.len() < 13 {
