@@ -135,6 +135,24 @@ When helping with this project:
    - Any vibe-tickets that should be created for follow-up work
    - Lessons learned that could benefit future development
 
+## Lessons Learned from Development
+
+### Active Ticket Management
+- Always update `.vibe-ticket/active_ticket` file when switching between tickets
+- Use `vibe-ticket start <id> --no-worktree` when a worktree already exists
+- Check ticket ID format carefully - use full UUID when needed
+
+### Worktree Best Practices
+- Each ticket has its own worktree directory for isolated development
+- Worktree names follow pattern: `vibe-ticket-vibeticket<date>-<slug>`
+- Always verify worktree existence before creating new ones
+- Clean up worktrees after closing tickets to save disk space
+
+### Documentation Testing
+- Run `cargo test --doc` to verify all documentation examples
+- Doc tests ensure code examples in documentation remain accurate
+- Keeping doc tests passing prevents documentation drift
+
 ## Work Retrospectives
 
 ### Why Retrospectives Matter
@@ -178,6 +196,34 @@ Brief overview of what was worked on.
 - Key insights that will help future development
 - Patterns to watch for or avoid
 ```
+
+## Retrospective: Fix Documentation Tests - 2025-07-31
+
+### Summary
+Fixed failing documentation tests that were preventing clean builds. All doc tests now pass successfully.
+
+### What Went Well
+- Quick identification of the issue through `cargo test --doc`
+- Existing worktree made it easy to isolate work
+- Tests were already well-structured, just needed minor fixes
+
+### Challenges Encountered
+- Initial confusion with ticket ID format (short vs full UUID)
+- Active ticket file needed manual update when switching contexts
+- Some doc tests were marked as ignored, which may need review
+
+### Improvements for Next Time
+- Create helper command to switch active tickets more easily
+- Consider automation for active ticket management
+- Review ignored doc tests to ensure they're still relevant
+
+### Follow-up Tickets Created
+None - all documentation tests are now passing
+
+### Lessons Learned
+- Documentation tests are crucial for maintaining accurate examples
+- Worktree workflow is effective for isolated development
+- Active ticket management could benefit from better tooling
 
 ---
 Generated on: 2025-07-22

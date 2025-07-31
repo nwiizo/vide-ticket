@@ -2,8 +2,7 @@
 //!
 //! This module implements the logic for archiving and unarchiving tickets.
 
-use crate::cli::{find_project_root, OutputFormatter};
-use crate::core::TicketId;
+use crate::cli::{find_project_root, handlers::resolve_ticket_ref, OutputFormatter};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
@@ -145,28 +144,6 @@ pub fn handle_archive_command(
     Ok(())
 }
 
-/// Resolve a ticket reference (ID or slug) to a ticket ID
-fn resolve_ticket_ref(storage: &FileStorage, ticket_ref: &str) -> Result<TicketId> {
-    // First try to parse as ticket ID
-    if let Ok(ticket_id) = TicketId::parse_str(ticket_ref) {
-        // Verify the ticket exists
-        if storage.load(&ticket_id).is_ok() {
-            return Ok(ticket_id);
-        }
-    }
-
-    // Try to find by slug
-    let all_tickets = storage.load_all()?;
-    for ticket in all_tickets {
-        if ticket.slug == ticket_ref {
-            return Ok(ticket.id);
-        }
-    }
-
-    Err(VibeTicketError::TicketNotFound {
-        id: ticket_ref.to_string(),
-    })
-}
 
 #[cfg(test)]
 mod tests {

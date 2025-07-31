@@ -2,14 +2,19 @@ id: 116ff93c-f6ee-4d89-98cc-589cb2372226
 slug: 202507212327-fix-doc-tests
 title: Fix failing documentation tests
 description: Several doc tests are failing due to incorrect imports and missing trait implementations. Need to fix these to ensure documentation examples work correctly.
-priority: medium
-status: todo
+priority: high
+status: doing
 tags:
 - documentation
 - testing
 created_at: 2025-07-21T14:27:25.498609Z
-started_at: null
+started_at: 2025-07-28T06:16:49.506452Z
 closed_at: null
 assignee: null
-tasks: []
+tasks:
+- id: fa2716c7-7e7b-481c-b756-7ec141a9dd05
+  title: Update documentation for partial UUID support
+  completed: false
+  created_at: 2025-07-28T06:25:10.896757Z
+  completed_at: null
 metadata: {}
