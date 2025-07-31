@@ -29,14 +29,14 @@ This command runs the same checks that CI runs, helping you catch issues before 
 !   echo ""
 !   
 !   echo "🔧 Applying clippy fixes..."
-!   cargo clippy --fix --allow-dirty -- -D warnings 2>/dev/null || true
+!   cargo clippy --all-features --fix --allow-dirty -- -D warnings 2>/dev/null || true
 !   echo "✅ Clippy fixes applied"
 !   echo ""
 ! fi
 
 # Format check
 ! echo "1️⃣ Checking code formatting..."
-! if cargo fmt -- --check 2>&1 | grep -q "Diff"; then
+! if cargo fmt -- --check 2>&1 | grep -q "Diff in"; then
 !   echo "❌ Formatting issues found. Run with 'fix' argument to auto-fix."
 !   ERROR=1
 ! else
@@ -44,9 +44,9 @@ This command runs the same checks that CI runs, helping you catch issues before 
 ! fi
 ! echo ""
 
-# Clippy check
-! echo "2️⃣ Running clippy linter..."
-! if cargo clippy -- -D warnings 2>&1 | grep -E "(error:|warning:)" > /dev/null; then
+# Clippy check with all features
+! echo "2️⃣ Running clippy linter with all features..."
+! if ! cargo clippy --all-features -- -D warnings 2>&1; then
 !   echo "❌ Clippy warnings found. Run with 'fix' argument to auto-fix some issues."
 !   ERROR=1
 ! else
@@ -60,9 +60,9 @@ This command runs the same checks that CI runs, helping you catch issues before 
 !   exit ${ERROR:-0}
 ! fi
 
-# Run tests
-! echo "3️⃣ Running all tests..."
-! if cargo test --quiet 2>&1 | grep -E "(FAILED|error:)" > /dev/null; then
+# Run tests with all features
+! echo "3️⃣ Running all tests with all features..."
+! if ! cargo test --all-features --quiet 2>&1; then
 !   echo "❌ Some tests failed"
 !   ERROR=1
 ! else
@@ -72,7 +72,7 @@ This command runs the same checks that CI runs, helping you catch issues before 
 
 # Test without default features
 ! echo "4️⃣ Running tests without default features..."
-! if cargo test --no-default-features --quiet 2>&1 | grep -E "(FAILED|error:)" > /dev/null; then
+! if ! cargo test --no-default-features --quiet 2>&1; then
 !   echo "❌ Some tests failed without default features"
 !   ERROR=1
 ! else
@@ -82,8 +82,8 @@ This command runs the same checks that CI runs, helping you catch issues before 
 
 # Build documentation
 ! echo "5️⃣ Building documentation..."
-! if cargo doc --no-deps --quiet 2>&1 | grep -E "(error:|warning:)" > /dev/null; then
-!   echo "⚠️  Documentation has warnings"
+! if ! cargo doc --all-features --no-deps --quiet 2>&1; then
+!   echo "⚠️  Documentation build failed or has warnings"
 ! else
 !   echo "✅ Documentation OK"
 ! fi
