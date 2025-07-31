@@ -114,3 +114,4 @@ release/
 
 # vibe-ticket worktree directories
 *-vibeticket-*/
+vibe-ticket-vibeticket*/
