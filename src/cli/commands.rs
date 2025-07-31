@@ -620,3 +620,869 @@ pub enum WorktreeCommands {
         remove_branches: bool,
     },
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    /// Test basic CLI structure parsing
+    #[test]
+    fn test_cli_parse_basic() {
+        let cli = Cli::parse_from(["vibe-ticket", "--version"]);
+        assert!(!cli.verbose);
+        assert!(!cli.json);
+        assert!(!cli.no_color);
+        assert!(cli.project.is_none());
+    }
+
+    /// Test global flags
+    #[test]
+    fn test_cli_global_flags() {
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "--verbose",
+            "--json",
+            "--no-color",
+            "--project",
+            "/path/to/project",
+            "list",
+        ]);
+        assert!(cli.verbose);
+        assert!(cli.json);
+        assert!(cli.no_color);
+        assert_eq!(cli.project, Some("/path/to/project".to_string()));
+    }
+
+    /// Test init command parsing
+    #[test]
+    fn test_init_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "init"]);
+        match cli.command {
+            Commands::Init {
+                name,
+                description,
+                force,
+                claude_md,
+            } => {
+                assert!(name.is_none());
+                assert!(description.is_none());
+                assert!(!force);
+                assert!(!claude_md);
+            }
+            _ => panic!("Expected Init command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "init",
+            "--name",
+            "test-project",
+            "--description",
+            "Test description",
+            "--force",
+            "--claude-md",
+        ]);
+        match cli.command {
+            Commands::Init {
+                name,
+                description,
+                force,
+                claude_md,
+            } => {
+                assert_eq!(name, Some("test-project".to_string()));
+                assert_eq!(description, Some("Test description".to_string()));
+                assert!(force);
+                assert!(claude_md);
+            }
+            _ => panic!("Expected Init command"),
+        }
+    }
+
+    /// Test new command parsing
+    #[test]
+    fn test_new_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "new", "fix-bug"]);
+        match cli.command {
+            Commands::New {
+                slug,
+                title,
+                description,
+                priority,
+                tags,
+                start,
+            } => {
+                assert_eq!(slug, "fix-bug");
+                assert!(title.is_none());
+                assert!(description.is_none());
+                assert_eq!(priority, "medium");
+                assert!(tags.is_none());
+                assert!(!start);
+            }
+            _ => panic!("Expected New command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "new",
+            "feature-auth",
+            "--title",
+            "Add authentication",
+            "--priority",
+            "high",
+            "--tags",
+            "auth,security",
+            "--start",
+        ]);
+        match cli.command {
+            Commands::New {
+                slug,
+                title,
+                priority,
+                tags,
+                start,
+                ..
+            } => {
+                assert_eq!(slug, "feature-auth");
+                assert_eq!(title, Some("Add authentication".to_string()));
+                assert_eq!(priority, "high");
+                assert_eq!(tags, Some("auth,security".to_string()));
+                assert!(start);
+            }
+            _ => panic!("Expected New command"),
+        }
+    }
+
+    /// Test list command with various filters
+    #[test]
+    fn test_list_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "list"]);
+        match cli.command {
+            Commands::List {
+                status,
+                priority,
+                assignee,
+                sort,
+                reverse,
+                limit,
+                archived,
+                open,
+                since,
+                until,
+            } => {
+                assert!(status.is_none());
+                assert!(priority.is_none());
+                assert!(assignee.is_none());
+                assert_eq!(sort, "slug");
+                assert!(!reverse);
+                assert!(limit.is_none());
+                assert!(!archived);
+                assert!(!open);
+                assert!(since.is_none());
+                assert!(until.is_none());
+            }
+            _ => panic!("Expected List command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "list",
+            "--status",
+            "doing",
+            "--priority",
+            "high",
+            "--sort",
+            "created",
+            "--reverse",
+            "--limit",
+            "10",
+            "--open",
+            "--since",
+            "yesterday",
+        ]);
+        match cli.command {
+            Commands::List {
+                status,
+                priority,
+                sort,
+                reverse,
+                limit,
+                open,
+                since,
+                ..
+            } => {
+                assert_eq!(status, Some("doing".to_string()));
+                assert_eq!(priority, Some("high".to_string()));
+                assert_eq!(sort, "created");
+                assert!(reverse);
+                assert_eq!(limit, Some(10));
+                assert!(open);
+                assert_eq!(since, Some("yesterday".to_string()));
+            }
+            _ => panic!("Expected List command"),
+        }
+    }
+
+    /// Test start command with worktree options
+    #[test]
+    fn test_start_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "start", "ticket-123"]);
+        match cli.command {
+            Commands::Start {
+                ticket,
+                branch,
+                branch_name,
+                worktree,
+                no_worktree,
+            } => {
+                assert_eq!(ticket, "ticket-123");
+                assert!(branch);
+                assert!(branch_name.is_none());
+                assert!(worktree);
+                assert!(!no_worktree);
+            }
+            _ => panic!("Expected Start command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "start",
+            "feature-xyz",
+            "--no-worktree",
+            "--branch-name",
+            "custom-branch",
+        ]);
+        match cli.command {
+            Commands::Start {
+                ticket,
+                branch_name,
+                no_worktree,
+                ..
+            } => {
+                assert_eq!(ticket, "feature-xyz");
+                assert_eq!(branch_name, Some("custom-branch".to_string()));
+                assert!(no_worktree);
+            }
+            _ => panic!("Expected Start command"),
+        }
+    }
+
+    /// Test task subcommands
+    #[test]
+    fn test_task_commands() {
+        let cli = Cli::parse_from(["vibe-ticket", "task", "add", "Write tests"]);
+        match cli.command {
+            Commands::Task { command } => match command {
+                TaskCommands::Add { title, ticket } => {
+                    assert_eq!(title, "Write tests");
+                    assert!(ticket.is_none());
+                }
+                _ => panic!("Expected Task Add command"),
+            },
+            _ => panic!("Expected Task command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "task",
+            "complete",
+            "1",
+            "--ticket",
+            "fix-bug",
+        ]);
+        match cli.command {
+            Commands::Task { command } => match command {
+                TaskCommands::Complete { task, ticket } => {
+                    assert_eq!(task, "1");
+                    assert_eq!(ticket, Some("fix-bug".to_string()));
+                }
+                _ => panic!("Expected Task Complete command"),
+            },
+            _ => panic!("Expected Task command"),
+        }
+
+        let cli = Cli::parse_from(["vibe-ticket", "task", "list", "--completed"]);
+        match cli.command {
+            Commands::Task { command } => match command {
+                TaskCommands::List {
+                    ticket,
+                    completed,
+                    incomplete,
+                } => {
+                    assert!(ticket.is_none());
+                    assert!(completed);
+                    assert!(!incomplete);
+                }
+                _ => panic!("Expected Task List command"),
+            },
+            _ => panic!("Expected Task command"),
+        }
+    }
+
+    /// Test config subcommands
+    #[test]
+    fn test_config_commands() {
+        let cli = Cli::parse_from(["vibe-ticket", "config", "show"]);
+        match cli.command {
+            Commands::Config { command } => match command {
+                ConfigCommands::Show { key } => {
+                    assert!(key.is_none());
+                }
+                _ => panic!("Expected Config Show command"),
+            },
+            _ => panic!("Expected Config command"),
+        }
+
+        let cli = Cli::parse_from(["vibe-ticket", "config", "set", "ui.emoji", "true"]);
+        match cli.command {
+            Commands::Config { command } => match command {
+                ConfigCommands::Set { key, value } => {
+                    assert_eq!(key, "ui.emoji");
+                    assert_eq!(value, "true");
+                }
+                _ => panic!("Expected Config Set command"),
+            },
+            _ => panic!("Expected Config command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "config",
+            "claude",
+            "--append",
+            "--template",
+            "advanced",
+        ]);
+        match cli.command {
+            Commands::Config { command } => match command {
+                ConfigCommands::Claude {
+                    append,
+                    template,
+                    output,
+                } => {
+                    assert!(append);
+                    assert_eq!(template, "advanced");
+                    assert!(output.is_none());
+                }
+                _ => panic!("Expected Config Claude command"),
+            },
+            _ => panic!("Expected Config command"),
+        }
+    }
+
+    /// Test spec subcommands
+    #[test]
+    fn test_spec_commands() {
+        let cli = Cli::parse_from(["vibe-ticket", "spec", "init", "New Feature Spec"]);
+        match cli.command {
+            Commands::Spec { command } => match command {
+                SpecCommands::Init {
+                    title,
+                    description,
+                    ticket,
+                    tags,
+                } => {
+                    assert_eq!(title, "New Feature Spec");
+                    assert!(description.is_none());
+                    assert!(ticket.is_none());
+                    assert!(tags.is_none());
+                }
+                _ => panic!("Expected Spec Init command"),
+            },
+            _ => panic!("Expected Spec command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "spec",
+            "requirements",
+            "--editor",
+            "--complete",
+        ]);
+        match cli.command {
+            Commands::Spec { command } => match command {
+                SpecCommands::Requirements {
+                    spec,
+                    editor,
+                    complete,
+                } => {
+                    assert!(spec.is_none());
+                    assert!(editor);
+                    assert!(complete);
+                }
+                _ => panic!("Expected Spec Requirements command"),
+            },
+            _ => panic!("Expected Spec command"),
+        }
+    }
+
+    /// Test worktree subcommands
+    #[test]
+    fn test_worktree_commands() {
+        let cli = Cli::parse_from(["vibe-ticket", "worktree", "list", "--all", "--verbose"]);
+        match cli.command {
+            Commands::Worktree { command } => match command {
+                WorktreeCommands::List {
+                    all,
+                    status,
+                    verbose,
+                } => {
+                    assert!(all);
+                    assert!(status.is_none());
+                    assert!(verbose);
+                }
+                _ => panic!("Expected Worktree List command"),
+            },
+            _ => panic!("Expected Worktree command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "worktree",
+            "remove",
+            "fix-bug",
+            "--force",
+            "--keep-branch",
+        ]);
+        match cli.command {
+            Commands::Worktree { command } => match command {
+                WorktreeCommands::Remove {
+                    worktree,
+                    force,
+                    keep_branch,
+                } => {
+                    assert_eq!(worktree, "fix-bug");
+                    assert!(force);
+                    assert!(keep_branch);
+                }
+                _ => panic!("Expected Worktree Remove command"),
+            },
+            _ => panic!("Expected Worktree command"),
+        }
+    }
+
+    /// Test edge cases and error scenarios
+    #[test]
+    fn test_edge_cases() {
+        // Test empty tags
+        let cli = Cli::parse_from(["vibe-ticket", "new", "test", "--tags", ""]);
+        match cli.command {
+            Commands::New { tags, .. } => {
+                assert_eq!(tags, Some("".to_string()));
+            }
+            _ => panic!("Expected New command"),
+        }
+
+        // Test search with regex
+        let cli = Cli::parse_from(["vibe-ticket", "search", "bug.*fix", "--regex"]);
+        match cli.command {
+            Commands::Search { query, regex, .. } => {
+                assert_eq!(query, "bug.*fix");
+                assert!(regex);
+            }
+            _ => panic!("Expected Search command"),
+        }
+
+        // Test export with custom output
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "export",
+            "--format",
+            "yaml",
+            "--output",
+            "tickets.yaml",
+            "--include-archived",
+        ]);
+        match cli.command {
+            Commands::Export {
+                format,
+                output,
+                include_archived,
+            } => {
+                assert_eq!(format, "yaml");
+                assert_eq!(output, Some("tickets.yaml".to_string()));
+                assert!(include_archived);
+            }
+            _ => panic!("Expected Export command"),
+        }
+    }
+
+    /// Test command aliases
+    #[test]
+    fn test_command_aliases() {
+        // Test claude-md alias
+        let cli = Cli::parse_from(["vibe-ticket", "init", "--claude"]);
+        match cli.command {
+            Commands::Init { claude_md, .. } => {
+                assert!(claude_md);
+            }
+            _ => panic!("Expected Init command"),
+        }
+    }
+
+    /// Test complex command combinations
+    #[test]
+    fn test_complex_commands() {
+        // Test close with all options
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "close",
+            "feature-123",
+            "--message",
+            "Completed feature",
+            "--archive",
+            "--pr",
+        ]);
+        match cli.command {
+            Commands::Close {
+                ticket,
+                message,
+                archive,
+                pr,
+            } => {
+                assert_eq!(ticket, Some("feature-123".to_string()));
+                assert_eq!(message, Some("Completed feature".to_string()));
+                assert!(archive);
+                assert!(pr);
+            }
+            _ => panic!("Expected Close command"),
+        }
+
+        // Test edit with multiple tag operations
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "edit",
+            "--title",
+            "New Title",
+            "--add-tags",
+            "urgent,frontend",
+            "--remove-tags",
+            "backend",
+            "--status",
+            "review",
+        ]);
+        match cli.command {
+            Commands::Edit {
+                ticket,
+                title,
+                add_tags,
+                remove_tags,
+                status,
+                ..
+            } => {
+                assert!(ticket.is_none());
+                assert_eq!(title, Some("New Title".to_string()));
+                assert_eq!(add_tags, Some("urgent,frontend".to_string()));
+                assert_eq!(remove_tags, Some("backend".to_string()));
+                assert_eq!(status, Some("review".to_string()));
+            }
+            _ => panic!("Expected Edit command"),
+        }
+    }
+
+    /// Test default values
+    #[test]
+    fn test_default_values() {
+        // Test list sort default
+        let cli = Cli::parse_from(["vibe-ticket", "list"]);
+        match cli.command {
+            Commands::List { sort, .. } => {
+                assert_eq!(sort, "slug");
+            }
+            _ => panic!("Expected List command"),
+        }
+
+        // Test open sort default
+        let cli = Cli::parse_from(["vibe-ticket", "open"]);
+        match cli.command {
+            Commands::Open { sort, .. } => {
+                assert_eq!(sort, "updated");
+            }
+            _ => panic!("Expected Open command"),
+        }
+
+        // Test export format default
+        let cli = Cli::parse_from(["vibe-ticket", "export"]);
+        match cli.command {
+            Commands::Export { format, .. } => {
+                assert_eq!(format, "json");
+            }
+            _ => panic!("Expected Export command"),
+        }
+    }
+
+    /// Test import command variations
+    #[test]
+    fn test_import_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "import", "data.json"]);
+        match cli.command {
+            Commands::Import {
+                file,
+                format,
+                skip_validation,
+                dry_run,
+            } => {
+                assert_eq!(file, "data.json");
+                assert!(format.is_none());
+                assert!(!skip_validation);
+                assert!(!dry_run);
+            }
+            _ => panic!("Expected Import command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "import",
+            "tickets.csv",
+            "--format",
+            "csv",
+            "--skip-validation",
+            "--dry-run",
+        ]);
+        match cli.command {
+            Commands::Import {
+                file,
+                format,
+                skip_validation,
+                dry_run,
+            } => {
+                assert_eq!(file, "tickets.csv");
+                assert_eq!(format, Some("csv".to_string()));
+                assert!(skip_validation);
+                assert!(dry_run);
+            }
+            _ => panic!("Expected Import command"),
+        }
+    }
+
+    /// Test show command variations
+    #[test]
+    fn test_show_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "show", "ABC-123"]);
+        match cli.command {
+            Commands::Show {
+                ticket,
+                tasks,
+                history,
+                markdown,
+            } => {
+                assert_eq!(ticket, "ABC-123");
+                assert!(!tasks);
+                assert!(!history);
+                assert!(!markdown);
+            }
+            _ => panic!("Expected Show command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "show",
+            "feature-1",
+            "--tasks",
+            "--history",
+            "--markdown",
+        ]);
+        match cli.command {
+            Commands::Show {
+                ticket,
+                tasks,
+                history,
+                markdown,
+            } => {
+                assert_eq!(ticket, "feature-1");
+                assert!(tasks);
+                assert!(history);
+                assert!(markdown);
+            }
+            _ => panic!("Expected Show command"),
+        }
+    }
+
+    /// Test check command variations
+    #[test]
+    fn test_check_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "check"]);
+        match cli.command {
+            Commands::Check { detailed, stats } => {
+                assert!(!detailed);
+                assert!(!stats);
+            }
+            _ => panic!("Expected Check command"),
+        }
+
+        let cli = Cli::parse_from(["vibe-ticket", "check", "--detailed", "--stats"]);
+        match cli.command {
+            Commands::Check { detailed, stats } => {
+                assert!(detailed);
+                assert!(stats);
+            }
+            _ => panic!("Expected Check command"),
+        }
+    }
+
+    /// Test archive command
+    #[test]
+    fn test_archive_command() {
+        let cli = Cli::parse_from(["vibe-ticket", "archive", "old-ticket"]);
+        match cli.command {
+            Commands::Archive { ticket, unarchive } => {
+                assert_eq!(ticket, "old-ticket");
+                assert!(!unarchive);
+            }
+            _ => panic!("Expected Archive command"),
+        }
+
+        let cli = Cli::parse_from(["vibe-ticket", "archive", "ticket-123", "--unarchive"]);
+        match cli.command {
+            Commands::Archive { ticket, unarchive } => {
+                assert_eq!(ticket, "ticket-123");
+                assert!(unarchive);
+            }
+            _ => panic!("Expected Archive command"),
+        }
+    }
+
+    /// Test search command filters
+    #[test]
+    fn test_search_filters() {
+        let cli = Cli::parse_from(["vibe-ticket", "search", "auth", "--title"]);
+        match cli.command {
+            Commands::Search {
+                query,
+                title,
+                description,
+                tags,
+                ..
+            } => {
+                assert_eq!(query, "auth");
+                assert!(title);
+                assert!(!description);
+                assert!(!tags);
+            }
+            _ => panic!("Expected Search command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "search",
+            "security",
+            "--description",
+            "--tags",
+        ]);
+        match cli.command {
+            Commands::Search {
+                query,
+                title,
+                description,
+                tags,
+                ..
+            } => {
+                assert_eq!(query, "security");
+                assert!(!title);
+                assert!(description);
+                assert!(tags);
+            }
+            _ => panic!("Expected Search command"),
+        }
+    }
+
+    /// Test spec command variations
+    #[test]
+    fn test_spec_variations() {
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "spec",
+            "list",
+            "--status",
+            "draft",
+            "--phase",
+            "requirements",
+            "--archived",
+        ]);
+        match cli.command {
+            Commands::Spec { command } => match command {
+                SpecCommands::List {
+                    status,
+                    phase,
+                    archived,
+                } => {
+                    assert_eq!(status, Some("draft".to_string()));
+                    assert_eq!(phase, Some("requirements".to_string()));
+                    assert!(archived);
+                }
+                _ => panic!("Expected Spec List command"),
+            },
+            _ => panic!("Expected Spec command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "spec",
+            "approve",
+            "spec-123",
+            "design",
+            "--message",
+            "LGTM",
+        ]);
+        match cli.command {
+            Commands::Spec { command } => match command {
+                SpecCommands::Approve {
+                    spec,
+                    phase,
+                    message,
+                } => {
+                    assert_eq!(spec, "spec-123");
+                    assert_eq!(phase, "design");
+                    assert_eq!(message, Some("LGTM".to_string()));
+                }
+                _ => panic!("Expected Spec Approve command"),
+            },
+            _ => panic!("Expected Spec command"),
+        }
+    }
+
+    /// Test worktree prune options
+    #[test]
+    fn test_worktree_prune() {
+        let cli = Cli::parse_from(["vibe-ticket", "worktree", "prune"]);
+        match cli.command {
+            Commands::Worktree { command } => match command {
+                WorktreeCommands::Prune {
+                    force,
+                    dry_run,
+                    remove_branches,
+                } => {
+                    assert!(!force);
+                    assert!(!dry_run);
+                    assert!(!remove_branches);
+                }
+                _ => panic!("Expected Worktree Prune command"),
+            },
+            _ => panic!("Expected Worktree command"),
+        }
+
+        let cli = Cli::parse_from([
+            "vibe-ticket",
+            "worktree",
+            "prune",
+            "--force",
+            "--dry-run",
+            "--remove-branches",
+        ]);
+        match cli.command {
+            Commands::Worktree { command } => match command {
+                WorktreeCommands::Prune {
+                    force,
+                    dry_run,
+                    remove_branches,
+                } => {
+                    assert!(force);
+                    assert!(dry_run);
+                    assert!(remove_branches);
+                }
+                _ => panic!("Expected Worktree Prune command"),
+            },
+            _ => panic!("Expected Worktree command"),
+        }
+    }
+}
