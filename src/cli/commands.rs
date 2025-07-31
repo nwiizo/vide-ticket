@@ -591,7 +591,7 @@ pub enum McpCommands {
         host: Option<String>,
 
         /// Port to listen on  
-        #[arg(short, long, default_value = "3033")]
+        #[arg(short = 'P', long, default_value = "3033")]
         port: Option<u16>,
 
         /// Run as daemon

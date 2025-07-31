@@ -104,7 +104,7 @@ impl TicketCache {
             // Also cache individual tickets
             for ticket in tickets {
                 let ticket_entry = CachedEntry {
-                    data: CacheValue::Ticket(ticket.clone()),
+                    data: CacheValue::Ticket(Box::new(ticket.clone())),
                     timestamp: Instant::now(),
                 };
                 cache.insert(CacheKey::Ticket(ticket.id.clone()), ticket_entry);
