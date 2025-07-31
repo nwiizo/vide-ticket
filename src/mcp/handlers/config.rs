@@ -16,14 +16,14 @@ impl ConfigManager {
     fn new() -> Self {
         Self
     }
-    
+
     fn load_from_path(&self, path: &std::path::Path) -> Result<Config, String> {
-        Config::load_from_path(path)
-            .map_err(|e| format!("Failed to load config: {}", e))
+        Config::load_from_path(path).map_err(|e| format!("Failed to load config: {}", e))
     }
-    
+
     fn save_to_path(&self, config: &Config, path: &std::path::Path) -> Result<(), String> {
-        config.save_to_path(path)
+        config
+            .save_to_path(path)
             .map_err(|e| format!("Failed to save config: {}", e))
     }
 }
@@ -75,12 +75,16 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
         key: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
-    let config_path = service.project_root.join(".vibe-ticket").join("config.yaml");
+    let config_path = service
+        .project_root
+        .join(".vibe-ticket")
+        .join("config.yaml");
     let config_manager = ConfigManager::new();
-    let config = config_manager.load_from_path(&config_path)
+    let config = config_manager
+        .load_from_path(&config_path)
         .map_err(|e| format!("Failed to load configuration: {}", e))?;
 
     if let Some(key) = args.key {
@@ -90,7 +94,7 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
             "project.description" => json!(config.project.description),
             "project.default_priority" => json!(config.project.default_priority),
             "project.default_assignee" => json!(config.project.default_assignee),
-            
+
             "git.auto_branch" => json!(config.git.auto_branch),
             "git.branch_prefix" => json!(config.git.branch_prefix),
             "git.commit_template" => json!(config.git.commit_template),
@@ -98,12 +102,12 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
             "git.worktree_default" => json!(config.git.worktree_default),
             "git.worktree_prefix" => json!(config.git.worktree_prefix),
             "git.worktree_cleanup_on_close" => json!(config.git.worktree_cleanup_on_close),
-            
+
             "ui.date_format" => json!(config.ui.date_format),
-            
-            _ => return Err(format!("Unknown configuration key: {}", key))
+
+            _ => return Err(format!("Unknown configuration key: {}", key)),
         };
-        
+
         Ok(json!({
             "key": key,
             "value": value
@@ -141,77 +145,86 @@ pub async fn handle_set(service: &VibeTicketService, arguments: Value) -> Result
         value: Value,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
-    let config_path = service.project_root.join(".vibe-ticket").join("config.yaml");
+    let config_path = service
+        .project_root
+        .join(".vibe-ticket")
+        .join("config.yaml");
     let config_manager = ConfigManager::new();
-    let mut config = config_manager.load_from_path(&config_path)
+    let mut config = config_manager
+        .load_from_path(&config_path)
         .map_err(|e| format!("Failed to load configuration: {}", e))?;
 
     // Parse and set the value
     match args.key.as_str() {
         "project.name" => {
-            config.project.name = args.value.as_str()
+            config.project.name = args
+                .value
+                .as_str()
                 .ok_or("Value must be a string")?
                 .to_string();
         },
         "project.description" => {
-            config.project.description = args.value.as_str()
-                .map(|s| s.to_string());
+            config.project.description = args.value.as_str().map(|s| s.to_string());
         },
         "project.default_priority" => {
-            config.project.default_priority = args.value.as_str()
+            config.project.default_priority = args
+                .value
+                .as_str()
                 .ok_or("Value must be a string")?
                 .to_string();
         },
         "project.default_assignee" => {
-            config.project.default_assignee = args.value.as_str()
-                .map(|s| s.to_string());
+            config.project.default_assignee = args.value.as_str().map(|s| s.to_string());
         },
-        
+
         "git.auto_branch" => {
-            config.git.auto_branch = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
+            config.git.auto_branch = args.value.as_bool().ok_or("Value must be a boolean")?;
         },
         "git.branch_prefix" => {
-            config.git.branch_prefix = args.value.as_str()
+            config.git.branch_prefix = args
+                .value
+                .as_str()
                 .ok_or("Value must be a string")?
                 .to_string();
         },
         "git.commit_template" => {
-            config.git.commit_template = args.value.as_str()
-                .map(|s| s.to_string());
+            config.git.commit_template = args.value.as_str().map(|s| s.to_string());
         },
         "git.worktree_enabled" => {
-            config.git.worktree_enabled = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
+            config.git.worktree_enabled = args.value.as_bool().ok_or("Value must be a boolean")?;
         },
         "git.worktree_default" => {
-            config.git.worktree_default = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
+            config.git.worktree_default = args.value.as_bool().ok_or("Value must be a boolean")?;
         },
         "git.worktree_prefix" => {
-            config.git.worktree_prefix = args.value.as_str()
+            config.git.worktree_prefix = args
+                .value
+                .as_str()
                 .ok_or("Value must be a string")?
                 .to_string();
         },
         "git.worktree_cleanup_on_close" => {
-            config.git.worktree_cleanup_on_close = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
+            config.git.worktree_cleanup_on_close =
+                args.value.as_bool().ok_or("Value must be a boolean")?;
         },
-        
+
         "ui.date_format" => {
-            config.ui.date_format = args.value.as_str()
+            config.ui.date_format = args
+                .value
+                .as_str()
                 .ok_or("Value must be a string")?
                 .to_string();
         },
-        
-        _ => return Err(format!("Unknown configuration key: {}", args.key))
+
+        _ => return Err(format!("Unknown configuration key: {}", args.key)),
     }
 
     // Save the updated configuration
-    config_manager.save_to_path(&config, &config_path)
+    config_manager
+        .save_to_path(&config, &config_path)
         .map_err(|e| format!("Failed to save configuration: {}", e))?;
 
     Ok(json!({

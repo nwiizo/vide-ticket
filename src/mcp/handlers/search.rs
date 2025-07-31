@@ -97,36 +97,38 @@ pub async fn handle_search(service: &VibeTicketService, arguments: Value) -> Res
         in_tasks: Option<bool>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let query = args.query.to_lowercase();
-    let search_all = !args.in_title.unwrap_or(false) 
-        && !args.in_description.unwrap_or(false) 
+    let search_all = !args.in_title.unwrap_or(false)
+        && !args.in_description.unwrap_or(false)
         && !args.in_tasks.unwrap_or(false);
 
-    let tickets = service.storage.list()
+    let tickets = service
+        .storage
+        .list()
         .map_err(|e| format!("Failed to list tickets: {}", e))?;
 
     let mut results = Vec::new();
 
     for ticket in tickets {
         let mut matches = Vec::new();
-        
+
         // Search in title
         if search_all || args.in_title.unwrap_or(false) {
             if ticket.title.to_lowercase().contains(&query) {
                 matches.push("title");
             }
         }
-        
+
         // Search in description
         if search_all || args.in_description.unwrap_or(false) {
             if ticket.description.to_lowercase().contains(&query) {
                 matches.push("description");
             }
         }
-        
+
         // Search in tasks
         if search_all || args.in_tasks.unwrap_or(false) {
             for task in &ticket.tasks {
@@ -136,12 +138,12 @@ pub async fn handle_search(service: &VibeTicketService, arguments: Value) -> Res
                 }
             }
         }
-        
+
         // Search in slug if searching all
         if search_all && ticket.slug.to_lowercase().contains(&query) {
             matches.push("slug");
         }
-        
+
         // Search in tags if searching all
         if search_all {
             for tag in &ticket.tags {
@@ -151,7 +153,7 @@ pub async fn handle_search(service: &VibeTicketService, arguments: Value) -> Res
                 }
             }
         }
-        
+
         if !matches.is_empty() {
             results.push(json!({
                 "id": ticket.id.to_string(),
@@ -180,37 +182,34 @@ pub async fn handle_export(service: &VibeTicketService, arguments: Value) -> Res
         ticket: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let tickets = if let Some(ticket_ref) = args.ticket {
         // Export specific ticket
-        let ticket_id = crate::mcp::handlers::tickets::resolve_ticket_ref(service, &ticket_ref).await?;
-        let ticket = service.storage.load(&ticket_id)
+        let ticket_id =
+            crate::mcp::handlers::tickets::resolve_ticket_ref(service, &ticket_ref).await?;
+        let ticket = service
+            .storage
+            .load(&ticket_id)
             .map_err(|e| format!("Failed to load ticket: {}", e))?;
         vec![ticket]
     } else {
         // Export all tickets
-        service.storage.list()
+        service
+            .storage
+            .list()
             .map_err(|e| format!("Failed to list tickets: {}", e))?
     };
 
     let exported_data = match args.format.as_str() {
-        "json" => {
-            serde_json::to_string_pretty(&tickets)
-                .map_err(|e| format!("Failed to serialize to JSON: {}", e))?
-        },
-        "yaml" => {
-            serde_yaml::to_string(&tickets)
-                .map_err(|e| format!("Failed to serialize to YAML: {}", e))?
-        },
-        "csv" => {
-            export_to_csv(&tickets)?
-        },
-        "markdown" => {
-            export_to_markdown(&tickets)
-        },
-        _ => return Err(format!("Invalid format: {}", args.format))
+        "json" => serde_json::to_string_pretty(&tickets)
+            .map_err(|e| format!("Failed to serialize to JSON: {}", e))?,
+        "yaml" => serde_yaml::to_string(&tickets)
+            .map_err(|e| format!("Failed to serialize to YAML: {}", e))?,
+        "csv" => export_to_csv(&tickets)?,
+        "markdown" => export_to_markdown(&tickets),
+        _ => return Err(format!("Invalid format: {}", args.format)),
     };
 
     Ok(json!({
@@ -228,22 +227,19 @@ pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Res
         format: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let format = args.format.unwrap_or_else(|| "json".to_string());
 
-    let tickets: Vec<Ticket> = match format.as_str() {
-        "json" => {
-            serde_json::from_str(&args.data)
-                .map_err(|e| format!("Failed to parse JSON: {}", e))?
-        },
-        "yaml" => {
-            serde_yaml::from_str(&args.data)
-                .map_err(|e| format!("Failed to parse YAML: {}", e))?
-        },
-        _ => return Err(format!("Invalid format: {}", format))
-    };
+    let tickets: Vec<Ticket> =
+        match format.as_str() {
+            "json" => serde_json::from_str(&args.data)
+                .map_err(|e| format!("Failed to parse JSON: {}", e))?,
+            "yaml" => serde_yaml::from_str(&args.data)
+                .map_err(|e| format!("Failed to parse YAML: {}", e))?,
+            _ => return Err(format!("Invalid format: {}", format)),
+        };
 
     let mut imported_count = 0;
     let mut skipped_count = 0;
@@ -251,9 +247,15 @@ pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Res
 
     for ticket in tickets {
         // Check if ticket already exists
-        if service.storage.list()
-            .map(|existing| existing.iter().any(|t| t.id == ticket.id || t.slug == ticket.slug))
-            .unwrap_or(false) 
+        if service
+            .storage
+            .list()
+            .map(|existing| {
+                existing
+                    .iter()
+                    .any(|t| t.id == ticket.id || t.slug == ticket.slug)
+            })
+            .unwrap_or(false)
         {
             skipped_count += 1;
             continue;
@@ -261,7 +263,7 @@ pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Res
 
         match service.storage.save(&ticket) {
             Ok(_) => imported_count += 1,
-            Err(e) => errors.push(format!("Failed to import '{}': {}", ticket.slug, e))
+            Err(e) => errors.push(format!("Failed to import '{}': {}", ticket.slug, e)),
         }
     }
 
@@ -281,19 +283,19 @@ pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Res
 /// Export tickets to CSV format
 fn export_to_csv(tickets: &[Ticket]) -> Result<String, String> {
     use std::io::Write;
-    
+
     let mut csv_data = Vec::new();
-    
+
     // Write header
     writeln!(&mut csv_data, "ID,Slug,Title,Status,Priority,Assignee,Tags,Created,Started,Closed,Tasks Total,Tasks Completed")
         .map_err(|e| format!("Failed to write CSV header: {}", e))?;
-    
+
     // Write ticket rows
     for ticket in tickets {
         let tags = ticket.tags.join(";");
         let tasks_total = ticket.tasks.len();
         let tasks_completed = ticket.tasks.iter().filter(|t| t.completed).count();
-        
+
         writeln!(
             &mut csv_data,
             "{},{},{},{},{},{},{},{},{},{},{},{}",
@@ -305,56 +307,67 @@ fn export_to_csv(tickets: &[Ticket]) -> Result<String, String> {
             ticket.assignee.as_deref().unwrap_or(""),
             tags,
             ticket.created_at.to_rfc3339(),
-            ticket.started_at.map(|dt| dt.to_rfc3339()).unwrap_or_default(),
-            ticket.closed_at.map(|dt| dt.to_rfc3339()).unwrap_or_default(),
+            ticket
+                .started_at
+                .map(|dt| dt.to_rfc3339())
+                .unwrap_or_default(),
+            ticket
+                .closed_at
+                .map(|dt| dt.to_rfc3339())
+                .unwrap_or_default(),
             tasks_total,
             tasks_completed
-        ).map_err(|e| format!("Failed to write CSV row: {}", e))?;
+        )
+        .map_err(|e| format!("Failed to write CSV row: {}", e))?;
     }
-    
-    String::from_utf8(csv_data)
-        .map_err(|e| format!("Failed to convert CSV to string: {}", e))
+
+    String::from_utf8(csv_data).map_err(|e| format!("Failed to convert CSV to string: {}", e))
 }
 
 /// Export tickets to Markdown format
 fn export_to_markdown(tickets: &[Ticket]) -> String {
     use std::fmt::Write;
-    
+
     let mut md = String::new();
-    
+
     writeln!(&mut md, "# Tickets Export\n").unwrap();
-    writeln!(&mut md, "Generated on: {}\n", chrono::Utc::now().to_rfc3339()).unwrap();
-    
+    writeln!(
+        &mut md,
+        "Generated on: {}\n",
+        chrono::Utc::now().to_rfc3339()
+    )
+    .unwrap();
+
     for ticket in tickets {
         writeln!(&mut md, "## {} - {}", ticket.slug, ticket.title).unwrap();
         writeln!(&mut md).unwrap();
         writeln!(&mut md, "- **ID**: {}", ticket.id).unwrap();
         writeln!(&mut md, "- **Status**: {:?}", ticket.status).unwrap();
         writeln!(&mut md, "- **Priority**: {:?}", ticket.priority).unwrap();
-        
+
         if let Some(assignee) = &ticket.assignee {
             writeln!(&mut md, "- **Assignee**: {}", assignee).unwrap();
         }
-        
+
         if !ticket.tags.is_empty() {
             writeln!(&mut md, "- **Tags**: {}", ticket.tags.join(", ")).unwrap();
         }
-        
+
         writeln!(&mut md, "- **Created**: {}", ticket.created_at.to_rfc3339()).unwrap();
-        
+
         if let Some(started) = ticket.started_at {
             writeln!(&mut md, "- **Started**: {}", started.to_rfc3339()).unwrap();
         }
-        
+
         if let Some(closed) = ticket.closed_at {
             writeln!(&mut md, "- **Closed**: {}", closed.to_rfc3339()).unwrap();
         }
-        
+
         if !ticket.description.is_empty() {
             writeln!(&mut md, "\n### Description\n").unwrap();
             writeln!(&mut md, "{}", ticket.description).unwrap();
         }
-        
+
         if !ticket.tasks.is_empty() {
             writeln!(&mut md, "\n### Tasks\n").unwrap();
             for task in &ticket.tasks {
@@ -362,10 +375,10 @@ fn export_to_markdown(tickets: &[Ticket]) -> String {
                 writeln!(&mut md, "- [{}] {}", checkbox, task.title).unwrap();
             }
         }
-        
+
         writeln!(&mut md, "\n---\n").unwrap();
     }
-    
+
     md
 }
 

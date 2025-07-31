@@ -66,8 +66,8 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
         all: Option<bool>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     // Execute git worktree list
     let output = std::process::Command::new("git")
@@ -79,14 +79,16 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
         .map_err(|e| format!("Failed to execute git worktree list: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("Git worktree list failed: {}", 
-            String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "Git worktree list failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     let output_str = String::from_utf8_lossy(&output.stdout);
     let mut worktrees = Vec::new();
     let mut current_worktree = json!({});
-    
+
     for line in output_str.lines() {
         if line.starts_with("worktree ") {
             if !current_worktree.as_object().unwrap().is_empty() {
@@ -102,7 +104,7 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
             current_worktree["detached"] = json!(true);
         }
     }
-    
+
     if !current_worktree.as_object().unwrap().is_empty() {
         worktrees.push(current_worktree);
     }
@@ -132,12 +134,15 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
         force: Option<bool>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     // Resolve ticket to get the worktree path
-    let ticket_id = crate::mcp::handlers::tickets::resolve_ticket_ref(service, &args.ticket).await?;
-    let ticket = service.storage.load(&ticket_id)
+    let ticket_id =
+        crate::mcp::handlers::tickets::resolve_ticket_ref(service, &args.ticket).await?;
+    let ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     // Construct worktree path pattern
@@ -165,27 +170,29 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
         }
     }
 
-    let path = worktree_path.ok_or_else(|| {
-        format!("No worktree found for ticket '{}'", args.ticket)
-    })?;
+    let path =
+        worktree_path.ok_or_else(|| format!("No worktree found for ticket '{}'", args.ticket))?;
 
     // Remove the worktree
     let mut remove_cmd = std::process::Command::new("git");
     remove_cmd.arg("worktree").arg("remove");
-    
+
     if args.force.unwrap_or(false) {
         remove_cmd.arg("--force");
     }
-    
+
     remove_cmd.arg(&path);
     remove_cmd.current_dir(&service.project_root);
 
-    let output = remove_cmd.output()
+    let output = remove_cmd
+        .output()
         .map_err(|e| format!("Failed to remove worktree: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("Failed to remove worktree: {}", 
-            String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "Failed to remove worktree: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     Ok(json!({
@@ -197,7 +204,10 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
 }
 
 /// Handle pruning stale worktrees
-pub async fn handle_prune(_service: &VibeTicketService, _arguments: Value) -> Result<Value, String> {
+pub async fn handle_prune(
+    _service: &VibeTicketService,
+    _arguments: Value,
+) -> Result<Value, String> {
     // Execute git worktree prune
     let output = std::process::Command::new("git")
         .arg("worktree")
@@ -207,12 +217,17 @@ pub async fn handle_prune(_service: &VibeTicketService, _arguments: Value) -> Re
         .map_err(|e| format!("Failed to prune worktrees: {}", e))?;
 
     if !output.status.success() {
-        return Err(format!("Git worktree prune failed: {}", 
-            String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "Git worktree prune failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
 
     let output_str = String::from_utf8_lossy(&output.stdout);
-    let pruned_count = output_str.lines().filter(|l| l.contains("Removing")).count();
+    let pruned_count = output_str
+        .lines()
+        .filter(|l| l.contains("Removing"))
+        .count();
 
     Ok(json!({
         "status": "pruned",

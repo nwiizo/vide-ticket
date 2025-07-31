@@ -42,7 +42,10 @@ impl McpServer {
         info!("Starting MCP server with stdio transport");
 
         // Get project root from storage path (parent of .vibe-ticket)
-        let project_root = self.config.storage_path.parent()
+        let project_root = self
+            .config
+            .storage_path
+            .parent()
             .unwrap_or(&self.config.storage_path)
             .to_path_buf();
 

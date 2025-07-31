@@ -204,14 +204,19 @@ pub fn register_tools() -> Vec<Tool> {
 }
 
 /// Helper to resolve ticket reference (ID or slug)
-pub async fn resolve_ticket_ref(service: &VibeTicketService, ticket_ref: &str) -> Result<TicketId, String> {
+pub async fn resolve_ticket_ref(
+    service: &VibeTicketService,
+    ticket_ref: &str,
+) -> Result<TicketId, String> {
     // Try parsing as ID first
     if let Ok(id) = TicketId::parse_str(ticket_ref) {
         return Ok(id);
     }
 
     // Otherwise, search by slug
-    let tickets = service.storage.list()
+    let tickets = service
+        .storage
+        .list()
         .map_err(|e| format!("Failed to list tickets: {}", e))?;
 
     for ticket in tickets {
@@ -235,8 +240,8 @@ pub async fn handle_new(service: &VibeTicketService, arguments: Value) -> Result
         assignee: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let mut ticket = Ticket::new(args.slug.clone(), args.title);
 
@@ -262,7 +267,9 @@ pub async fn handle_new(service: &VibeTicketService, arguments: Value) -> Result
         ticket.assignee = Some(assignee);
     }
 
-    service.storage.save(&ticket)
+    service
+        .storage
+        .save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
 
     Ok(json!({
@@ -289,10 +296,12 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
         tags: Option<Vec<String>>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
-    let mut tickets = service.storage.list()
+    let mut tickets = service
+        .storage
+        .list()
         .map_err(|e| format!("Failed to list tickets: {}", e))?;
 
     // Apply filters
@@ -335,17 +344,22 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
         tickets.retain(|t| tags.iter().any(|tag| t.tags.contains(tag)));
     }
 
-    let ticket_list: Vec<Value> = tickets.into_iter().map(|t| json!({
-        "id": t.id.to_string(),
-        "slug": t.slug,
-        "title": t.title,
-        "status": format!("{:?}", t.status).to_lowercase(),
-        "priority": format!("{:?}", t.priority).to_lowercase(),
-        "assignee": t.assignee,
-        "tags": t.tags,
-        "created_at": t.created_at.to_rfc3339(),
-        "closed_at": t.closed_at.map(|dt| dt.to_rfc3339()),
-    })).collect();
+    let ticket_list: Vec<Value> = tickets
+        .into_iter()
+        .map(|t| {
+            json!({
+                "id": t.id.to_string(),
+                "slug": t.slug,
+                "title": t.title,
+                "status": format!("{:?}", t.status).to_lowercase(),
+                "priority": format!("{:?}", t.priority).to_lowercase(),
+                "assignee": t.assignee,
+                "tags": t.tags,
+                "created_at": t.created_at.to_rfc3339(),
+                "closed_at": t.closed_at.map(|dt| dt.to_rfc3339()),
+            })
+        })
+        .collect();
 
     Ok(json!({
         "tickets": ticket_list,
@@ -360,11 +374,13 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
         ticket: String,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, &args.ticket).await?;
-    let ticket = service.storage.load(&ticket_id)
+    let ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     Ok(json!({
@@ -403,11 +419,13 @@ pub async fn handle_edit(service: &VibeTicketService, arguments: Value) -> Resul
         tags: Option<Vec<String>>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, &args.ticket).await?;
-    let mut ticket = service.storage.load(&ticket_id)
+    let mut ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     let mut changes = Vec::new();
@@ -431,12 +449,12 @@ pub async fn handle_edit(service: &VibeTicketService, arguments: Value) -> Resul
             "review" => Status::Review,
             _ => return Err(format!("Invalid status: {}", status_str)),
         };
-        
+
         // Handle status transitions
         if ticket.status == Status::Todo && status == Status::Doing && ticket.started_at.is_none() {
             ticket.started_at = Some(chrono::Utc::now());
         }
-        
+
         ticket.status = status;
         changes.push("status");
     }
@@ -469,7 +487,9 @@ pub async fn handle_edit(service: &VibeTicketService, arguments: Value) -> Resul
         }));
     }
 
-    service.storage.save(&ticket)
+    service
+        .storage
+        .save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
 
     Ok(json!({
@@ -488,11 +508,13 @@ pub async fn handle_close(service: &VibeTicketService, arguments: Value) -> Resu
         message: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, &args.ticket).await?;
-    let mut ticket = service.storage.load(&ticket_id)
+    let mut ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     if ticket.closed_at.is_some() {
@@ -503,10 +525,14 @@ pub async fn handle_close(service: &VibeTicketService, arguments: Value) -> Resu
     ticket.closed_at = Some(chrono::Utc::now());
 
     if let Some(message) = args.message {
-        ticket.metadata.insert("closing_message".to_string(), Value::String(message));
+        ticket
+            .metadata
+            .insert("closing_message".to_string(), Value::String(message));
     }
 
-    service.storage.save(&ticket)
+    service
+        .storage
+        .save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
 
     // Clear active ticket if this was it
@@ -532,11 +558,13 @@ pub async fn handle_start(service: &VibeTicketService, arguments: Value) -> Resu
         no_worktree: Option<bool>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, &args.ticket).await?;
-    let mut ticket = service.storage.load(&ticket_id)
+    let mut ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     // Update ticket status if needed
@@ -545,12 +573,16 @@ pub async fn handle_start(service: &VibeTicketService, arguments: Value) -> Resu
         if ticket.started_at.is_none() {
             ticket.started_at = Some(chrono::Utc::now());
         }
-        service.storage.save(&ticket)
+        service
+            .storage
+            .save(&ticket)
             .map_err(|e| format!("Failed to save ticket: {}", e))?;
     }
 
     // Set as active ticket
-    service.storage.set_active(&ticket_id)
+    service
+        .storage
+        .set_active(&ticket_id)
         .map_err(|e| format!("Failed to set active ticket: {}", e))?;
 
     let mut response = json!({
@@ -590,7 +622,9 @@ pub async fn handle_check(service: &VibeTicketService, _arguments: Value) -> Res
         None
     };
 
-    let ticket_count = service.storage.list()
+    let ticket_count = service
+        .storage
+        .list()
         .map(|tickets| tickets.len())
         .unwrap_or(0);
 

@@ -100,12 +100,17 @@ pub fn register_tools() -> Vec<Tool> {
 }
 
 /// Helper to resolve ticket reference
-async fn resolve_ticket_ref(service: &VibeTicketService, ticket_ref: Option<&str>) -> Result<crate::core::TicketId, String> {
+async fn resolve_ticket_ref(
+    service: &VibeTicketService,
+    ticket_ref: Option<&str>,
+) -> Result<crate::core::TicketId, String> {
     if let Some(ref_str) = ticket_ref {
         crate::mcp::handlers::tickets::resolve_ticket_ref(service, ref_str).await
     } else {
         // Get active ticket
-        service.storage.get_active()
+        service
+            .storage
+            .get_active()
             .map_err(|e| format!("Failed to get active ticket: {}", e))?
             .ok_or_else(|| "No active ticket. Please specify a ticket ID or slug.".to_string())
     }
@@ -119,11 +124,13 @@ pub async fn handle_add(service: &VibeTicketService, arguments: Value) -> Result
         ticket: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, args.ticket.as_deref()).await?;
-    let mut ticket = service.storage.load(&ticket_id)
+    let mut ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     let task = Task::new(args.title);
@@ -131,7 +138,9 @@ pub async fn handle_add(service: &VibeTicketService, arguments: Value) -> Result
     let task_title = task.title.clone();
     ticket.tasks.push(task);
 
-    service.storage.save(&ticket)
+    service
+        .storage
+        .save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
 
     Ok(json!({
@@ -148,18 +157,23 @@ pub async fn handle_add(service: &VibeTicketService, arguments: Value) -> Result
 }
 
 /// Handle completing a task
-pub async fn handle_complete(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub async fn handle_complete(
+    service: &VibeTicketService,
+    arguments: Value,
+) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         task_id: String,
         ticket: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, args.ticket.as_deref()).await?;
-    let mut ticket = service.storage.load(&ticket_id)
+    let mut ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     let task_id = TaskId::parse_str(&args.task_id)
@@ -185,7 +199,9 @@ pub async fn handle_complete(service: &VibeTicketService, arguments: Value) -> R
         return Err(format!("Task '{}' not found in ticket", args.task_id));
     }
 
-    service.storage.save(&ticket)
+    service
+        .storage
+        .save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
 
     let completed_count = ticket.tasks.iter().filter(|t| t.completed).count();
@@ -216,15 +232,17 @@ pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Resul
         incomplete_only: Option<bool>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, args.ticket.as_deref()).await?;
-    let ticket = service.storage.load(&ticket_id)
+    let ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     let mut tasks: Vec<&Task> = ticket.tasks.iter().collect();
-    
+
     if args.completed_only.unwrap_or(false) {
         tasks.retain(|t| t.completed);
     } else if args.incomplete_only.unwrap_or(false) {
@@ -261,24 +279,30 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
         ticket: Option<String>,
     }
 
-    let args: Args = serde_json::from_value(arguments)
-        .map_err(|e| format!("Invalid arguments: {}", e))?;
+    let args: Args =
+        serde_json::from_value(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
 
     let ticket_id = resolve_ticket_ref(service, args.ticket.as_deref()).await?;
-    let mut ticket = service.storage.load(&ticket_id)
+    let mut ticket = service
+        .storage
+        .load(&ticket_id)
         .map_err(|e| format!("Failed to load ticket: {}", e))?;
 
     let task_id = TaskId::parse_str(&args.task_id)
         .map_err(|_| format!("Invalid task ID: {}", args.task_id))?;
 
     // Find and remove the task
-    let task_index = ticket.tasks.iter()
+    let task_index = ticket
+        .tasks
+        .iter()
         .position(|t| t.id == task_id)
         .ok_or_else(|| format!("Task '{}' not found in ticket", args.task_id))?;
 
     let removed_task = ticket.tasks.remove(task_index);
 
-    service.storage.save(&ticket)
+    service
+        .storage
+        .save(&ticket)
         .map_err(|e| format!("Failed to save ticket: {}", e))?;
 
     Ok(json!({

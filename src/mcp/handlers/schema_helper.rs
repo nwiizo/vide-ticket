@@ -11,6 +11,6 @@ pub fn json_to_schema(value: Value) -> Map<String, Value> {
             map.insert("type".to_string(), json!("object"));
             map.insert("properties".to_string(), Value::Object(Map::new()));
             map
-        }
+        },
     }
 }
