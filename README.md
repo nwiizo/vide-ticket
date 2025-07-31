@@ -70,6 +70,7 @@ project:
 - [Spec-Driven Development](docs/spec-driven-development.md)
 - [Git Worktree Guide](docs/git-worktree.md)
 - [Claude Integration](docs/claude-integration.md)
+- [MCP Integration Guide](docs/mcp-guide.md)
 - [Data Formats](docs/data-formats.md)
 
 ## AI Assistant Setup
