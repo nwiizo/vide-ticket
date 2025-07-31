@@ -40,7 +40,9 @@
 //! - Permission errors
 
 mod file;
+mod lock;
 mod repository;
 
 pub use file::{FileStorage, ProjectState};
+pub use lock::{FileLock, LockGuard};
 pub use repository::{ActiveTicketRepository, Repository, TicketRepository};

@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use crate::cache::TicketCache;
 use crate::core::{Ticket, TicketId};
+
 use crate::error::{ErrorContext, Result, VibeTicketError};
 
 /// File-based storage implementation for tickets
@@ -32,7 +33,7 @@ impl FileStorage {
     }
 
     /// Returns the path to a specific ticket file
-    fn ticket_path(&self, id: &TicketId) -> PathBuf {
+    pub(crate) fn ticket_path(&self, id: &TicketId) -> PathBuf {
         self.tickets_dir().join(format!("{id}.yaml"))
     }
 
@@ -57,11 +58,16 @@ impl FileStorage {
         Ok(())
     }
 
-    /// Saves a ticket to storage
+    /// Saves a ticket to storage with file locking for concurrent access protection
     pub fn save_ticket(&self, ticket: &Ticket) -> Result<()> {
         self.ensure_directories()?;
 
         let path = self.ticket_path(&ticket.id);
+        
+        // Acquire lock before modifying the file
+        let _lock = super::FileLock::acquire(&path, Some("save_ticket".to_string()))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for saving ticket: {}", e)))?;
+        
         let yaml = serde_yaml::to_string(ticket).context("Failed to serialize ticket")?;
 
         fs::write(&path, yaml)
@@ -73,7 +79,7 @@ impl FileStorage {
         Ok(())
     }
 
-    /// Loads a ticket from storage by ID
+    /// Loads a ticket from storage by ID with read locking
     pub fn load_ticket(&self, id: &TicketId) -> Result<Ticket> {
         // Check cache first
         if let Some(ticket) = self.cache.get_ticket(id) {
@@ -85,6 +91,10 @@ impl FileStorage {
         if !path.exists() {
             return Err(VibeTicketError::TicketNotFound { id: id.to_string() });
         }
+
+        // Acquire lock for reading to ensure consistency
+        let _lock = super::FileLock::acquire(&path, Some("load_ticket".to_string()))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for loading ticket: {}", e)))?;
 
         let yaml = fs::read_to_string(&path)
             .with_context(|| format!("Failed to read ticket from {}", path.display()))?;
@@ -139,13 +149,17 @@ impl FileStorage {
         Ok(tickets)
     }
 
-    /// Deletes a ticket from storage
+    /// Deletes a ticket from storage with locking
     pub fn delete_ticket(&self, id: &TicketId) -> Result<()> {
         let path = self.ticket_path(id);
 
         if !path.exists() {
             return Err(VibeTicketError::TicketNotFound { id: id.to_string() });
         }
+
+        // Acquire lock before deleting
+        let _lock = super::FileLock::acquire(&path, Some("delete_ticket".to_string()))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for deleting ticket: {}", e)))?;
 
         fs::remove_file(&path)
             .with_context(|| format!("Failed to delete ticket at {}", path.display()))?;
@@ -156,9 +170,14 @@ impl FileStorage {
         Ok(())
     }
 
-    /// Sets the active ticket
+    /// Sets the active ticket with locking
     pub fn set_active_ticket(&self, id: &TicketId) -> Result<()> {
         let path = self.active_ticket_path();
+        
+        // Acquire lock for the active ticket file
+        let _lock = super::FileLock::acquire(&path, Some("set_active_ticket".to_string()))
+            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for setting active ticket: {}", e)))?;
+        
         fs::write(&path, id.to_string()).context("Failed to write active ticket")?;
         Ok(())
     }
@@ -178,11 +197,15 @@ impl FileStorage {
         Ok(Some(id))
     }
 
-    /// Clears the active ticket
+    /// Clears the active ticket with locking
     pub fn clear_active_ticket(&self) -> Result<()> {
         let path = self.active_ticket_path();
 
         if path.exists() {
+            // Acquire lock before removing
+            let _lock = super::FileLock::acquire(&path, Some("clear_active_ticket".to_string()))
+                .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for clearing active ticket: {}", e)))?;
+                
             fs::remove_file(&path).context("Failed to clear active ticket")?;
         }
 
@@ -304,3 +327,7 @@ mod tests {
         assert_eq!(active_id, None);
     }
 }
+// Include concurrent tests
+#[cfg(test)]
+#[path = "concurrent_tests.rs"]
+mod concurrent_tests;
