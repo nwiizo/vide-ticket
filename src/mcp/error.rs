@@ -44,7 +44,23 @@ pub enum McpError {
     /// Connection error
     #[error("Connection error: {0}")]
     ConnectionError(String),
+    
+    /// Generic server error
+    #[error("Server error: {0}")]
+    ServerError(String),
 }
 
 /// Result type alias for MCP operations
 pub type McpResult<T> = Result<T, McpError>;
+
+impl From<rmcp::service::ServerInitializeError> for McpError {
+    fn from(err: rmcp::service::ServerInitializeError) -> Self {
+        McpError::ProtocolError(err.to_string())
+    }
+}
+
+impl From<tokio::task::JoinError> for McpError {
+    fn from(err: tokio::task::JoinError) -> Self {
+        McpError::ServerError(err.to_string())
+    }
+}

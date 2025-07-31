@@ -15,7 +15,7 @@ pub mod handlers;
 #[cfg(feature = "mcp")]
 pub mod server;
 #[cfg(feature = "mcp")]
-pub mod transport;
+pub mod service;
 
 #[cfg(feature = "mcp")]
 pub use config::McpConfig;

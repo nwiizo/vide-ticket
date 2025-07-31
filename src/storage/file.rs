@@ -10,6 +10,7 @@ use crate::error::{ErrorContext, Result, VibeTicketError};
 ///
 /// This implementation stores tickets as YAML files in a directory structure
 /// within the project's .vibe-ticket directory.
+#[derive(Clone)]
 pub struct FileStorage {
     /// Base directory for storing ticket data
     base_dir: PathBuf,
