@@ -88,7 +88,6 @@ pub fn handle_show_command(
     Ok(())
 }
 
-
 /// Output ticket information in plain text format
 fn output_plain(
     ticket: &crate::core::Ticket,

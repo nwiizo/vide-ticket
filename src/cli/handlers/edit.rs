@@ -197,7 +197,6 @@ pub fn handle_edit_command(
     Ok(())
 }
 
-
 /// Edit ticket in the default editor
 fn edit_in_editor(
     ticket: &mut crate::core::Ticket,

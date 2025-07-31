@@ -32,7 +32,7 @@ enum CacheKey {
 #[derive(Clone)]
 enum CacheValue {
     /// Single ticket
-    Ticket(Ticket),
+    Ticket(Box<Ticket>),
     /// Multiple tickets
     Tickets(Vec<Ticket>),
 }
@@ -55,13 +55,13 @@ impl TicketCache {
     pub fn get_ticket(&self, id: &TicketId) -> Option<Ticket> {
         let cache = self.cache.read().ok()?;
         let entry = cache.get(&CacheKey::Ticket(id.clone()))?;
-        
+
         if self.is_expired(&entry.timestamp) {
             return None;
         }
 
         match &entry.data {
-            CacheValue::Ticket(ticket) => Some(ticket.clone()),
+            CacheValue::Ticket(ticket) => Some((**ticket).clone()),
             _ => None,
         }
     }
@@ -70,7 +70,7 @@ impl TicketCache {
     pub fn cache_ticket(&self, ticket: &Ticket) {
         if let Ok(mut cache) = self.cache.write() {
             let entry = CachedEntry {
-                data: CacheValue::Ticket(ticket.clone()),
+                data: CacheValue::Ticket(Box::new(ticket.clone())),
                 timestamp: Instant::now(),
             };
             cache.insert(CacheKey::Ticket(ticket.id.clone()), entry);
@@ -81,7 +81,7 @@ impl TicketCache {
     pub fn get_all_tickets(&self) -> Option<Vec<Ticket>> {
         let cache = self.cache.read().ok()?;
         let entry = cache.get(&CacheKey::AllTickets)?;
-        
+
         if self.is_expired(&entry.timestamp) {
             return None;
         }
@@ -100,7 +100,7 @@ impl TicketCache {
                 timestamp: Instant::now(),
             };
             cache.insert(CacheKey::AllTickets, entry);
-            
+
             // Also cache individual tickets
             for ticket in tickets {
                 let ticket_entry = CachedEntry {
@@ -170,10 +170,10 @@ mod tests {
     fn test_cache_and_retrieve_ticket() {
         let cache = TicketCache::new(Duration::from_secs(60));
         let ticket = create_test_ticket("1");
-        
+
         // Cache the ticket
         cache.cache_ticket(&ticket);
-        
+
         // Retrieve it
         let cached = cache.get_ticket(&ticket.id);
         assert!(cached.is_some());
@@ -184,15 +184,15 @@ mod tests {
     fn test_cache_expiration() {
         let cache = TicketCache::new(Duration::from_millis(100));
         let ticket = create_test_ticket("2");
-        
+
         cache.cache_ticket(&ticket);
-        
+
         // Should exist immediately
         assert!(cache.get_ticket(&ticket.id).is_some());
-        
+
         // Wait for expiration
         thread::sleep(Duration::from_millis(150));
-        
+
         // Should be expired
         assert!(cache.get_ticket(&ticket.id).is_none());
     }
@@ -205,14 +205,14 @@ mod tests {
             create_test_ticket("4"),
             create_test_ticket("5"),
         ];
-        
+
         cache.cache_all_tickets(&tickets);
-        
+
         // Check all tickets cache
         let cached_all = cache.get_all_tickets();
         assert!(cached_all.is_some());
         assert_eq!(cached_all.unwrap().len(), 3);
-        
+
         // Check individual tickets are also cached
         assert!(cache.get_ticket(&tickets[0].id).is_some());
         assert!(cache.get_ticket(&tickets[1].id).is_some());
@@ -223,10 +223,10 @@ mod tests {
     fn test_cache_invalidation() {
         let cache = TicketCache::new(Duration::from_secs(60));
         let ticket = create_test_ticket("6");
-        
+
         cache.cache_ticket(&ticket);
         assert!(cache.get_ticket(&ticket.id).is_some());
-        
+
         cache.invalidate_ticket(&ticket.id);
         assert!(cache.get_ticket(&ticket.id).is_none());
     }
@@ -236,14 +236,14 @@ mod tests {
         let cache = TicketCache::new(Duration::from_millis(100));
         let ticket1 = create_test_ticket("7");
         let ticket2 = create_test_ticket("8");
-        
+
         cache.cache_ticket(&ticket1);
         thread::sleep(Duration::from_millis(150));
         cache.cache_ticket(&ticket2);
-        
+
         // Before cleanup, expired ticket might still be in cache
         cache.cleanup_expired();
-        
+
         // After cleanup, only non-expired ticket should remain
         assert!(cache.get_ticket(&ticket1.id).is_none());
         assert!(cache.get_ticket(&ticket2.id).is_some());

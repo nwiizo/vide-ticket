@@ -1,5 +1,14 @@
 # vibe-ticket Command Reference
 
+## Concurrent Access Safety
+
+All vibe-ticket commands are safe to use concurrently. Multiple users or processes can safely:
+- Create, edit, and close tickets simultaneously
+- Work on different tickets without conflicts
+- Access the same ticket with automatic retry and locking
+
+The system uses file-based locking with automatic cleanup of stale locks (after 30 seconds).
+
 ## Project Management
 
 ### `init`

@@ -19,6 +19,20 @@
 //! - Migration support for schema management
 //! - Connection pooling and transaction management
 //!
+//! # Concurrent Access Protection
+//!
+//! The file storage implementation includes built-in protection against concurrent
+//! modifications through a file-based locking mechanism:
+//!
+//! - **Automatic Locking**: All write operations acquire exclusive locks
+//! - **Lock Files**: Created as `<filename>.lock` with metadata
+//! - **Retry Logic**: Operations retry up to 10 times with 100ms delays
+//! - **Stale Lock Cleanup**: Locks older than 30 seconds are removed automatically
+//! - **RAII Pattern**: Locks are released automatically using Rust's Drop trait
+//!
+//! This ensures data integrity even when multiple users or processes access
+//! tickets simultaneously.
+//!
 //! # Example
 //!
 //! ```ignore
@@ -27,7 +41,7 @@
 //! // Initialize storage backend
 //! let storage = FileStorage::new(".vibe-ticket");
 //!
-//! // Use storage through repository traits
+//! // Use storage through repository traits (locking is automatic)
 //! let tickets = storage.get_all()?;
 //! ```
 //!
@@ -38,6 +52,7 @@
 //! - Serialization/deserialization errors
 //! - Not found errors
 //! - Permission errors
+//! - Lock acquisition failures
 
 mod file;
 mod lock;

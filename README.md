@@ -34,11 +34,13 @@ vibe-ticket close fix-bug --message "Fixed login issue"
 ## Key Features
 
 - **Git Worktree Support**: Work on multiple tickets simultaneously
+- **Concurrent Edit Protection**: Safe multi-user/multi-process ticket access with automatic lock management
 - **Spec-Driven Development**: Three-phase development with requirements, design, and tasks
 - **Task Management**: Break tickets into trackable tasks
 - **Flexible Search**: Find tickets with powerful filters
 - **Export/Import**: JSON, YAML, CSV, and Markdown formats
 - **AI Integration**: Claude Code support with CLAUDE.md generation
+- **MCP Server**: Run as Model Context Protocol server for AI assistants
 
 ## Essential Commands
 
@@ -80,6 +82,23 @@ vibe-ticket init --claude-md
 curl https://raw.githubusercontent.com/nwiizo/vibe-ticket/main/rules/agent.md >> CLAUDE.md
 ```
 
+### MCP (Model Context Protocol) Support
+
+vibe-ticket can run as an MCP server for AI assistants like Claude:
+
+```bash
+# Install with MCP support
+cargo install vibe-ticket --features mcp
+
+# Add to Claude Code (global)
+claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope global -- mcp serve
+
+# Test the server
+vibe-ticket mcp serve
+```
+
+See [MCP Integration Guide](docs/mcp-integration.md) for detailed setup and usage.
+
 ## Best Practices
 
 ### Ticket Management
@@ -105,6 +124,12 @@ curl https://raw.githubusercontent.com/nwiizo/vibe-ticket/main/rules/agent.md >>
 - Break complex work into tasks within tickets
 - Conduct retrospectives after major tasks
 
+### Concurrent Access Safety
+- vibe-ticket automatically handles multiple users/processes accessing tickets
+- File locking prevents data corruption during concurrent modifications
+- Stale locks are automatically cleaned up after 30 seconds
+- Operations retry automatically if a file is temporarily locked
+
 ## Installation
 
 ### From Source
@@ -114,6 +139,10 @@ git clone https://github.com/nwiizo/vibe-ticket.git
 cd vibe-ticket
 cargo build --release
 cargo install --path .
+
+# With MCP support
+cargo build --release --features mcp
+cargo install --path . --features mcp
 ```
 
 ### Prerequisites

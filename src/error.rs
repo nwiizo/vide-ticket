@@ -154,13 +154,25 @@ impl VibeTicketError {
     }
 
     /// Creates an I/O error with consistent formatting
-    pub fn io_error(operation: &str, path: &std::path::Path, error: impl std::fmt::Display) -> Self {
-        Self::custom(format!("Failed to {} {}: {}", operation, path.display(), error))
+    pub fn io_error(
+        operation: &str,
+        path: &std::path::Path,
+        error: impl std::fmt::Display,
+    ) -> Self {
+        Self::custom(format!(
+            "Failed to {} {}: {}",
+            operation,
+            path.display(),
+            error
+        ))
     }
 
     /// Creates a parsing error with consistent formatting
     pub fn parse_error(type_name: &str, value: &str, error: impl std::fmt::Display) -> Self {
-        Self::custom(format!("Failed to parse '{}' as {}: {}", value, type_name, error))
+        Self::custom(format!(
+            "Failed to parse '{}' as {}: {}",
+            value, type_name, error
+        ))
     }
 
     /// Returns suggested actions for the error

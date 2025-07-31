@@ -124,7 +124,7 @@ fn output_results(
 ) -> Result<()> {
     if let Some(path) = output_path {
         std::fs::write(&path, content)
-            .map_err(|e| VibeTicketError::io_error("write", &std::path::Path::new(&path), e))?;
+            .map_err(|e| VibeTicketError::io_error("write", std::path::Path::new(&path), e))?;
 
         output.success(&format!("Exported {ticket_count} tickets to {path}"));
         output.info(&format!("Format: {format_name}"));
@@ -175,9 +175,9 @@ mod tests {
                 assert!(result.is_ok(), "Export should succeed");
                 let output = result.unwrap();
                 assert!(
-                    output.contains($contains), 
-                    "Expected output to contain '{}', but got: {}", 
-                    $contains, 
+                    output.contains($contains),
+                    "Expected output to contain '{}', but got: {}",
+                    $contains,
                     output
                 );
             }

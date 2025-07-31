@@ -154,10 +154,10 @@ mod tests {
             Ticket::new("test-1".to_string(), "Test Ticket 1".to_string()),
             Ticket::new("test-2".to_string(), "Test Ticket 2".to_string()),
         ];
-        
+
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let markdown = result.unwrap();
         assert!(markdown.contains("# Ticket Export"));
         assert!(markdown.contains("**Total tickets**: 2"));
@@ -169,10 +169,10 @@ mod tests {
     fn test_markdown_export_empty() {
         let exporter = MarkdownExporter;
         let tickets: Vec<Ticket> = vec![];
-        
+
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let markdown = result.unwrap();
         assert!(markdown.contains("**Total tickets**: 0"));
     }
@@ -180,20 +180,20 @@ mod tests {
     #[test]
     fn test_markdown_export_with_different_statuses() {
         let exporter = MarkdownExporter;
-        
+
         let mut todo_ticket = Ticket::new("todo".to_string(), "Todo Ticket".to_string());
         todo_ticket.status = Status::Todo;
-        
+
         let mut doing_ticket = Ticket::new("doing".to_string(), "Doing Ticket".to_string());
         doing_ticket.status = Status::Doing;
-        
+
         let mut done_ticket = Ticket::new("done".to_string(), "Done Ticket".to_string());
         done_ticket.status = Status::Done;
-        
+
         let tickets = vec![todo_ticket, doing_ticket, done_ticket];
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let markdown = result.unwrap();
         assert!(markdown.contains("### 📋 Todo"));
         assert!(markdown.contains("### 🔄 In Progress"));
@@ -203,7 +203,7 @@ mod tests {
     #[test]
     fn test_markdown_export_with_rich_ticket() {
         let exporter = MarkdownExporter;
-        
+
         let mut ticket = Ticket::new("rich".to_string(), "Rich Ticket".to_string());
         ticket.description = "This is a detailed description\nwith multiple lines".to_string();
         ticket.priority = Priority::High;
@@ -214,11 +214,11 @@ mod tests {
             Task::new("Task 2".to_string()),
         ];
         ticket.tasks[0].completed = true;
-        
+
         let tickets = vec![ticket];
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let markdown = result.unwrap();
         assert!(markdown.contains("- **Priority**: High"));
         assert!(markdown.contains("- **Assignee**: user@example.com"));
@@ -246,7 +246,7 @@ mod tests {
             ticket.status = Status::Done;
             tickets.push(ticket);
         }
-        
+
         let counts = count_by_status(&tickets);
         assert_eq!(*counts.get("Todo").unwrap(), 3);
         assert_eq!(*counts.get("Done").unwrap(), 2);

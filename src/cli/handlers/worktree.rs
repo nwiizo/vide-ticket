@@ -499,17 +499,17 @@ mod tests {
     #[test]
     fn test_extract_ticket_slug() {
         let config = create_test_config();
-        
+
         // Test standard worktree path
         let path = PathBuf::from("./test-project-vibeticket-fix-bug");
         let slug = extract_ticket_slug(&path, &config).unwrap();
         assert_eq!(slug, Some("fix-bug".to_string()));
-        
+
         // Test path without prefix
         let path = PathBuf::from("./some-other-dir");
         let slug = extract_ticket_slug(&path, &config).unwrap();
         assert_eq!(slug, None);
-        
+
         // Test with parent directory prefix
         let mut config_parent = config.clone();
         config_parent.git.worktree_prefix = "../{project}-vibeticket-".to_string();
@@ -523,7 +523,7 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         let path = temp_dir.path().join("worktree");
         std::fs::create_dir(&path).unwrap();
-        
+
         // Test active worktree
         let worktree = WorktreeInfo {
             path: path.clone(),
@@ -532,12 +532,12 @@ mod tests {
             status: "active".to_string(),
         };
         assert_eq!(determine_worktree_status(&worktree), "active");
-        
+
         // Test detached worktree
         let mut detached = worktree.clone();
         detached.status = "detached".to_string();
         assert_eq!(determine_worktree_status(&detached), "detached");
-        
+
         // Test orphaned worktree (non-existent path)
         let orphaned = WorktreeInfo {
             path: PathBuf::from("/non/existent/path"),
@@ -553,20 +553,21 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         let project_root = temp_dir.path();
         let config = create_test_config();
-        
+
         // Create test worktree directory
         let worktree_name = "test-project-vibeticket-test-ticket";
         let worktree_path = project_root.join(worktree_name);
         std::fs::create_dir(&worktree_path).unwrap();
-        
+
         // Test resolving by ticket slug
         let resolved = resolve_worktree_path("test-ticket", project_root, &config).unwrap();
         assert_eq!(resolved, worktree_path);
-        
+
         // Test absolute path
-        let resolved = resolve_worktree_path(worktree_path.to_str().unwrap(), project_root, &config).unwrap();
+        let resolved =
+            resolve_worktree_path(worktree_path.to_str().unwrap(), project_root, &config).unwrap();
         assert_eq!(resolved, worktree_path);
-        
+
         // Test non-existent worktree
         let result = resolve_worktree_path("non-existent", project_root, &config);
         assert!(result.is_err());
@@ -581,7 +582,7 @@ mod tests {
             commit: "abc123def456".to_string(),
             status: "active".to_string(),
         };
-        
+
         assert_eq!(worktree.path.to_str().unwrap(), "/path/to/worktree");
         assert_eq!(worktree.branch.as_ref().unwrap(), "feature/test");
         assert_eq!(worktree.commit, "abc123def456");
@@ -592,32 +593,44 @@ mod tests {
     fn test_display_worktree() {
         use crate::core::Ticket;
         let formatter = OutputFormatter::new(false, false);
-        
+
         let worktree = WorktreeInfo {
             path: PathBuf::from("./test-worktree"),
             branch: Some("feature/test".to_string()),
             commit: "abc123def456".to_string(),
             status: "active".to_string(),
         };
-        
+
         // Test with ticket
         let ticket = Ticket::new("test-ticket".to_string(), "Test Ticket".to_string());
         let mut ticket_map = HashMap::new();
         ticket_map.insert("test-ticket".to_string(), ticket);
-        
-        display_worktree(&worktree, Some("test-ticket"), &ticket_map, false, &formatter);
-        
+
+        display_worktree(
+            &worktree,
+            Some("test-ticket"),
+            &ticket_map,
+            false,
+            &formatter,
+        );
+
         // Test without ticket
         display_worktree(&worktree, None, &ticket_map, false, &formatter);
-        
+
         // Test verbose mode
-        display_worktree(&worktree, Some("test-ticket"), &ticket_map, true, &formatter);
+        display_worktree(
+            &worktree,
+            Some("test-ticket"),
+            &ticket_map,
+            true,
+            &formatter,
+        );
     }
 
     #[test]
     fn test_check_uncommitted_changes_no_git() {
         let temp_dir = TempDir::new().unwrap();
-        
+
         // Test with non-git directory (should succeed)
         let result = check_uncommitted_changes(temp_dir.path());
         assert!(result.is_ok());
