@@ -43,6 +43,9 @@ mod file;
 mod lock;
 mod repository;
 
+#[cfg(test)]
+mod concurrent_tests;
+
 pub use file::{FileStorage, ProjectState};
 pub use lock::{FileLock, LockGuard};
 pub use repository::{ActiveTicketRepository, Repository, TicketRepository};
