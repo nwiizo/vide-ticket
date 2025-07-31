@@ -34,6 +34,7 @@ vibe-ticket close fix-bug --message "Fixed login issue"
 ## Key Features
 
 - **Git Worktree Support**: Work on multiple tickets simultaneously
+- **Spec-Driven Development**: Three-phase development with requirements, design, and tasks
 - **Task Management**: Break tickets into trackable tasks
 - **Flexible Search**: Find tickets with powerful filters
 - **Export/Import**: JSON, YAML, CSV, and Markdown formats
@@ -64,6 +65,7 @@ project:
 
 - [Command Reference](docs/commands.md)
 - [Configuration](docs/configuration.md)
+- [Spec-Driven Development](docs/spec-driven-development.md)
 - [Git Worktree Guide](docs/git-worktree.md)
 - [Claude Integration](docs/claude-integration.md)
 - [Data Formats](docs/data-formats.md)

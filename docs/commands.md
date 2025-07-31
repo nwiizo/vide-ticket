@@ -306,6 +306,184 @@ Options:
   --remove-branches           Also remove associated branches
 ```
 
+## Specification Management
+
+### `spec`
+Manage specifications for spec-driven development workflow.
+
+```bash
+vibe-ticket spec <SUBCOMMAND>
+
+Subcommands:
+  init                         Initialize a new specification
+  requirements                 Create or update requirements document
+  design                      Create or update design document
+  tasks                       Create or update implementation tasks
+  status                      Show specification status
+  list                        List all specifications
+  show                        Show specification details
+  delete                      Delete a specification
+  approve                     Approve a specification phase
+  activate                    Set active specification
+```
+
+#### `spec init`
+Create a new specification with metadata tracking.
+
+```bash
+vibe-ticket spec init <TITLE> [OPTIONS]
+
+Arguments:
+  <TITLE>                       Specification title
+
+Options:
+  -d, --description <DESC>      Brief description
+  -t, --ticket <TICKET>         Associated ticket ID/slug
+  --tags <TAGS>                 Comma-separated tags
+```
+
+#### `spec requirements`
+Create or edit requirements definition document.
+
+```bash
+vibe-ticket spec requirements [OPTIONS]
+
+Options:
+  -s, --spec <SPEC_ID>          Specification ID (defaults to active)
+  -e, --editor                  Open in editor
+  -c, --complete                Mark phase as complete
+```
+
+#### `spec design`
+Create or edit technical design document.
+
+```bash
+vibe-ticket spec design [OPTIONS]
+
+Options:
+  -s, --spec <SPEC_ID>          Specification ID (defaults to active)
+  -e, --editor                  Open in editor
+  -c, --complete                Mark phase as complete
+```
+
+#### `spec tasks`
+Create or edit implementation plan/tasks document.
+
+```bash
+vibe-ticket spec tasks [OPTIONS]
+
+Options:
+  -s, --spec <SPEC_ID>          Specification ID (defaults to active)
+  -e, --editor                  Open in editor
+  -c, --complete                Mark phase as complete
+  --export-tickets              Export tasks as vibe-tickets
+```
+
+#### `spec status`
+Show current specification progress and phase.
+
+```bash
+vibe-ticket spec status [OPTIONS]
+
+Options:
+  -s, --spec <SPEC_ID>          Specification ID (defaults to active)
+  -d, --detailed                Show detailed information
+```
+
+#### `spec list`
+List all specifications with filtering options.
+
+```bash
+vibe-ticket spec list [OPTIONS]
+
+Options:
+  -s, --status <STATUS>         Filter by status
+  -p, --phase <PHASE>           Filter by phase (initial, requirements, design, tasks, completed)
+  --archived                    Show archived specifications
+```
+
+#### `spec show`
+Display specification details and documents.
+
+```bash
+vibe-ticket spec show <SPEC_ID> [OPTIONS]
+
+Arguments:
+  <SPEC_ID>                     Specification ID
+
+Options:
+  -a, --all                     Show all documents
+  -m, --markdown                Output in markdown format
+```
+
+#### `spec delete`
+Delete a specification and all associated documents.
+
+```bash
+vibe-ticket spec delete <SPEC_ID> [OPTIONS]
+
+Arguments:
+  <SPEC_ID>                     Specification ID
+
+Options:
+  -f, --force                   Skip confirmation prompt
+```
+
+#### `spec approve`
+Approve a specification phase for progression.
+
+```bash
+vibe-ticket spec approve <SPEC_ID> <PHASE> [OPTIONS]
+
+Arguments:
+  <SPEC_ID>                     Specification ID
+  <PHASE>                       Phase to approve (requirements, design, tasks)
+
+Options:
+  -m, --message <MSG>           Approval message
+```
+
+#### `spec activate`
+Set the active specification for default operations.
+
+```bash
+vibe-ticket spec activate <SPEC_ID>
+
+Arguments:
+  <SPEC_ID>                     Specification ID to activate
+```
+
+### Example Workflow
+
+```bash
+# 1. Initialize a new specification
+vibe-ticket spec init "User Authentication System" \
+  --description "Implement OAuth2-based authentication" \
+  --tags "security,backend"
+
+# 2. Activate the specification
+vibe-ticket spec activate 9cc43ac7-d9ff-4628-8509-b329b5c61784
+
+# 3. Create requirements document
+vibe-ticket spec requirements --editor
+
+# 4. Mark requirements as complete
+vibe-ticket spec requirements --complete
+
+# 5. Create technical design
+vibe-ticket spec design --editor
+
+# 6. Create implementation tasks
+vibe-ticket spec tasks --editor
+
+# 7. Check overall status
+vibe-ticket spec status --detailed
+
+# 8. Approve phases
+vibe-ticket spec approve 9cc43ac7-d9ff-4628-8509-b329b5c61784 requirements \
+  --message "Requirements reviewed and approved"
+```
+
 ## Utility Commands
 
 ### `check`

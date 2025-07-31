@@ -1,6 +1,7 @@
 // vibe-ticket library root
 // This file serves as the entry point for the library
 
+pub mod cache;
 pub mod cli;
 pub mod config;
 pub mod core;
