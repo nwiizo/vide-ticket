@@ -82,20 +82,22 @@ vibe-ticket init --claude-md
 curl https://raw.githubusercontent.com/nwiizo/vibe-ticket/main/rules/agent.md >> CLAUDE.md
 ```
 
-### MCP (Model Context Protocol) Integration
+### MCP (Model Context Protocol) Support
 
-vibe-ticket can run as an MCP server, allowing AI assistants to interact with your ticket system:
+vibe-ticket can run as an MCP server for AI assistants like Claude:
 
 ```bash
-# Run MCP server (requires --features mcp during build)
+# Install with MCP support
+cargo install vibe-ticket --features mcp
+
+# Add to Claude Code (global)
+claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope global -- mcp serve
+
+# Test the server
 vibe-ticket mcp serve
-
-# Add to Claude Desktop
-claude mcp add vibe-ticket cargo --scope local -- run --features mcp -- mcp serve
-
-# Or if installed system-wide
-claude mcp add vibe-ticket vibe-ticket --scope local -- mcp serve
 ```
+
+See [MCP Integration Guide](docs/mcp-integration.md) for detailed setup and usage.
 
 ## Best Practices
 

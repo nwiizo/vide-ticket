@@ -37,6 +37,8 @@ pub mod cli;
 pub mod config;
 pub mod core;
 pub mod error;
+pub mod events;
+pub mod integration;
 pub mod plugins;
 pub mod specs;
 pub mod storage;

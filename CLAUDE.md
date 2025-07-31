@@ -87,6 +87,75 @@ vibe-ticket config set git.worktree_default false  # Disable default worktree cr
 vibe-ticket config claude
 ```
 
+## Using vibe-ticket with MCP (Model Context Protocol)
+
+vibe-ticket now supports MCP, allowing you to manage tickets through AI assistants and other MCP-compatible tools.
+
+### Quick MCP Setup
+
+```bash
+# Install with MCP support
+cargo install vibe-ticket --features mcp
+
+# Add to Claude Code
+claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope global -- mcp serve
+
+# Verify installation
+claude mcp list | grep vibe-ticket
+```
+
+For detailed setup options, see [MCP Integration Guide](docs/mcp-integration.md).
+
+### Available MCP Tools
+
+When using vibe-ticket through MCP, the following tools are available:
+
+#### Ticket Management
+- `vibe-ticket_new` - Create a new ticket
+- `vibe-ticket_list` - List tickets with filters
+- `vibe-ticket_show` - Show ticket details
+- `vibe-ticket_edit` - Edit ticket properties
+- `vibe-ticket_close` - Close a ticket
+- `vibe-ticket_start` - Start working on a ticket
+- `vibe-ticket_check` - Check current status
+
+#### Task Management
+- `vibe-ticket_task_add` - Add a task to a ticket
+- `vibe-ticket_task_complete` - Complete a task
+- `vibe-ticket_task_list` - List tasks for a ticket
+- `vibe-ticket_task_remove` - Remove a task
+
+#### Worktree Management
+- `vibe-ticket_worktree_list` - List worktrees
+- `vibe-ticket_worktree_remove` - Remove a worktree
+- `vibe-ticket_worktree_prune` - Prune stale worktrees
+
+#### Other Operations
+- `vibe-ticket_search` - Search tickets
+- `vibe-ticket_export` - Export tickets
+- `vibe-ticket_import` - Import tickets
+- `vibe-ticket_config_show` - Show configuration
+- `vibe-ticket_config_set` - Set configuration values
+
+### Using MCP Tools in Your Sessions
+
+When I have access to vibe-ticket MCP tools, I can:
+- Create and manage tickets directly
+- Update ticket status and properties
+- Add and complete tasks
+- Search and filter tickets
+- Manage Git worktrees
+
+Example: "Create a ticket for implementing user authentication with high priority"
+→ I'll use `vibe-ticket_new` with appropriate arguments
+
+### Key Points for MCP Usage
+
+- **Ticket References**: Use either slug or ID
+- **Status Values**: `todo`, `doing`, `done`, `blocked`, `review`
+- **Priority Values**: `low`, `medium`, `high`, `critical`
+- **Synchronization**: CLI and MCP share the same data instantly
+
 ## Project Configuration
 
 The project has been initialized with default settings. You can customize them using the config commands above.
