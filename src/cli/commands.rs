@@ -325,6 +325,13 @@ pub enum Commands {
         #[command(subcommand)]
         command: WorktreeCommands,
     },
+    
+    #[cfg(feature = "mcp")]
+    /// Model Context Protocol (MCP) server
+    Mcp {
+        #[command(subcommand)]
+        command: McpCommands,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -571,6 +578,25 @@ pub enum SpecCommands {
     Activate {
         /// Specification ID
         spec: String,
+    },
+}
+
+#[cfg(feature = "mcp")]
+#[derive(Subcommand, Debug)]
+pub enum McpCommands {
+    /// Start MCP server
+    Serve {
+        /// Host to bind to
+        #[arg(short = 'H', long, default_value = "127.0.0.1")]
+        host: Option<String>,
+        
+        /// Port to listen on  
+        #[arg(short, long, default_value = "3033")]
+        port: Option<u16>,
+        
+        /// Run as daemon
+        #[arg(short, long)]
+        daemon: bool,
     },
 }
 

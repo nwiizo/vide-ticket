@@ -80,6 +80,7 @@ harness = false
 default = []
 api = ["axum", "tower", "tower-http"]
 database = ["sqlx"]
+mcp = ["rmcp", "tokio-util", "async-trait"]
 
 # Optional dependencies
 [dependencies.axum]
@@ -100,6 +101,19 @@ version = "0.8"
 features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"]
 optional = true
 
+# MCP dependencies
+[dependencies.rmcp]
+version = "0.3.2"
+features = ["server"]
+optional = true
+
+[dependencies.tokio-util]
+version = "0.7"
+optional = true
+
+[dependencies.async-trait]
+version = "0.1"
+optional = true
 [profile.release]
 lto = true
 opt-level = 3
