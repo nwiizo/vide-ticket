@@ -25,8 +25,8 @@ pub enum TicketEvent {
 }
 
 /// Trait for handling ticket events
-#[trait_variant::make(EventHandler: Send)]
-pub trait LocalEventHandler {
+#[async_trait::async_trait]
+pub trait EventHandler: Send + Sync {
     /// Handle a ticket event
     async fn handle_event(&self, event: TicketEvent) -> Result<()>;
 }

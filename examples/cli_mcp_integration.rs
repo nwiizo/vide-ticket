@@ -1,11 +1,9 @@
 //! Example demonstrating CLI-MCP integration
 
-use vibe_ticket::cli::output::OutputFormatter;
-use vibe_ticket::cli::utils::{find_project_root, parse_tags, validate_slug};
 use vibe_ticket::core::{Priority, Ticket};
 use vibe_ticket::error::{Result, VibeTicketError};
 use vibe_ticket::integration::{notify_ticket_created, notify_status_changed};
-use vibe_ticket::storage::{FileStorage, TicketRepository};
+use vibe_ticket::storage::{FileStorage, TicketRepository, ActiveTicketRepository};
 use std::convert::TryFrom;
 
 /// Example of creating a ticket with integration notifications
@@ -28,7 +26,11 @@ pub fn create_ticket_with_notification(
 
     // Validate slug
     let base_slug = slug.trim();
-    validate_slug(base_slug)?;
+    if base_slug.is_empty() || !base_slug.chars().all(|c| c.is_alphanumeric() || c == '-') {
+        return Err(VibeTicketError::InvalidSlug {
+            slug: base_slug.to_string(),
+        });
+    }
 
     // Combine timestamp and slug
     let slug = format!("{timestamp_prefix}-{base_slug}");
@@ -45,7 +47,7 @@ pub fn create_ticket_with_notification(
         })?;
 
     // Parse tags
-    let tags = tags.map(|t| parse_tags(Some(t))).unwrap_or_default();
+    let tags = tags.map(|t| t.split(',').map(|s| s.trim().to_string()).collect()).unwrap_or_default();
 
     // Create title from slug if not provided
     let title = title.unwrap_or_else(|| {

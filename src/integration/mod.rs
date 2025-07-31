@@ -1,7 +1,7 @@
 //! CLI-MCP integration module
 
 use crate::core::{Ticket, TicketId, Status};
-use crate::storage::{FileStorage, TicketRepository};
+use crate::storage::FileStorage;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
@@ -16,8 +16,18 @@ pub enum IntegrationEvent {
 
 /// Integration service that bridges CLI and MCP
 pub struct IntegrationService {
+    #[allow(dead_code)]
     storage: Arc<FileStorage>,
     event_sender: broadcast::Sender<IntegrationEvent>,
+}
+
+impl std::fmt::Debug for IntegrationService {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("IntegrationService")
+            .field("storage", &"Arc<FileStorage>")
+            .field("event_sender", &"broadcast::Sender<IntegrationEvent>")
+            .finish()
+    }
 }
 
 impl IntegrationService {

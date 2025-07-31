@@ -1,24 +1,25 @@
 //! MCP event handler for CLI operations
 
-use crate::events::{EventHandler, LocalEventHandler, TicketEvent};
-use crate::mcp::service::VibeTicketMcp;
+use crate::events::{EventHandler, TicketEvent};
+use crate::mcp::service::VibeTicketService;
 use crate::Result;
 use std::sync::Arc;
 
 /// MCP event handler that processes CLI events
 pub struct McpEventHandler {
-    service: Arc<VibeTicketMcp>,
+    #[allow(dead_code)]
+    service: Arc<VibeTicketService>,
 }
 
 impl McpEventHandler {
     /// Create a new MCP event handler
-    pub fn new(service: Arc<VibeTicketMcp>) -> Self {
+    pub fn new(service: Arc<VibeTicketService>) -> Self {
         Self { service }
     }
 }
 
-#[trait_variant::make(EventHandler: Send)]
-impl LocalEventHandler for McpEventHandler {
+#[async_trait::async_trait]
+impl EventHandler for McpEventHandler {
     async fn handle_event(&self, event: TicketEvent) -> Result<()> {
         match event {
             TicketEvent::Created(ticket) => {

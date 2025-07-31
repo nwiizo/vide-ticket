@@ -58,7 +58,7 @@
 //! }
 //! ```
 
-#![cfg(feature = "api")]
+
 
 // TODO: Add submodules as they are implemented
 // pub mod server;
