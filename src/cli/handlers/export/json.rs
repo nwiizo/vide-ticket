@@ -1,23 +1,18 @@
 //! JSON export implementation
 
-use super::Exporter;
+use super::{Exporter, ExportMetadata};
 use crate::core::Ticket;
 use crate::error::{Result, VibeTicketError};
-use serde_json::json;
 
 /// JSON exporter implementation
 pub struct JsonExporter;
 
 impl Exporter for JsonExporter {
     fn export(&self, tickets: &[Ticket]) -> Result<String> {
-        let json = json!({
-            "tickets": tickets,
-            "exported_at": chrono::Utc::now(),
-            "total": tickets.len(),
-        });
+        let metadata = ExportMetadata::new(tickets.to_vec());
 
-        serde_json::to_string_pretty(&json)
-            .map_err(|e| VibeTicketError::custom(format!("Failed to serialize to JSON: {e}")))
+        serde_json::to_string_pretty(&metadata)
+            .map_err(|e| VibeTicketError::serialization_error("JSON", e))
     }
 
     fn format_name(&self) -> &'static str {

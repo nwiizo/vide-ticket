@@ -239,9 +239,9 @@ fn edit_in_editor(
 
     // Write to temporary file
     let mut file = std::fs::File::create(&temp_file)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to create temp file: {e}")))?;
+        .map_err(|e| VibeTicketError::io_error("create", &temp_file, e))?;
     file.write_all(yaml_content.as_bytes())
-        .map_err(|e| VibeTicketError::custom(format!("Failed to write temp file: {e}")))?;
+        .map_err(|e| VibeTicketError::io_error("write", &temp_file, e))?;
 
     // Get editor from environment
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
@@ -258,11 +258,11 @@ fn edit_in_editor(
 
     // Read the edited content
     let edited_content = std::fs::read_to_string(&temp_file)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to read edited file: {e}")))?;
+        .map_err(|e| VibeTicketError::io_error("read", &temp_file, e))?;
 
     // Parse the edited ticket
     let edited_ticket: crate::core::Ticket = serde_yaml::from_str(&edited_content)
-        .map_err(|e| VibeTicketError::custom(format!("Failed to parse edited ticket: {e}")))?;
+        .map_err(|e| VibeTicketError::deserialization_error("YAML ticket", e))?;
 
     // Update the original ticket
     *ticket = edited_ticket;
