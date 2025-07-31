@@ -88,8 +88,8 @@ curl https://raw.githubusercontent.com/nwiizo/vibe-ticket/main/rules/agent.md >>
 vibe-ticket can run as an MCP server for AI assistants like Claude:
 
 ```bash
-# Install with MCP support
-cargo install vibe-ticket --features mcp
+# Install (MCP is now included by default)
+cargo install vibe-ticket
 
 # Add to Claude Code (global)
 claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope global -- mcp serve
@@ -98,7 +98,23 @@ claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope global -- mcp serve
 vibe-ticket mcp serve
 ```
 
-See [MCP Integration Guide](docs/mcp-integration.md) for detailed setup and usage.
+#### AI Assistant Integration
+
+When using vibe-ticket with AI assistants via MCP:
+
+1. **All CLI operations are available through MCP** - AI can create tickets, manage tasks, search, and more
+2. **Suggest MCP tools for improvements** - If you notice patterns or repetitive tasks, ask your AI assistant to use vibe-ticket MCP tools to automate them
+3. **Integrated workflow** - AI can seamlessly switch between code editing and ticket management
+
+Example AI interactions:
+```
+"Create a ticket for the bug we just found"
+"Add a task to track the performance optimization"
+"Search for tickets related to authentication"
+"Show me all open high-priority tickets"
+```
+
+See [MCP Integration Guide](docs/mcp-guide.md) for detailed setup and usage.
 
 ## Best Practices
 

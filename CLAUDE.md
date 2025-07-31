@@ -197,12 +197,29 @@ When helping with this project:
 3. Update ticket status as implementation progresses
 4. Use `vibe-ticket check` to understand current context
 5. Generate new tickets for bugs or features discovered during development
-6. **IMPORTANT**: After completing each major task or work session, provide a retrospective that includes:
+6. **USE MCP TOOLS**: When users describe repetitive tasks or workflow improvements, proactively suggest using vibe-ticket MCP tools to automate them
+7. **IMPORTANT**: After completing each major task or work session, provide a retrospective that includes:
    - What was accomplished
    - What challenges were encountered
    - What could be improved for next time
    - Any vibe-tickets that should be created for follow-up work
    - Lessons learned that could benefit future development
+
+## MCP Integration for AI Assistants
+
+vibe-ticket provides full MCP support, allowing AI assistants to:
+- Create and manage tickets programmatically
+- Automate repetitive ticket operations
+- Generate reports and analytics
+- Integrate ticket management with code changes
+
+**When to suggest MCP tools:**
+- User mentions creating multiple similar tickets
+- Repetitive task management is needed
+- Bulk operations on tickets would save time
+- Workflow automation opportunities arise
+
+Example: "I notice you're creating several similar tickets. Would you like me to use the vibe-ticket MCP tools to automate this process?"
 
 ## Lessons Learned from Development
 

@@ -436,6 +436,41 @@ fi
 echo "\n\nTicket: $active_ticket" >> $1
 ```
 
+## Using MCP for Workflow Improvements
+
+### Suggesting MCP Tools to AI Assistants
+
+When you notice opportunities for automation or improvement, actively suggest that your AI assistant use vibe-ticket MCP tools:
+
+**Common scenarios for MCP tool suggestions:**
+
+1. **Repetitive ticket creation**
+   ```
+   "I need to create similar tickets for each microservice. Can you use MCP to automate this?"
+   ```
+
+2. **Bulk task management**
+   ```
+   "Use MCP to add these test tasks to all open bug tickets"
+   ```
+
+3. **Regular status reports**
+   ```
+   "Generate a weekly report of completed tickets using MCP search and export"
+   ```
+
+4. **Workflow automation**
+   ```
+   "When I mention a bug in our conversation, automatically create a ticket for it"
+   ```
+
+### Best Practices for AI Collaboration
+
+1. **Be explicit about MCP usage** - Tell your AI when you want it to use MCP tools
+2. **Describe patterns** - Help AI identify when to proactively use vibe-ticket
+3. **Request automation** - Ask AI to create scripts or workflows using MCP tools
+4. **Provide feedback** - Let AI know which automations are helpful
+
 ## MCP Tool Reference
 
 ### Available Tools
