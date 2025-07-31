@@ -1,6 +1,6 @@
 //! Event system for CLI-MCP synchronization
 
-use crate::core::{Ticket, TicketId, Status, Task};
+use crate::core::{Status, Task, Ticket, TicketId};
 use crate::error::Result;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -53,27 +53,27 @@ impl EventBus {
     /// Emit an event to all registered handlers
     pub async fn emit(&self, event: TicketEvent) -> Result<()> {
         let handlers = self.handlers.read().await;
-        
+
         // Process events asynchronously but wait for all to complete
         let mut tasks = Vec::new();
         for handler in handlers.iter() {
             let handler = Arc::clone(handler);
             let event = event.clone();
-            
+
             let task = tokio::spawn(async move {
                 if let Err(e) = handler.handle_event(event).await {
                     eprintln!("Event handler error: {}", e);
                 }
             });
-            
+
             tasks.push(task);
         }
-        
+
         // Wait for all handlers to complete
         for task in tasks {
             let _ = task.await;
         }
-        
+
         Ok(())
     }
 }

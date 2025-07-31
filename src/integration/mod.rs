@@ -1,6 +1,6 @@
 //! CLI-MCP integration module
 
-use crate::core::{Ticket, TicketId, Status};
+use crate::core::{Status, Ticket, TicketId};
 use crate::storage::FileStorage;
 use std::sync::Arc;
 use tokio::sync::broadcast;
@@ -8,10 +8,21 @@ use tokio::sync::broadcast;
 /// Event types for CLI-MCP communication
 #[derive(Debug, Clone)]
 pub enum IntegrationEvent {
-    TicketCreated { ticket: Ticket },
-    TicketUpdated { ticket: Ticket },
-    TicketClosed { ticket_id: TicketId, message: String },
-    StatusChanged { ticket_id: TicketId, old_status: Status, new_status: Status },
+    TicketCreated {
+        ticket: Ticket,
+    },
+    TicketUpdated {
+        ticket: Ticket,
+    },
+    TicketClosed {
+        ticket_id: TicketId,
+        message: String,
+    },
+    StatusChanged {
+        ticket_id: TicketId,
+        old_status: Status,
+        new_status: Status,
+    },
 }
 
 /// Integration service that bridges CLI and MCP
@@ -71,24 +82,36 @@ impl IntegrationService {
     }
 
     /// Notify about a status change
-    pub fn notify_status_changed(&self, ticket_id: &TicketId, old_status: Status, new_status: Status) {
+    pub fn notify_status_changed(
+        &self,
+        ticket_id: &TicketId,
+        old_status: Status,
+        new_status: Status,
+    ) {
         let _ = self.event_sender.send(IntegrationEvent::StatusChanged {
             ticket_id: ticket_id.clone(),
             old_status,
             new_status,
         });
-        tracing::info!("Integration: Status changed - {} from {:?} to {:?}", 
-            ticket_id.short(), old_status, new_status);
+        tracing::info!(
+            "Integration: Status changed - {} from {:?} to {:?}",
+            ticket_id.short(),
+            old_status,
+            new_status
+        );
     }
 }
 
 /// Global integration service instance
-static INTEGRATION: once_cell::sync::OnceCell<Arc<IntegrationService>> = once_cell::sync::OnceCell::new();
+static INTEGRATION: once_cell::sync::OnceCell<Arc<IntegrationService>> =
+    once_cell::sync::OnceCell::new();
 
 /// Initialize the integration service
 pub fn init_integration(storage: Arc<FileStorage>) {
     let service = Arc::new(IntegrationService::new(storage));
-    INTEGRATION.set(service).expect("Integration already initialized");
+    INTEGRATION
+        .set(service)
+        .expect("Integration already initialized");
 }
 
 /// Get the integration service

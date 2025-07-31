@@ -1,10 +1,10 @@
 //! Example demonstrating CLI-MCP integration
 
+use std::convert::TryFrom;
 use vibe_ticket::core::{Priority, Ticket};
 use vibe_ticket::error::{Result, VibeTicketError};
-use vibe_ticket::integration::{notify_ticket_created, notify_status_changed};
-use vibe_ticket::storage::{FileStorage, TicketRepository, ActiveTicketRepository};
-use std::convert::TryFrom;
+use vibe_ticket::integration::{notify_status_changed, notify_ticket_created};
+use vibe_ticket::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
 
 /// Example of creating a ticket with integration notifications
 pub fn create_ticket_with_notification(
@@ -41,13 +41,14 @@ pub fn create_ticket_with_notification(
     }
 
     // Parse priority
-    let priority = Priority::try_from(priority)
-        .map_err(|_| VibeTicketError::InvalidPriority {
-            priority: priority.to_string(),
-        })?;
+    let priority = Priority::try_from(priority).map_err(|_| VibeTicketError::InvalidPriority {
+        priority: priority.to_string(),
+    })?;
 
     // Parse tags
-    let tags = tags.map(|t| t.split(',').map(|s| s.trim().to_string()).collect()).unwrap_or_default();
+    let tags = tags
+        .map(|t| t.split(',').map(|s| s.trim().to_string()).collect())
+        .unwrap_or_default();
 
     // Create title from slug if not provided
     let title = title.unwrap_or_else(|| {
@@ -89,16 +90,18 @@ pub fn create_ticket_with_notification(
         println!("✓ Notified MCP about status change: Todo → Doing");
     }
 
-    println!("✓ Ticket created successfully: {} (ID: {})", ticket.slug, ticket.id.short());
+    println!(
+        "✓ Ticket created successfully: {} (ID: {})",
+        ticket.slug,
+        ticket.id.short()
+    );
 
     Ok(())
 }
 
 fn main() -> Result<()> {
     // Initialize logging
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     // Initialize integration (in a real app, this would be done once at startup)
     let storage = std::sync::Arc::new(FileStorage::new(".vibe-ticket"));
