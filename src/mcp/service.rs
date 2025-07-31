@@ -1,13 +1,12 @@
 //! MCP service implementation for vibe-ticket
 
-use crate::cli::find_project_root;
-use crate::core::{Priority, Status, Ticket};
-use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
+use crate::storage::FileStorage;
 use rmcp::{
     model::{ServerCapabilities, ServerInfo, Tool},
-    ServerHandler,
+    service::RequestContext,
+    ErrorData, RoleServer, ServerHandler,
 };
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::borrow::Cow;
 use std::future::Future;
 use std::path::PathBuf;
@@ -17,8 +16,8 @@ use std::sync::Arc;
 /// MCP service implementation
 #[derive(Clone)]
 pub struct VibeTicketService {
-    storage: Arc<FileStorage>,
-    project_root: PathBuf,
+    pub storage: Arc<FileStorage>,
+    pub project_root: PathBuf,
 }
 
 impl VibeTicketService {
@@ -63,21 +62,30 @@ impl ServerHandler for VibeTicketService {
         }
     }
 
-    fn list_tools(&self) -> Vec<Tool> {
-        Self::get_tools()
+    fn list_tools(
+        &self,
+        _pagination: Option<rmcp::model::PaginatedRequestParam>,
+        _ctx: RequestContext<RoleServer>,
+    ) -> impl Future<Output = Result<rmcp::model::ListToolsResult, rmcp::ErrorData>> + Send + '_ {
+        async move {
+            Ok(rmcp::model::ListToolsResult {
+                tools: Self::get_tools(),
+                next_cursor: None,
+            })
+        }
     }
 
     fn call_tool(
         &self,
-        name: &str,
-        arguments: Value,
-    ) -> Pin<Box<dyn Future<Output = Result<Value, String>> + Send + 'static>> {
+        request: rmcp::model::CallToolRequestParam,
+        _ctx: RequestContext<RoleServer>,
+    ) -> Pin<Box<dyn Future<Output = Result<rmcp::model::CallToolResult, rmcp::ErrorData>> + Send + 'static>> {
         let service = self.clone();
-        let name = name.to_string();
-        let arguments = arguments.clone();
+        let name = request.name.clone();
+        let arguments = Value::Object(request.arguments.unwrap_or_default());
 
         Box::pin(async move {
-            match name.as_str() {
+            let result = match name.as_ref() {
                 // Ticket operations
                 "vibe-ticket.new" => crate::mcp::handlers::tickets::handle_new(&service, arguments).await,
                 "vibe-ticket.list" => crate::mcp::handlers::tickets::handle_list(&service, arguments).await,
@@ -113,6 +121,21 @@ impl ServerHandler for VibeTicketService {
                 "vibe-ticket.spec.check" => crate::mcp::handlers::spec::handle_check(&service, arguments).await,
                 
                 _ => Err(format!("Unknown tool: {}", name)),
+            };
+            
+            match result {
+                Ok(content) => Ok(rmcp::model::CallToolResult {
+                    content: vec![rmcp::model::Content::text(
+                        serde_json::to_string_pretty(&content)
+                            .unwrap_or_else(|_| content.to_string())
+                    )],
+                    is_error: None,
+                }),
+                Err(e) => Err(ErrorData {
+                    code: -32603, // Internal error code
+                    message: Cow::Borrowed("Internal error"),
+                    data: Some(serde_json::json!({ "error": e })),
+                }),
             }
         })
     }

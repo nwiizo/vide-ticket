@@ -41,8 +41,13 @@ impl McpServer {
     pub async fn start_stdio(&self) -> McpResult<()> {
         info!("Starting MCP server with stdio transport");
 
+        // Get project root from storage path (parent of .vibe-ticket)
+        let project_root = self.config.storage_path.parent()
+            .unwrap_or(&self.config.storage_path)
+            .to_path_buf();
+
         // Create service
-        let service = VibeTicketService::new((*self.storage).clone());
+        let service = VibeTicketService::new((*self.storage).clone(), project_root);
 
         // Create stdio transport
         let transport = (tokio::io::stdin(), tokio::io::stdout());

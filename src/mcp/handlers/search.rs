@@ -1,6 +1,7 @@
 //! Search and export MCP tool handlers
 
-use crate::core::{Ticket, TicketId};
+use crate::core::Ticket;
+use crate::mcp::handlers::schema_helper::json_to_schema;
 use crate::mcp::service::VibeTicketService;
 use crate::storage::TicketRepository;
 use rmcp::model::Tool;
@@ -16,7 +17,7 @@ pub fn register_tools() -> Vec<Tool> {
         Tool {
             name: Cow::Borrowed("vibe-ticket.search"),
             description: Some(Cow::Borrowed("Search tickets by keyword")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "query": {
@@ -37,14 +38,14 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["query"]
-            })),
+            }))),
             annotations: None,
         },
         // Export tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.export"),
             description: Some(Cow::Borrowed("Export tickets in various formats")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "format": {
@@ -58,14 +59,14 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["format"]
-            })),
+            }))),
             annotations: None,
         },
         // Import tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.import"),
             description: Some(Cow::Borrowed("Import tickets from JSON or YAML")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "data": {
@@ -80,7 +81,7 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["data"]
-            })),
+            }))),
             annotations: None,
         },
     ]

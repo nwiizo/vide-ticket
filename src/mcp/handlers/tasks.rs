@@ -1,6 +1,7 @@
 //! Task management MCP tool handlers
 
 use crate::core::{Task, TaskId};
+use crate::mcp::handlers::schema_helper::json_to_schema;
 use crate::mcp::service::VibeTicketService;
 use crate::storage::{ActiveTicketRepository, TicketRepository};
 use rmcp::model::Tool;
@@ -16,7 +17,7 @@ pub fn register_tools() -> Vec<Tool> {
         Tool {
             name: Cow::Borrowed("vibe-ticket.task.add"),
             description: Some(Cow::Borrowed("Add a task to a ticket")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "title": {
@@ -29,14 +30,14 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["title"]
-            })),
+            }))),
             annotations: None,
         },
         // Complete task tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.task.complete"),
             description: Some(Cow::Borrowed("Mark a task as completed")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "task_id": {
@@ -49,14 +50,14 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["task_id"]
-            })),
+            }))),
             annotations: None,
         },
         // List tasks tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.task.list"),
             description: Some(Cow::Borrowed("List tasks in a ticket")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "ticket": {
@@ -72,14 +73,14 @@ pub fn register_tools() -> Vec<Tool> {
                         "description": "Show only incomplete tasks"
                     }
                 }
-            })),
+            }))),
             annotations: None,
         },
         // Remove task tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.task.remove"),
             description: Some(Cow::Borrowed("Remove a task from a ticket")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "task_id": {
@@ -92,7 +93,7 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["task_id"]
-            })),
+            }))),
             annotations: None,
         },
     ]

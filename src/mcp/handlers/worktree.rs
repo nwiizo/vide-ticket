@@ -1,5 +1,6 @@
 //! Worktree management MCP tool handlers
 
+use crate::mcp::handlers::schema_helper::json_to_schema;
 use crate::mcp::service::VibeTicketService;
 use rmcp::model::Tool;
 use serde::Deserialize;
@@ -14,7 +15,7 @@ pub fn register_tools() -> Vec<Tool> {
         Tool {
             name: Cow::Borrowed("vibe-ticket.worktree.list"),
             description: Some(Cow::Borrowed("List Git worktrees")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "all": {
@@ -22,14 +23,14 @@ pub fn register_tools() -> Vec<Tool> {
                         "description": "Show all worktrees (not just ticket worktrees)"
                     }
                 }
-            })),
+            }))),
             annotations: None,
         },
         // Remove worktree tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.worktree.remove"),
             description: Some(Cow::Borrowed("Remove a Git worktree")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "ticket": {
@@ -42,17 +43,17 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["ticket"]
-            })),
+            }))),
             annotations: None,
         },
         // Prune worktrees tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.worktree.prune"),
             description: Some(Cow::Borrowed("Remove stale worktree information")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {}
-            })),
+            }))),
             annotations: None,
         },
     ]

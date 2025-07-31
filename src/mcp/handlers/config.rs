@@ -1,12 +1,32 @@
 //! Configuration management MCP tool handlers
 
-use crate::config::{Config, ConfigManager};
+use crate::config::Config;
+use crate::mcp::handlers::schema_helper::json_to_schema;
 use crate::mcp::service::VibeTicketService;
 use rmcp::model::Tool;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::borrow::Cow;
 use std::sync::Arc;
+
+// Simple ConfigManager for MCP
+struct ConfigManager;
+
+impl ConfigManager {
+    fn new() -> Self {
+        Self
+    }
+    
+    fn load_from_path(&self, path: &std::path::Path) -> Result<Config, String> {
+        Config::load_from_path(path)
+            .map_err(|e| format!("Failed to load config: {}", e))
+    }
+    
+    fn save_to_path(&self, config: &Config, path: &std::path::Path) -> Result<(), String> {
+        config.save_to_path(path)
+            .map_err(|e| format!("Failed to save config: {}", e))
+    }
+}
 
 /// Register all configuration management tools
 pub fn register_tools() -> Vec<Tool> {
@@ -15,7 +35,7 @@ pub fn register_tools() -> Vec<Tool> {
         Tool {
             name: Cow::Borrowed("vibe-ticket.config.show"),
             description: Some(Cow::Borrowed("Show current configuration")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "key": {
@@ -23,14 +43,14 @@ pub fn register_tools() -> Vec<Tool> {
                         "description": "Specific configuration key to show (shows all if not specified)"
                     }
                 }
-            })),
+            }))),
             annotations: None,
         },
         // Set config tool
         Tool {
             name: Cow::Borrowed("vibe-ticket.config.set"),
             description: Some(Cow::Borrowed("Set a configuration value")),
-            input_schema: Arc::new(json!({
+            input_schema: Arc::new(json_to_schema(json!({
                 "type": "object",
                 "properties": {
                     "key": {
@@ -42,7 +62,7 @@ pub fn register_tools() -> Vec<Tool> {
                     }
                 },
                 "required": ["key", "value"]
-            })),
+            }))),
             annotations: None,
         },
     ]
@@ -68,13 +88,8 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
         let value = match key.as_str() {
             "project.name" => json!(config.project.name),
             "project.description" => json!(config.project.description),
-            "project.default_priority" => json!(format!("{:?}", config.project.default_priority).to_lowercase()),
+            "project.default_priority" => json!(config.project.default_priority),
             "project.default_assignee" => json!(config.project.default_assignee),
-            "project.allowed_statuses" => json!(config.project.allowed_statuses.iter()
-                .map(|s| format!("{:?}", s).to_lowercase())
-                .collect::<Vec<_>>()),
-            "project.required_fields" => json!(config.project.required_fields),
-            "project.custom_fields" => json!(config.project.custom_fields),
             
             "git.auto_branch" => json!(config.git.auto_branch),
             "git.branch_prefix" => json!(config.git.branch_prefix),
@@ -85,12 +100,6 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
             "git.worktree_cleanup_on_close" => json!(config.git.worktree_cleanup_on_close),
             
             "ui.date_format" => json!(config.ui.date_format),
-            "ui.color_enabled" => json!(config.ui.color_enabled),
-            "ui.table_style" => json!(config.ui.table_style),
-            
-            "export.default_format" => json!(config.export.default_format),
-            "export.include_closed" => json!(config.export.include_closed),
-            "export.include_metadata" => json!(config.export.include_metadata),
             
             _ => return Err(format!("Unknown configuration key: {}", key))
         };
@@ -105,13 +114,8 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
             "project": {
                 "name": config.project.name,
                 "description": config.project.description,
-                "default_priority": format!("{:?}", config.project.default_priority).to_lowercase(),
+                "default_priority": config.project.default_priority,
                 "default_assignee": config.project.default_assignee,
-                "allowed_statuses": config.project.allowed_statuses.iter()
-                    .map(|s| format!("{:?}", s).to_lowercase())
-                    .collect::<Vec<_>>(),
-                "required_fields": config.project.required_fields,
-                "custom_fields": config.project.custom_fields,
             },
             "git": {
                 "auto_branch": config.git.auto_branch,
@@ -124,13 +128,6 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
             },
             "ui": {
                 "date_format": config.ui.date_format,
-                "color_enabled": config.ui.color_enabled,
-                "table_style": config.ui.table_style,
-            },
-            "export": {
-                "default_format": config.export.default_format,
-                "include_closed": config.export.include_closed,
-                "include_metadata": config.export.include_metadata,
             }
         }))
     }
@@ -161,19 +158,12 @@ pub async fn handle_set(service: &VibeTicketService, arguments: Value) -> Result
         },
         "project.description" => {
             config.project.description = args.value.as_str()
-                .ok_or("Value must be a string")?
-                .to_string();
+                .map(|s| s.to_string());
         },
         "project.default_priority" => {
-            let priority_str = args.value.as_str()
-                .ok_or("Value must be a string")?;
-            config.project.default_priority = match priority_str {
-                "low" => crate::core::Priority::Low,
-                "medium" => crate::core::Priority::Medium,
-                "high" => crate::core::Priority::High,
-                "critical" => crate::core::Priority::Critical,
-                _ => return Err(format!("Invalid priority: {}", priority_str))
-            };
+            config.project.default_priority = args.value.as_str()
+                .ok_or("Value must be a string")?
+                .to_string();
         },
         "project.default_assignee" => {
             config.project.default_assignee = args.value.as_str()
@@ -215,29 +205,6 @@ pub async fn handle_set(service: &VibeTicketService, arguments: Value) -> Result
             config.ui.date_format = args.value.as_str()
                 .ok_or("Value must be a string")?
                 .to_string();
-        },
-        "ui.color_enabled" => {
-            config.ui.color_enabled = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
-        },
-        "ui.table_style" => {
-            config.ui.table_style = args.value.as_str()
-                .ok_or("Value must be a string")?
-                .to_string();
-        },
-        
-        "export.default_format" => {
-            config.export.default_format = args.value.as_str()
-                .ok_or("Value must be a string")?
-                .to_string();
-        },
-        "export.include_closed" => {
-            config.export.include_closed = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
-        },
-        "export.include_metadata" => {
-            config.export.include_metadata = args.value.as_bool()
-                .ok_or("Value must be a boolean")?;
         },
         
         _ => return Err(format!("Unknown configuration key: {}", args.key))
