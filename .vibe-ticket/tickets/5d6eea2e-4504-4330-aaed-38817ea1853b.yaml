@@ -29,9 +29,9 @@ tasks:
   completed_at: 2025-07-31T18:02:34.862442Z
 - id: da3c109e-a29a-4dd1-a948-21a8b0e51360
   title: Create git tag v0.2.0
-  completed: false
+  completed: true
   created_at: 2025-07-31T18:01:03.694799Z
-  completed_at: null
+  completed_at: 2025-07-31T18:03:08.228777Z
 - id: dd574230-7ebb-41e8-8076-2ba79f35f132
   title: Publish to crates.io
   completed: false
