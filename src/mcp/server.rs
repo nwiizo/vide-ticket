@@ -1,10 +1,6 @@
 //! MCP server implementation
 
-use crate::mcp::{
-    config::McpConfig,
-    error::McpResult,
-    service::VibeTicketService,
-};
+use crate::mcp::{config::McpConfig, error::McpResult, service::VibeTicketService};
 use crate::storage::FileStorage;
 use rmcp::ServiceExt;
 use std::sync::Arc;
@@ -15,7 +11,7 @@ use tracing::{error, info};
 pub struct McpServer {
     /// Server configuration
     config: McpConfig,
-    
+
     /// Storage backend
     #[allow(dead_code)]
     storage: Arc<FileStorage>,
@@ -33,7 +29,7 @@ impl McpServer {
     /// Start the MCP server
     pub async fn start(&self) -> McpResult<()> {
         let addr = format!("{}:{}", self.config.server.host, self.config.server.port);
-        
+
         info!("Starting MCP server on {}", addr);
 
         // For now, we'll use stdio transport
@@ -46,9 +42,7 @@ impl McpServer {
         info!("Starting MCP server with stdio transport");
 
         // Create service
-        let service = VibeTicketService::new(
-            (*self.storage).clone(),
-        );
+        let service = VibeTicketService::new((*self.storage).clone());
 
         // Create stdio transport
         let transport = (tokio::io::stdin(), tokio::io::stdout());
@@ -57,7 +51,7 @@ impl McpServer {
         let server = service.serve(transport).await?;
 
         info!("MCP server started successfully");
-        
+
         // Wait for the server to complete
         server.waiting().await?;
         info!("MCP server shut down");
@@ -70,21 +64,21 @@ impl McpServer {
     pub async fn start_tcp(&self) -> McpResult<()> {
         let addr = format!("{}:{}", self.config.server.host, self.config.server.port);
         let listener = TcpListener::bind(&addr).await?;
-        
+
         info!("MCP server listening on {}", addr);
 
         loop {
             match listener.accept().await {
                 Ok((_stream, peer_addr)) => {
                     info!("New connection from {}", peer_addr);
-                    
+
                     // TODO: Implement TCP transport handling
                     // This would involve creating a transport from the TCP stream
                     // and serving the service on that transport
-                }
+                },
                 Err(e) => {
                     error!("Failed to accept connection: {}", e);
-                }
+                },
             }
         }
     }

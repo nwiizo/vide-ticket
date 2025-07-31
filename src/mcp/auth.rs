@@ -14,7 +14,7 @@ impl AuthMiddleware {
     pub fn new(config: AuthConfig) -> Self {
         Self { config }
     }
-    
+
     /// Authenticate a request
     pub fn authenticate(
         &self,
@@ -24,7 +24,7 @@ impl AuthMiddleware {
             if !self.config.enabled {
                 return Ok(());
             }
-            
+
             // TODO: Implement actual authentication
             Ok(())
         })

@@ -64,11 +64,13 @@ impl FileStorage {
         self.ensure_directories()?;
 
         let path = self.ticket_path(&ticket.id);
-        
+
         // Acquire lock before modifying the file
-        let _lock = super::FileLock::acquire(&path, Some("save_ticket".to_string()))
-            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for saving ticket: {}", e)))?;
-        
+        let _lock =
+            super::FileLock::acquire(&path, Some("save_ticket".to_string())).map_err(|e| {
+                VibeTicketError::custom(format!("Failed to acquire lock for saving ticket: {}", e))
+            })?;
+
         let yaml = serde_yaml::to_string(ticket).context("Failed to serialize ticket")?;
 
         fs::write(&path, yaml)
@@ -94,8 +96,10 @@ impl FileStorage {
         }
 
         // Acquire lock for reading to ensure consistency
-        let _lock = super::FileLock::acquire(&path, Some("load_ticket".to_string()))
-            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for loading ticket: {}", e)))?;
+        let _lock =
+            super::FileLock::acquire(&path, Some("load_ticket".to_string())).map_err(|e| {
+                VibeTicketError::custom(format!("Failed to acquire lock for loading ticket: {}", e))
+            })?;
 
         let yaml = fs::read_to_string(&path)
             .with_context(|| format!("Failed to read ticket from {}", path.display()))?;
@@ -159,8 +163,13 @@ impl FileStorage {
         }
 
         // Acquire lock before deleting
-        let _lock = super::FileLock::acquire(&path, Some("delete_ticket".to_string()))
-            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for deleting ticket: {}", e)))?;
+        let _lock =
+            super::FileLock::acquire(&path, Some("delete_ticket".to_string())).map_err(|e| {
+                VibeTicketError::custom(format!(
+                    "Failed to acquire lock for deleting ticket: {}",
+                    e
+                ))
+            })?;
 
         fs::remove_file(&path)
             .with_context(|| format!("Failed to delete ticket at {}", path.display()))?;
@@ -174,11 +183,16 @@ impl FileStorage {
     /// Sets the active ticket with locking
     pub fn set_active_ticket(&self, id: &TicketId) -> Result<()> {
         let path = self.active_ticket_path();
-        
+
         // Acquire lock for the active ticket file
         let _lock = super::FileLock::acquire(&path, Some("set_active_ticket".to_string()))
-            .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for setting active ticket: {}", e)))?;
-        
+            .map_err(|e| {
+                VibeTicketError::custom(format!(
+                    "Failed to acquire lock for setting active ticket: {}",
+                    e
+                ))
+            })?;
+
         fs::write(&path, id.to_string()).context("Failed to write active ticket")?;
         Ok(())
     }
@@ -205,8 +219,13 @@ impl FileStorage {
         if path.exists() {
             // Acquire lock before removing
             let _lock = super::FileLock::acquire(&path, Some("clear_active_ticket".to_string()))
-                .map_err(|e| VibeTicketError::custom(format!("Failed to acquire lock for clearing active ticket: {}", e)))?;
-                
+                .map_err(|e| {
+                    VibeTicketError::custom(format!(
+                        "Failed to acquire lock for clearing active ticket: {}",
+                        e
+                    ))
+                })?;
+
             fs::remove_file(&path).context("Failed to clear active ticket")?;
         }
 

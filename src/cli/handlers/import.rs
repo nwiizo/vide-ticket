@@ -41,7 +41,7 @@ pub fn handle_import_command(
 
     // Read file content
     let content = std::fs::read_to_string(file_path)
-        .map_err(|e| VibeTicketError::io_error("read", &std::path::Path::new(&file_path), e))?;
+        .map_err(|e| VibeTicketError::io_error("read", std::path::Path::new(&file_path), e))?;
 
     // Detect format if not specified
     let format = if let Some(fmt) = format {
@@ -231,8 +231,7 @@ fn import_csv(content: &str) -> Result<Vec<Ticket>> {
     let mut tickets = Vec::new();
 
     for result in rdr.records() {
-        let record = result
-            .map_err(|e| VibeTicketError::deserialization_error("CSV record", e))?;
+        let record = result.map_err(|e| VibeTicketError::deserialization_error("CSV record", e))?;
 
         // Expected columns: ID, Slug, Title, Status, Priority, Assignee, Tags, Created At, Started At, Closed At, Tasks Total, Tasks Completed, Description
         if record.len() < 13 {

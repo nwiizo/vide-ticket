@@ -8,10 +8,10 @@ use std::path::PathBuf;
 pub struct McpConfig {
     /// Server configuration
     pub server: ServerConfig,
-    
+
     /// Authentication configuration
     pub auth: AuthConfig,
-    
+
     /// Ticket storage path
     pub storage_path: PathBuf,
 }
@@ -31,10 +31,10 @@ impl Default for McpConfig {
 pub struct ServerConfig {
     /// Host to bind to
     pub host: String,
-    
+
     /// Port to listen on
     pub port: u16,
-    
+
     /// Transport type (stdio, tcp, websocket)
     pub transport: TransportType,
 }
@@ -55,10 +55,10 @@ impl Default for ServerConfig {
 pub enum TransportType {
     /// Standard input/output
     Stdio,
-    
+
     /// TCP socket
     Tcp,
-    
+
     /// WebSocket
     WebSocket,
 }
@@ -68,7 +68,7 @@ pub enum TransportType {
 pub struct AuthConfig {
     /// Enable authentication
     pub enabled: bool,
-    
+
     /// API key for authentication
     pub api_key: Option<String>,
 }

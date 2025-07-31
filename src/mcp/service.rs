@@ -2,8 +2,8 @@
 
 use crate::storage::FileStorage;
 use rmcp::{
+    model::{ServerCapabilities, ServerInfo},
     ServerHandler,
-    model::{ServerInfo, ServerCapabilities},
 };
 use std::sync::Arc;
 
@@ -28,9 +28,7 @@ impl ServerHandler for VibeTicketService {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some("vibe-ticket MCP server for ticket management".into()),
-            capabilities: ServerCapabilities::builder()
-                .enable_tools()
-                .build(),
+            capabilities: ServerCapabilities::builder().enable_tools().build(),
             ..Default::default()
         }
     }

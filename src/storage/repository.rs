@@ -123,15 +123,15 @@ mod tests {
     fn test_ticket_repository_save_and_load() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         let ticket = create_test_ticket("test-save");
         let id = ticket.id.clone();
-        
+
         // Save ticket
         storage.save(&ticket).expect("Failed to save ticket");
-        
+
         // Load ticket
         let loaded = storage.load(&id).expect("Failed to load ticket");
         assert_eq!(loaded.id, ticket.id);
@@ -142,18 +142,18 @@ mod tests {
     fn test_ticket_repository_load_all() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         // Save multiple tickets
         let tickets: Vec<_> = (0..3)
             .map(|i| create_test_ticket(&format!("test-{}", i)))
             .collect();
-        
+
         for ticket in &tickets {
             storage.save(ticket).expect("Failed to save ticket");
         }
-        
+
         // Load all tickets
         let loaded = storage.load_all().expect("Failed to load all tickets");
         assert_eq!(loaded.len(), 3);
@@ -163,16 +163,16 @@ mod tests {
     fn test_ticket_repository_delete() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         let ticket = create_test_ticket("test-delete");
         let id = ticket.id.clone();
-        
+
         // Save and delete
         storage.save(&ticket).expect("Failed to save ticket");
         assert!(storage.exists(&id).expect("Failed to check existence"));
-        
+
         storage.delete(&id).expect("Failed to delete ticket");
         assert!(!storage.exists(&id).expect("Failed to check existence"));
     }
@@ -181,16 +181,18 @@ mod tests {
     fn test_ticket_repository_exists() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         let ticket = create_test_ticket("test-exists");
         let id = ticket.id.clone();
         let non_existent_id = TicketId::new();
-        
+
         // Check non-existent
-        assert!(!storage.exists(&non_existent_id).expect("Failed to check existence"));
-        
+        assert!(!storage
+            .exists(&non_existent_id)
+            .expect("Failed to check existence"));
+
         // Save and check exists
         storage.save(&ticket).expect("Failed to save ticket");
         assert!(storage.exists(&id).expect("Failed to check existence"));
@@ -200,19 +202,19 @@ mod tests {
     fn test_ticket_repository_find() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         // Create tickets with different priorities
         let mut high_priority = create_test_ticket("high-priority");
         high_priority.priority = Priority::High;
-        
+
         let mut low_priority = create_test_ticket("low-priority");
         low_priority.priority = Priority::Low;
-        
+
         storage.save(&high_priority).expect("Failed to save ticket");
         storage.save(&low_priority).expect("Failed to save ticket");
-        
+
         // Find high priority tickets
         let found = storage
             .find(|t| t.priority == Priority::High)
@@ -225,23 +227,23 @@ mod tests {
     fn test_ticket_repository_count() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         // Create tickets with different statuses
         let mut todo = create_test_ticket("todo");
         todo.status = Status::Todo;
-        
+
         let mut doing = create_test_ticket("doing");
         doing.status = Status::Doing;
-        
+
         let mut done = create_test_ticket("done");
         done.status = Status::Done;
-        
+
         storage.save(&todo).expect("Failed to save ticket");
         storage.save(&doing).expect("Failed to save ticket");
         storage.save(&done).expect("Failed to save ticket");
-        
+
         // Count open tickets
         let open_count = storage
             .count(|t| matches!(t.status, Status::Todo | Status::Doing))
@@ -253,41 +255,52 @@ mod tests {
     fn test_active_ticket_repository() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         let ticket_id = TicketId::new();
-        
+
         // Initially no active ticket
-        assert!(storage.get_active().expect("Failed to get active").is_none());
-        
+        assert!(storage
+            .get_active()
+            .expect("Failed to get active")
+            .is_none());
+
         // Set active ticket
-        storage.set_active(&ticket_id).expect("Failed to set active");
+        storage
+            .set_active(&ticket_id)
+            .expect("Failed to set active");
         let active = storage.get_active().expect("Failed to get active");
         assert_eq!(active, Some(ticket_id.clone()));
-        
+
         // Clear active ticket
         storage.clear_active().expect("Failed to clear active");
-        assert!(storage.get_active().expect("Failed to get active").is_none());
+        assert!(storage
+            .get_active()
+            .expect("Failed to get active")
+            .is_none());
     }
 
     #[test]
     fn test_combined_repository() {
         let temp_dir = TempDir::new().unwrap();
         let storage_path = temp_dir.path().join(".vibe-ticket");
-        std::fs::create_dir_all(&storage_path.join("tickets")).unwrap();
+        std::fs::create_dir_all(storage_path.join("tickets")).unwrap();
         let storage = FileStorage::new(storage_path);
-        
+
         // Test both ticket and active ticket operations
         let ticket = create_test_ticket("combined-test");
         let id = ticket.id.clone();
-        
+
         // Ticket operations
         storage.save(&ticket).expect("Failed to save ticket");
         assert!(storage.exists(&id).expect("Failed to check existence"));
-        
+
         // Active ticket operations
         storage.set_active(&id).expect("Failed to set active");
-        assert_eq!(storage.get_active().expect("Failed to get active"), Some(id));
+        assert_eq!(
+            storage.get_active().expect("Failed to get active"),
+            Some(id)
+        );
     }
 }

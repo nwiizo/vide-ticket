@@ -40,8 +40,7 @@ impl Exporter for CsvExporter {
             .into_inner()
             .map_err(|e| VibeTicketError::serialization_error("CSV", e))?;
 
-        String::from_utf8(data)
-            .map_err(|e| VibeTicketError::serialization_error("CSV string", e))
+        String::from_utf8(data).map_err(|e| VibeTicketError::serialization_error("CSV string", e))
     }
 
     fn format_name(&self) -> &'static str {

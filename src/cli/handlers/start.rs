@@ -135,7 +135,6 @@ pub fn handle_start_command(
     Ok(())
 }
 
-
 /// Create a Git branch for the ticket
 fn create_git_branch(
     project_root: &std::path::Path,

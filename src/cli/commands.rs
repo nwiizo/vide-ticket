@@ -325,7 +325,7 @@ pub enum Commands {
         #[command(subcommand)]
         command: WorktreeCommands,
     },
-    
+
     #[cfg(feature = "mcp")]
     /// Model Context Protocol (MCP) server
     Mcp {
@@ -589,11 +589,11 @@ pub enum McpCommands {
         /// Host to bind to
         #[arg(short = 'H', long, default_value = "127.0.0.1")]
         host: Option<String>,
-        
+
         /// Port to listen on  
         #[arg(short, long, default_value = "3033")]
         port: Option<u16>,
-        
+
         /// Run as daemon
         #[arg(short, long)]
         daemon: bool,
@@ -695,7 +695,7 @@ mod tests {
                 assert!(description.is_none());
                 assert!(!force);
                 assert!(!claude_md);
-            }
+            },
             _ => panic!("Expected Init command"),
         }
 
@@ -720,7 +720,7 @@ mod tests {
                 assert_eq!(description, Some("Test description".to_string()));
                 assert!(force);
                 assert!(claude_md);
-            }
+            },
             _ => panic!("Expected Init command"),
         }
     }
@@ -744,7 +744,7 @@ mod tests {
                 assert_eq!(priority, "medium");
                 assert!(tags.is_none());
                 assert!(!start);
-            }
+            },
             _ => panic!("Expected New command"),
         }
 
@@ -774,7 +774,7 @@ mod tests {
                 assert_eq!(priority, "high");
                 assert_eq!(tags, Some("auth,security".to_string()));
                 assert!(start);
-            }
+            },
             _ => panic!("Expected New command"),
         }
     }
@@ -807,7 +807,7 @@ mod tests {
                 assert!(!open);
                 assert!(since.is_none());
                 assert!(until.is_none());
-            }
+            },
             _ => panic!("Expected List command"),
         }
 
@@ -845,7 +845,7 @@ mod tests {
                 assert_eq!(limit, Some(10));
                 assert!(open);
                 assert_eq!(since, Some("yesterday".to_string()));
-            }
+            },
             _ => panic!("Expected List command"),
         }
     }
@@ -867,7 +867,7 @@ mod tests {
                 assert!(branch_name.is_none());
                 assert!(worktree);
                 assert!(!no_worktree);
-            }
+            },
             _ => panic!("Expected Start command"),
         }
 
@@ -889,7 +889,7 @@ mod tests {
                 assert_eq!(ticket, "feature-xyz");
                 assert_eq!(branch_name, Some("custom-branch".to_string()));
                 assert!(no_worktree);
-            }
+            },
             _ => panic!("Expected Start command"),
         }
     }
@@ -903,7 +903,7 @@ mod tests {
                 TaskCommands::Add { title, ticket } => {
                     assert_eq!(title, "Write tests");
                     assert!(ticket.is_none());
-                }
+                },
                 _ => panic!("Expected Task Add command"),
             },
             _ => panic!("Expected Task command"),
@@ -922,7 +922,7 @@ mod tests {
                 TaskCommands::Complete { task, ticket } => {
                     assert_eq!(task, "1");
                     assert_eq!(ticket, Some("fix-bug".to_string()));
-                }
+                },
                 _ => panic!("Expected Task Complete command"),
             },
             _ => panic!("Expected Task command"),
@@ -939,7 +939,7 @@ mod tests {
                     assert!(ticket.is_none());
                     assert!(completed);
                     assert!(!incomplete);
-                }
+                },
                 _ => panic!("Expected Task List command"),
             },
             _ => panic!("Expected Task command"),
@@ -954,7 +954,7 @@ mod tests {
             Commands::Config { command } => match command {
                 ConfigCommands::Show { key } => {
                     assert!(key.is_none());
-                }
+                },
                 _ => panic!("Expected Config Show command"),
             },
             _ => panic!("Expected Config command"),
@@ -966,7 +966,7 @@ mod tests {
                 ConfigCommands::Set { key, value } => {
                     assert_eq!(key, "ui.emoji");
                     assert_eq!(value, "true");
-                }
+                },
                 _ => panic!("Expected Config Set command"),
             },
             _ => panic!("Expected Config command"),
@@ -990,7 +990,7 @@ mod tests {
                     assert!(append);
                     assert_eq!(template, "advanced");
                     assert!(output.is_none());
-                }
+                },
                 _ => panic!("Expected Config Claude command"),
             },
             _ => panic!("Expected Config command"),
@@ -1013,7 +1013,7 @@ mod tests {
                     assert!(description.is_none());
                     assert!(ticket.is_none());
                     assert!(tags.is_none());
-                }
+                },
                 _ => panic!("Expected Spec Init command"),
             },
             _ => panic!("Expected Spec command"),
@@ -1036,7 +1036,7 @@ mod tests {
                     assert!(spec.is_none());
                     assert!(editor);
                     assert!(complete);
-                }
+                },
                 _ => panic!("Expected Spec Requirements command"),
             },
             _ => panic!("Expected Spec command"),
@@ -1057,7 +1057,7 @@ mod tests {
                     assert!(all);
                     assert!(status.is_none());
                     assert!(verbose);
-                }
+                },
                 _ => panic!("Expected Worktree List command"),
             },
             _ => panic!("Expected Worktree command"),
@@ -1081,7 +1081,7 @@ mod tests {
                     assert_eq!(worktree, "fix-bug");
                     assert!(force);
                     assert!(keep_branch);
-                }
+                },
                 _ => panic!("Expected Worktree Remove command"),
             },
             _ => panic!("Expected Worktree command"),
@@ -1096,7 +1096,7 @@ mod tests {
         match cli.command {
             Commands::New { tags, .. } => {
                 assert_eq!(tags, Some("".to_string()));
-            }
+            },
             _ => panic!("Expected New command"),
         }
 
@@ -1106,7 +1106,7 @@ mod tests {
             Commands::Search { query, regex, .. } => {
                 assert_eq!(query, "bug.*fix");
                 assert!(regex);
-            }
+            },
             _ => panic!("Expected Search command"),
         }
 
@@ -1129,7 +1129,7 @@ mod tests {
                 assert_eq!(format, "yaml");
                 assert_eq!(output, Some("tickets.yaml".to_string()));
                 assert!(include_archived);
-            }
+            },
             _ => panic!("Expected Export command"),
         }
     }
@@ -1142,7 +1142,7 @@ mod tests {
         match cli.command {
             Commands::Init { claude_md, .. } => {
                 assert!(claude_md);
-            }
+            },
             _ => panic!("Expected Init command"),
         }
     }
@@ -1171,7 +1171,7 @@ mod tests {
                 assert_eq!(message, Some("Completed feature".to_string()));
                 assert!(archive);
                 assert!(pr);
-            }
+            },
             _ => panic!("Expected Close command"),
         }
 
@@ -1202,7 +1202,7 @@ mod tests {
                 assert_eq!(add_tags, Some("urgent,frontend".to_string()));
                 assert_eq!(remove_tags, Some("backend".to_string()));
                 assert_eq!(status, Some("review".to_string()));
-            }
+            },
             _ => panic!("Expected Edit command"),
         }
     }
@@ -1215,7 +1215,7 @@ mod tests {
         match cli.command {
             Commands::List { sort, .. } => {
                 assert_eq!(sort, "slug");
-            }
+            },
             _ => panic!("Expected List command"),
         }
 
@@ -1224,7 +1224,7 @@ mod tests {
         match cli.command {
             Commands::Open { sort, .. } => {
                 assert_eq!(sort, "updated");
-            }
+            },
             _ => panic!("Expected Open command"),
         }
 
@@ -1233,7 +1233,7 @@ mod tests {
         match cli.command {
             Commands::Export { format, .. } => {
                 assert_eq!(format, "json");
-            }
+            },
             _ => panic!("Expected Export command"),
         }
     }
@@ -1253,7 +1253,7 @@ mod tests {
                 assert!(format.is_none());
                 assert!(!skip_validation);
                 assert!(!dry_run);
-            }
+            },
             _ => panic!("Expected Import command"),
         }
 
@@ -1277,7 +1277,7 @@ mod tests {
                 assert_eq!(format, Some("csv".to_string()));
                 assert!(skip_validation);
                 assert!(dry_run);
-            }
+            },
             _ => panic!("Expected Import command"),
         }
     }
@@ -1297,7 +1297,7 @@ mod tests {
                 assert!(!tasks);
                 assert!(!history);
                 assert!(!markdown);
-            }
+            },
             _ => panic!("Expected Show command"),
         }
 
@@ -1320,7 +1320,7 @@ mod tests {
                 assert!(tasks);
                 assert!(history);
                 assert!(markdown);
-            }
+            },
             _ => panic!("Expected Show command"),
         }
     }
@@ -1333,7 +1333,7 @@ mod tests {
             Commands::Check { detailed, stats } => {
                 assert!(!detailed);
                 assert!(!stats);
-            }
+            },
             _ => panic!("Expected Check command"),
         }
 
@@ -1342,7 +1342,7 @@ mod tests {
             Commands::Check { detailed, stats } => {
                 assert!(detailed);
                 assert!(stats);
-            }
+            },
             _ => panic!("Expected Check command"),
         }
     }
@@ -1355,7 +1355,7 @@ mod tests {
             Commands::Archive { ticket, unarchive } => {
                 assert_eq!(ticket, "old-ticket");
                 assert!(!unarchive);
-            }
+            },
             _ => panic!("Expected Archive command"),
         }
 
@@ -1364,7 +1364,7 @@ mod tests {
             Commands::Archive { ticket, unarchive } => {
                 assert_eq!(ticket, "ticket-123");
                 assert!(unarchive);
-            }
+            },
             _ => panic!("Expected Archive command"),
         }
     }
@@ -1385,7 +1385,7 @@ mod tests {
                 assert!(title);
                 assert!(!description);
                 assert!(!tags);
-            }
+            },
             _ => panic!("Expected Search command"),
         }
 
@@ -1408,7 +1408,7 @@ mod tests {
                 assert!(!title);
                 assert!(description);
                 assert!(tags);
-            }
+            },
             _ => panic!("Expected Search command"),
         }
     }
@@ -1436,7 +1436,7 @@ mod tests {
                     assert_eq!(status, Some("draft".to_string()));
                     assert_eq!(phase, Some("requirements".to_string()));
                     assert!(archived);
-                }
+                },
                 _ => panic!("Expected Spec List command"),
             },
             _ => panic!("Expected Spec command"),
@@ -1461,7 +1461,7 @@ mod tests {
                     assert_eq!(spec, "spec-123");
                     assert_eq!(phase, "design");
                     assert_eq!(message, Some("LGTM".to_string()));
-                }
+                },
                 _ => panic!("Expected Spec Approve command"),
             },
             _ => panic!("Expected Spec command"),
@@ -1482,7 +1482,7 @@ mod tests {
                     assert!(!force);
                     assert!(!dry_run);
                     assert!(!remove_branches);
-                }
+                },
                 _ => panic!("Expected Worktree Prune command"),
             },
             _ => panic!("Expected Worktree command"),
@@ -1506,7 +1506,7 @@ mod tests {
                     assert!(force);
                     assert!(dry_run);
                     assert!(remove_branches);
-                }
+                },
                 _ => panic!("Expected Worktree Prune command"),
             },
             _ => panic!("Expected Worktree command"),

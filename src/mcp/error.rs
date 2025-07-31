@@ -44,7 +44,7 @@ pub enum McpError {
     /// Connection error
     #[error("Connection error: {0}")]
     ConnectionError(String),
-    
+
     /// Generic server error
     #[error("Server error: {0}")]
     ServerError(String),

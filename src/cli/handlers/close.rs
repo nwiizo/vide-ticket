@@ -159,7 +159,6 @@ pub fn handle_close_command(
     Ok(())
 }
 
-
 /// Create a pull request for the ticket
 fn create_pull_request(
     project_root: &std::path::Path,

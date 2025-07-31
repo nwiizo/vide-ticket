@@ -431,8 +431,15 @@ fn run(cli: Cli, formatter: &OutputFormatter) -> Result<()> {
             vibe_ticket::cli::McpCommands::Serve { host, port, daemon } => {
                 use vibe_ticket::cli::handlers::handle_mcp_serve;
                 let config = vibe_ticket::config::Config::load_or_default()?;
-                handle_mcp_serve(config, host, port, daemon, cli.project.as_deref(), formatter)
-                    .map_err(|e| vibe_ticket::error::VibeTicketError::custom(e.to_string()))
+                handle_mcp_serve(
+                    config,
+                    host,
+                    port,
+                    daemon,
+                    cli.project.as_deref(),
+                    formatter,
+                )
+                .map_err(|e| vibe_ticket::error::VibeTicketError::custom(e.to_string()))
             },
         },
     }

@@ -26,6 +26,8 @@ mod export;
 mod import;
 mod init;
 mod list;
+#[cfg(feature = "mcp")]
+mod mcp;
 mod new;
 mod search;
 mod show;
@@ -33,8 +35,6 @@ mod spec;
 mod start;
 mod task;
 mod worktree;
-#[cfg(feature = "mcp")]
-mod mcp;
 
 // Re-export handlers
 pub use archive::handle_archive_command;
@@ -46,6 +46,8 @@ pub use export::handle_export_command;
 pub use import::handle_import_command;
 pub use init::handle_init;
 pub use list::handle_list_command;
+#[cfg(feature = "mcp")]
+pub use mcp::handle_mcp_serve;
 pub use new::handle_new_command;
 pub use search::handle_search_command;
 pub use show::handle_show_command;
@@ -60,8 +62,6 @@ pub use task::{
     handle_task_uncomplete,
 };
 pub use worktree::{handle_worktree_list, handle_worktree_prune, handle_worktree_remove};
-#[cfg(feature = "mcp")]
-pub use mcp::handle_mcp_serve;
 
 use crate::cli::output::OutputFormatter;
 use crate::error::Result;

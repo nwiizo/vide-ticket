@@ -1,6 +1,6 @@
 //! JSON export implementation
 
-use super::{Exporter, ExportMetadata};
+use super::{ExportMetadata, Exporter};
 use crate::core::Ticket;
 use crate::error::{Result, VibeTicketError};
 
@@ -32,10 +32,10 @@ mod tests {
             Ticket::new("test-1".to_string(), "Test Ticket 1".to_string()),
             Ticket::new("test-2".to_string(), "Test Ticket 2".to_string()),
         ];
-        
+
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let json_str = result.unwrap();
         assert!(json_str.contains("\"tickets\""));
         assert!(json_str.contains("\"exported_at\""));
@@ -46,10 +46,10 @@ mod tests {
     fn test_json_export_empty() {
         let exporter = JsonExporter;
         let tickets: Vec<Ticket> = vec![];
-        
+
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let json_str = result.unwrap();
         assert!(json_str.contains("\"total\": 0"));
     }
@@ -63,11 +63,11 @@ mod tests {
         ticket.status = Status::Doing;
         ticket.tags = vec!["tag1".to_string(), "tag2".to_string()];
         ticket.assignee = Some("user@example.com".to_string());
-        
+
         let tickets = vec![ticket];
         let result = exporter.export(&tickets);
         assert!(result.is_ok());
-        
+
         let json_str = result.unwrap();
         assert!(json_str.contains("Complex Ticket"));
         assert!(json_str.contains("\"priority\": \"high\""));

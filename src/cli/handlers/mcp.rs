@@ -21,44 +21,44 @@ pub fn handle_mcp_serve(
     formatter: &OutputFormatter,
 ) -> anyhow::Result<()> {
     use tracing::error;
-    
+
     // Create MCP configuration
     let mut mcp_config = McpConfig::default();
-    
+
     if let Some(host) = host {
         mcp_config.server.host = host;
     }
-    
+
     if let Some(port) = port {
         mcp_config.server.port = port;
     }
-    
+
     // Get storage path
     let storage_path = if let Some(path) = project_path {
         PathBuf::from(path).join(".vibe-ticket")
     } else {
         PathBuf::from(".vibe-ticket")
     };
-    
+
     mcp_config.storage_path = storage_path.clone();
-    
+
     // Create storage
     let storage = FileStorage::new(storage_path);
-    
+
     // Create and start server
     let server = McpServer::new(mcp_config.clone(), storage);
-    
+
     if daemon {
         formatter.info("Starting MCP server in daemon mode...");
         // TODO: Implement daemon mode
         return Err(anyhow::anyhow!("Daemon mode not yet implemented"));
     }
-    
+
     formatter.info(&format!(
         "Starting MCP server on {}:{}",
         mcp_config.server.host, mcp_config.server.port
     ));
-    
+
     // Run server
     let runtime = tokio::runtime::Runtime::new()?;
     runtime.block_on(async {
