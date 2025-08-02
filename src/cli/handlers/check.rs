@@ -3,7 +3,7 @@
 //! This module implements the logic for checking the current project status,
 //! including active ticket information and project statistics.
 
-use crate::cli::{find_project_root, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root};
 use crate::core::{Status, Ticket};
 use crate::error::Result;
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};

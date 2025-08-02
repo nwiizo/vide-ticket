@@ -3,7 +3,7 @@
 //! This module provides functionality to manage Git worktrees associated with tickets,
 //! enabling parallel development workflows.
 
-use crate::cli::{find_project_root, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root};
 use crate::config::Config;
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};

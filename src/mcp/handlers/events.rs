@@ -1,8 +1,8 @@
 //! MCP event handler for CLI operations
 
+use crate::Result;
 use crate::events::{EventHandler, TicketEvent};
 use crate::mcp::service::VibeTicketService;
-use crate::Result;
 use std::sync::Arc;
 
 /// MCP event handler that processes CLI events

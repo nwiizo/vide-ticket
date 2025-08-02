@@ -1,6 +1,6 @@
 //! Helper functions for creating MCP tool schemas
 
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 
 /// Convert a JSON value to a Map for use as tool schema
 pub fn json_to_schema(value: Value) -> Map<String, Value> {

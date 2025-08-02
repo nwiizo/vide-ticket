@@ -27,7 +27,7 @@ pub mod manager;
 pub mod storage;
 pub mod templates;
 
-pub use manager::{delete, get_document_path, list, load, save, SpecManager};
+pub use manager::{SpecManager, delete, get_document_path, list, load, save};
 pub use templates::{SpecTemplate, TemplateEngine};
 
 /// Specification metadata and progress tracking

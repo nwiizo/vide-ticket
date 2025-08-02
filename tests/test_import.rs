@@ -5,7 +5,7 @@
 
 use std::fs;
 use tempfile::TempDir;
-use vibe_ticket::cli::{handlers::handle_import_command, OutputFormatter};
+use vibe_ticket::cli::{OutputFormatter, handlers::handle_import_command};
 use vibe_ticket::core::{Priority, Status, Ticket, TicketId};
 use vibe_ticket::storage::{FileStorage, TicketRepository};
 

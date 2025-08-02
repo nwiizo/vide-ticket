@@ -189,9 +189,11 @@ mod tests {
         let non_existent_id = TicketId::new();
 
         // Check non-existent
-        assert!(!storage
-            .exists(&non_existent_id)
-            .expect("Failed to check existence"));
+        assert!(
+            !storage
+                .exists(&non_existent_id)
+                .expect("Failed to check existence")
+        );
 
         // Save and check exists
         storage.save(&ticket).expect("Failed to save ticket");
@@ -261,10 +263,12 @@ mod tests {
         let ticket_id = TicketId::new();
 
         // Initially no active ticket
-        assert!(storage
-            .get_active()
-            .expect("Failed to get active")
-            .is_none());
+        assert!(
+            storage
+                .get_active()
+                .expect("Failed to get active")
+                .is_none()
+        );
 
         // Set active ticket
         storage
@@ -275,10 +279,12 @@ mod tests {
 
         // Clear active ticket
         storage.clear_active().expect("Failed to clear active");
-        assert!(storage
-            .get_active()
-            .expect("Failed to get active")
-            .is_none());
+        assert!(
+            storage
+                .get_active()
+                .expect("Failed to get active")
+                .is_none()
+        );
     }
 
     #[test]

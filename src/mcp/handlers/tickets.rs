@@ -6,7 +6,7 @@ use crate::mcp::service::VibeTicketService;
 use crate::storage::{ActiveTicketRepository, TicketRepository};
 use rmcp::model::Tool;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::borrow::Cow;
 use std::sync::Arc;
 

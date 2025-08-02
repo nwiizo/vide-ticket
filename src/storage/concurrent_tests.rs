@@ -103,10 +103,12 @@ mod tests {
         let final_ticket = storage.load_ticket(&ticket_id).unwrap();
         assert!(final_ticket.description.starts_with("Modified by thread"));
         // Should have at least one thread tag
-        assert!(final_ticket
-            .tags
-            .iter()
-            .any(|tag| tag.starts_with("thread-")));
+        assert!(
+            final_ticket
+                .tags
+                .iter()
+                .any(|tag| tag.starts_with("thread-"))
+        );
     }
 
     #[test]

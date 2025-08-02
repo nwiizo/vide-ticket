@@ -2,7 +2,7 @@
 //!
 //! This module implements the logic for managing project configuration.
 
-use crate::cli::{find_project_root, ConfigCommands, OutputFormatter};
+use crate::cli::{ConfigCommands, OutputFormatter, find_project_root};
 use crate::config::Config;
 use crate::error::{Result, VibeTicketError};
 
@@ -205,7 +205,7 @@ fn get_config_value(config: &Config, key: &str) -> Result<serde_json::Value> {
             None => {
                 return Err(VibeTicketError::custom(format!(
                     "Configuration key '{key}' not found"
-                )))
+                )));
             },
         }
     }
@@ -264,7 +264,7 @@ fn set_config_value(config: &mut Config, key: &str, value: &str) -> Result<()> {
         _ => {
             return Err(VibeTicketError::custom(format!(
                 "Configuration key '{key}' cannot be set or doesn't exist"
-            )))
+            )));
         },
     }
 
@@ -296,7 +296,7 @@ fn handle_claude(
         _ => {
             return Err(VibeTicketError::custom(format!(
                 "Unknown template '{template}'. Available templates: basic, advanced"
-            )))
+            )));
         },
     };
 

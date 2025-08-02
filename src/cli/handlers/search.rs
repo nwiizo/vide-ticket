@@ -3,7 +3,7 @@
 //! This module implements the logic for searching tickets
 //! by title, description, tags, or using regex patterns.
 
-use crate::cli::{find_project_root, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root};
 use crate::core::Ticket;
 use crate::error::Result;
 use crate::storage::{FileStorage, TicketRepository};

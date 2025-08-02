@@ -1,4 +1,4 @@
-use crate::cli::{find_project_root, validate_slug, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root, validate_slug};
 use crate::core::{Priority, Ticket};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};

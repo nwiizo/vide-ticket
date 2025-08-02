@@ -8,7 +8,7 @@ mod json;
 mod markdown;
 mod yaml;
 
-use crate::cli::{find_project_root, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root};
 use crate::core::Ticket;
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
@@ -68,7 +68,7 @@ pub fn handle_export_command(
         _ => {
             return Err(VibeTicketError::custom(format!(
                 "Unsupported export format: {format}. Supported formats: json, yaml, csv, markdown"
-            )))
+            )));
         },
     };
 

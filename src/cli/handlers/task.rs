@@ -3,7 +3,7 @@
 //! This module implements the logic for managing tasks within tickets,
 //! including adding, completing, listing, and removing tasks.
 
-use crate::cli::{find_project_root, handlers::resolve_ticket_ref, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root, handlers::resolve_ticket_ref};
 use crate::core::{Task, TaskId};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{ActiveTicketRepository, FileStorage, TicketRepository};
@@ -574,10 +574,12 @@ mod tests {
         );
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("already completed"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("already completed")
+        );
     }
 
     #[test]

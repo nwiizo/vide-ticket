@@ -4,7 +4,7 @@
 //! reducing code duplication in file I/O operations.
 
 use crate::error::{ErrorContext, Result};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use std::fs;
 use std::path::{Path, PathBuf};
 

@@ -7,8 +7,8 @@
 use clap::Parser;
 use std::process;
 use vibe_ticket::cli::{
-    handlers::handle_init, Cli, Commands, OutputFormatter, SpecCommands, TaskCommands,
-    WorktreeCommands,
+    Cli, Commands, OutputFormatter, SpecCommands, TaskCommands, WorktreeCommands,
+    handlers::handle_init,
 };
 use vibe_ticket::error::Result;
 

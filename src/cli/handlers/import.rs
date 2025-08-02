@@ -3,7 +3,7 @@
 //! This module implements the logic for importing tickets
 //! from various formats (JSON, YAML, CSV).
 
-use crate::cli::{find_project_root, OutputFormatter};
+use crate::cli::{OutputFormatter, find_project_root};
 use crate::core::{Priority, Status, Ticket, TicketId};
 use crate::error::{Result, VibeTicketError};
 use crate::storage::{FileStorage, TicketRepository};
@@ -58,7 +58,7 @@ pub fn handle_import_command(
         _ => {
             return Err(VibeTicketError::custom(format!(
                 "Unsupported import format: {format}. Supported formats: json, yaml, csv"
-            )))
+            )));
         },
     };
 
