@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2025-08-02
+
+### Fixed
+- Removed 61 unnecessary `async` functions in MCP handlers that weren't using await
+- Fixed MSRV (Minimum Supported Rust Version) mismatch between Cargo.toml and clippy.toml (now 1.85.0)
+- Fixed CI workflow dependency on non-existent 'license' job
+- Fixed cargo-deny configuration to properly allow Unicode-3.0 license
+- Applied cargo fmt to entire codebase (34 files formatted)
+
+### Changed
+- Updated to Rust 2024 Edition
+- Improved CI configuration for better reliability
+- Cleaned up deny.toml for more accurate dependency checking
+
 ## [0.2.1] - 2025-08-01
 
 ### Added
