@@ -92,7 +92,7 @@ vibe-ticket can run as an MCP server for AI assistants like Claude:
 cargo install vibe-ticket
 
 # Add to Claude Code (global)
-claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope global -- mcp serve
+claude mcp add vibe-ticket ~/.cargo/bin/vibe-ticket --scope local -- mcp serve
 
 # Test the server
 vibe-ticket mcp serve
