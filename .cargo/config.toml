@@ -99,7 +99,6 @@ clippy-all = "clippy --all-targets --all-features -- -D warnings"
 test-all = "test --all-features"
 doc-open = "doc --no-deps --open"
 outdated = "outdated -R"
-audit = "audit"
 coverage = "tarpaulin --out Html"
 bench-all = "bench --all-features"
 

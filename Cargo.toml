@@ -101,7 +101,8 @@ optional = true
 
 [dependencies.sqlx]
 version = "0.8"
-features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"]
+default-features = false
+features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid", "macros"]
 optional = true
 
 # MCP dependencies
