@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["config","events","schema_helper","search","spec","tasks","tickets","worktree"]};
