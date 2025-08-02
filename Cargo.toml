@@ -2,6 +2,7 @@
 name = "vibe-ticket"
 version = "0.2.1"
 edition = "2021"
+rust-version = "1.85"
 authors = ["nwiizo"]
 description = "A high-performance ticket management system for Vibe Coding environment"
 license = "MIT"
