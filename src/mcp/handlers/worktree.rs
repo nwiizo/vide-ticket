@@ -61,7 +61,7 @@ pub fn register_tools() -> Vec<Tool> {
 }
 
 /// Handle listing worktrees
-pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_list(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         all: Option<bool>,
@@ -204,7 +204,7 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
 }
 
 /// Handle pruning stale worktrees
-pub async fn handle_prune(
+pub fn handle_prune(
     _service: &VibeTicketService,
     _arguments: Value,
 ) -> Result<Value, String> {

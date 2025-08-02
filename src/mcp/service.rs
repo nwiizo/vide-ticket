@@ -91,10 +91,10 @@ impl ServerHandler for VibeTicketService {
             let result = match name.as_ref() {
                 // Ticket operations
                 "vibe-ticket_new" => {
-                    crate::mcp::handlers::tickets::handle_new(&service, arguments).await
+                    crate::mcp::handlers::tickets::handle_new(&service, arguments)
                 },
                 "vibe-ticket_list" => {
-                    crate::mcp::handlers::tickets::handle_list(&service, arguments).await
+                    crate::mcp::handlers::tickets::handle_list(&service, arguments)
                 },
                 "vibe-ticket_show" => {
                     crate::mcp::handlers::tickets::handle_show(&service, arguments).await
@@ -109,7 +109,7 @@ impl ServerHandler for VibeTicketService {
                     crate::mcp::handlers::tickets::handle_start(&service, arguments).await
                 },
                 "vibe-ticket_check" => {
-                    crate::mcp::handlers::tickets::handle_check(&service, arguments).await
+                    crate::mcp::handlers::tickets::handle_check(&service, arguments)
                 },
 
                 // Task operations
@@ -128,32 +128,32 @@ impl ServerHandler for VibeTicketService {
 
                 // Worktree operations
                 "vibe-ticket_worktree_list" => {
-                    crate::mcp::handlers::worktree::handle_list(&service, arguments).await
+                    crate::mcp::handlers::worktree::handle_list(&service, arguments)
                 },
                 "vibe-ticket_worktree_remove" => {
                     crate::mcp::handlers::worktree::handle_remove(&service, arguments).await
                 },
                 "vibe-ticket_worktree_prune" => {
-                    crate::mcp::handlers::worktree::handle_prune(&service, arguments).await
+                    crate::mcp::handlers::worktree::handle_prune(&service, arguments)
                 },
 
                 // Search and export
                 "vibe-ticket_search" => {
-                    crate::mcp::handlers::search::handle_search(&service, arguments).await
+                    crate::mcp::handlers::search::handle_search(&service, arguments)
                 },
                 "vibe-ticket_export" => {
                     crate::mcp::handlers::search::handle_export(&service, arguments).await
                 },
                 "vibe-ticket_import" => {
-                    crate::mcp::handlers::search::handle_import(&service, arguments).await
+                    crate::mcp::handlers::search::handle_import(&service, arguments)
                 },
 
                 // Config operations
                 "vibe-ticket_config_show" => {
-                    crate::mcp::handlers::config::handle_show(&service, arguments).await
+                    crate::mcp::handlers::config::handle_show(&service, arguments)
                 },
                 "vibe-ticket_config_set" => {
-                    crate::mcp::handlers::config::handle_set(&service, arguments).await
+                    crate::mcp::handlers::config::handle_set(&service, arguments)
                 },
 
                 // Spec operations

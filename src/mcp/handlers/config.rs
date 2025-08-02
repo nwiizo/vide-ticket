@@ -69,7 +69,7 @@ pub fn register_tools() -> Vec<Tool> {
 }
 
 /// Handle showing configuration
-pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_show(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         key: Option<String>,
@@ -138,7 +138,7 @@ pub async fn handle_show(service: &VibeTicketService, arguments: Value) -> Resul
 }
 
 /// Handle setting configuration
-pub async fn handle_set(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_set(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         key: String,

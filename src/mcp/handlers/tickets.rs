@@ -229,7 +229,7 @@ pub async fn resolve_ticket_ref(
 }
 
 /// Handle creating a new ticket
-pub async fn handle_new(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_new(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         slug: String,
@@ -285,7 +285,7 @@ pub async fn handle_new(service: &VibeTicketService, arguments: Value) -> Result
 }
 
 /// Handle listing tickets
-pub async fn handle_list(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_list(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         status: Option<String>,
@@ -601,7 +601,7 @@ pub async fn handle_start(service: &VibeTicketService, arguments: Value) -> Resu
 }
 
 /// Handle checking current status
-pub async fn handle_check(service: &VibeTicketService, _arguments: Value) -> Result<Value, String> {
+pub fn handle_check(service: &VibeTicketService, _arguments: Value) -> Result<Value, String> {
     let active_ticket = if let Ok(Some(ticket_id)) = service.storage.get_active() {
         if let Ok(ticket) = service.storage.load(&ticket_id) {
             Some(json!({

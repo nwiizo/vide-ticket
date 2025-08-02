@@ -88,7 +88,7 @@ pub fn register_tools() -> Vec<Tool> {
 }
 
 /// Handle searching tickets
-pub async fn handle_search(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_search(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         query: String,
@@ -220,7 +220,7 @@ pub async fn handle_export(service: &VibeTicketService, arguments: Value) -> Res
 }
 
 /// Handle importing tickets
-pub async fn handle_import(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
+pub fn handle_import(service: &VibeTicketService, arguments: Value) -> Result<Value, String> {
     #[derive(Deserialize)]
     struct Args {
         data: String,
