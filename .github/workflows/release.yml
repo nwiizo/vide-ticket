@@ -248,18 +248,16 @@ jobs:
           fi
 
       - name: Upload release binary
+        shell: bash
         run: |
-          gh release upload "${{ needs.create-release.outputs.version }}" \
-            "${{ matrix.archive_name }}" \
-            --clobber
+          gh release upload "${{ needs.create-release.outputs.version }}" "${{ matrix.archive_name }}" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload checksum
+        shell: bash
         run: |
-          gh release upload "${{ needs.create-release.outputs.version }}" \
-            "${{ matrix.archive_name }}.sha256" \
-            --clobber
+          gh release upload "${{ needs.create-release.outputs.version }}" "${{ matrix.archive_name }}.sha256" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
