@@ -27,8 +27,6 @@ pub enum IntegrationEvent {
 
 /// Integration service that bridges CLI and MCP
 pub struct IntegrationService {
-    #[allow(dead_code)]
-    storage: Arc<FileStorage>,
     event_sender: broadcast::Sender<IntegrationEvent>,
 }
 

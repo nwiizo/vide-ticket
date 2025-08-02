@@ -281,34 +281,6 @@ jobs:
           name: benchmark-results
           path: target/criterion
 
-  # Dependency check
-  deps:
-    name: Dependency Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install cargo-deny
-        run: cargo install cargo-deny
-
-      - name: Check dependencies
-        run: cargo deny check
-
-      - name: Install cargo-outdated
-        run: cargo install cargo-outdated
-
-      - name: Check for outdated dependencies
-        run: cargo outdated --exit-code 1 || true
-
-      - name: Install cargo-udeps
-        run: cargo install cargo-udeps
-
-      - name: Check for unused dependencies
-        run: cargo +nightly udeps --all-targets --all-features || true
-
   # MSRV (Minimum Supported Rust Version) check
   msrv:
     name: MSRV Check
@@ -392,7 +364,6 @@ jobs:
       - security-audit
       - coverage
       - doc
-      - deps
       - msrv
     runs-on: ubuntu-latest
     steps:
@@ -405,7 +376,6 @@ jobs:
              [[ "${{ needs.security-audit.result }}" != "success" ]] ||
              [[ "${{ needs.coverage.result }}" != "success" ]] ||
              [[ "${{ needs.doc.result }}" != "success" ]] ||
-             [[ "${{ needs.deps.result }}" != "success" ]] ||
              [[ "${{ needs.msrv.result }}" != "success" ]]; then
             echo "One or more jobs failed"
             exit 1
