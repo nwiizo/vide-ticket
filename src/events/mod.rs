@@ -2,7 +2,9 @@
 
 use crate::core::{Status, Task, Ticket, TicketId};
 use crate::error::Result;
+#[cfg(feature = "mcp")]
 use std::sync::Arc;
+#[cfg(feature = "mcp")]
 use tokio::sync::RwLock;
 
 /// Events that can be emitted by CLI operations
@@ -25,6 +27,7 @@ pub enum TicketEvent {
 }
 
 /// Trait for handling ticket events
+#[cfg(feature = "mcp")]
 #[async_trait::async_trait]
 pub trait EventHandler: Send + Sync {
     /// Handle a ticket event
@@ -32,10 +35,12 @@ pub trait EventHandler: Send + Sync {
 }
 
 /// Event bus for distributing events to handlers
+#[cfg(feature = "mcp")]
 pub struct EventBus {
     handlers: Arc<RwLock<Vec<Arc<dyn EventHandler>>>>,
 }
 
+#[cfg(feature = "mcp")]
 impl EventBus {
     /// Create a new event bus
     pub fn new() -> Self {
@@ -78,6 +83,7 @@ impl EventBus {
     }
 }
 
+#[cfg(feature = "mcp")]
 impl Default for EventBus {
     fn default() -> Self {
         Self::new()
@@ -85,14 +91,23 @@ impl Default for EventBus {
 }
 
 /// Global event bus instance
+#[cfg(feature = "mcp")]
 static EVENT_BUS: once_cell::sync::Lazy<EventBus> = once_cell::sync::Lazy::new(EventBus::new);
 
 /// Get the global event bus
+#[cfg(feature = "mcp")]
 pub fn event_bus() -> &'static EventBus {
     &EVENT_BUS
 }
 
 /// Emit an event to the global event bus
+#[cfg(feature = "mcp")]
 pub async fn emit_event(event: TicketEvent) -> Result<()> {
     event_bus().emit(event).await
+}
+
+/// Emit an event (no-op when MCP is disabled)
+#[cfg(not(feature = "mcp"))]
+pub async fn emit_event(_event: TicketEvent) -> Result<()> {
+    Ok(())
 }

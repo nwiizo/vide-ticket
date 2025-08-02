@@ -327,6 +327,7 @@ pub enum Commands {
     },
 
     /// Model Context Protocol (MCP) server
+    #[cfg(feature = "mcp")]
     Mcp {
         #[command(subcommand)]
         command: McpCommands,
@@ -580,6 +581,7 @@ pub enum SpecCommands {
     },
 }
 
+#[cfg(feature = "mcp")]
 #[derive(Subcommand, Debug)]
 pub enum McpCommands {
     /// Start MCP server

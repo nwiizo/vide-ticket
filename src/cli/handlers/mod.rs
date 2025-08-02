@@ -26,6 +26,7 @@ mod export;
 mod import;
 mod init;
 mod list;
+#[cfg(feature = "mcp")]
 mod mcp;
 mod new;
 mod search;
@@ -45,6 +46,7 @@ pub use export::handle_export_command;
 pub use import::handle_import_command;
 pub use init::handle_init;
 pub use list::handle_list_command;
+#[cfg(feature = "mcp")]
 pub use mcp::handle_mcp_serve;
 pub use new::handle_new_command;
 pub use search::handle_search_command;

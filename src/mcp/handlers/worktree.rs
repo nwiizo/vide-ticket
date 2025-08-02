@@ -204,10 +204,7 @@ pub async fn handle_remove(service: &VibeTicketService, arguments: Value) -> Res
 }
 
 /// Handle pruning stale worktrees
-pub fn handle_prune(
-    _service: &VibeTicketService,
-    _arguments: Value,
-) -> Result<Value, String> {
+pub fn handle_prune(_service: &VibeTicketService, _arguments: Value) -> Result<Value, String> {
     // Execute git worktree prune
     let output = std::process::Command::new("git")
         .arg("worktree")

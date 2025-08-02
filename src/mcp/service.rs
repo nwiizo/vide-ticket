@@ -90,9 +90,7 @@ impl ServerHandler for VibeTicketService {
         Box::pin(async move {
             let result = match name.as_ref() {
                 // Ticket operations
-                "vibe-ticket_new" => {
-                    crate::mcp::handlers::tickets::handle_new(&service, arguments)
-                },
+                "vibe-ticket_new" => crate::mcp::handlers::tickets::handle_new(&service, arguments),
                 "vibe-ticket_list" => {
                     crate::mcp::handlers::tickets::handle_list(&service, arguments)
                 },
