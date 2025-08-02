@@ -80,13 +80,13 @@ pub fn create_ticket_with_notification(
 
     // If starting the ticket
     if start {
-        let old_status = ticket.status.clone();
+        let old_status = ticket.status;
         ticket.start();
         storage.save(&ticket)?;
         storage.set_active(&ticket.id)?;
 
         // NOTIFY MCP ABOUT STATUS CHANGE
-        notify_status_changed(&ticket.id, old_status, ticket.status.clone());
+        notify_status_changed(&ticket.id, old_status, ticket.status);
         println!("✓ Notified MCP about status change: Todo → Doing");
     }
 

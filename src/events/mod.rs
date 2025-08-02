@@ -108,6 +108,6 @@ pub async fn emit_event(event: TicketEvent) -> Result<()> {
 
 /// Emit an event (no-op when MCP is disabled)
 #[cfg(not(feature = "mcp"))]
-pub async fn emit_event(_event: TicketEvent) -> Result<()> {
+pub fn emit_event(_event: TicketEvent) -> Result<()> {
     Ok(())
 }
