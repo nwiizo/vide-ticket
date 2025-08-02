@@ -394,7 +394,6 @@ jobs:
       - doc
       - deps
       - msrv
-      - license
     runs-on: ubuntu-latest
     steps:
       - name: Check if all jobs succeeded

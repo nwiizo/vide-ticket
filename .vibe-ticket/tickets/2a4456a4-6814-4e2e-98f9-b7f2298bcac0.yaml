@@ -44,24 +44,24 @@ assignee: null
 tasks:
 - id: 657a0b60-d069-4fa0-87e0-de3385619285
   title: Rust 2024 Edition の最終的な機能リストを確認（2025年1月のベータリリース後）
-  completed: false
+  completed: true
   created_at: 2025-08-02T11:43:43.413449Z
-  completed_at: null
+  completed_at: 2025-08-02T11:53:43.554930Z
 - id: 7b030d02-7f3e-47b7-abe0-00ced10f6ce2
   title: 現在のコードベースでの互換性チェック
-  completed: false
+  completed: true
   created_at: 2025-08-02T11:43:47.413708Z
-  completed_at: null
+  completed_at: 2025-08-02T11:53:49.275671Z
 - id: c2ac8e8f-392c-42fa-848c-f039449e13c7
   title: 移行による影響の評価
-  completed: false
+  completed: true
   created_at: 2025-08-02T11:43:50.940267Z
-  completed_at: null
+  completed_at: 2025-08-02T11:53:54.423092Z
 - id: a6698fa7-3932-4752-8584-b8e11613092b
   title: 移行計画の作成
-  completed: false
+  completed: true
   created_at: 2025-08-02T11:43:54.554251Z
-  completed_at: null
+  completed_at: 2025-08-02T11:53:59.400585Z
 - id: 5ac71548-25bb-4859-87a2-1ebb80a0768f
   title: 移行の実施（必要に応じて）
   completed: false
