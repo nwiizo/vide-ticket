@@ -11,6 +11,10 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+  packages: write
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
@@ -100,15 +104,24 @@ jobs:
 
       - name: Create GitHub Release
         id: create-release
-        uses: actions/create-release@v1
+        run: |
+          # Create release using GitHub CLI
+          PRERELEASE=""
+          if [[ "${{ steps.get-version.outputs.version }}" == *"-"* ]]; then
+            PRERELEASE="--prerelease"
+          fi
+          
+          gh release create "${{ steps.get-version.outputs.version }}" \
+            --title "Release ${{ steps.get-version.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.CHANGELOG }}" \
+            $PRERELEASE
+          
+          # Get release info for outputs
+          RELEASE_INFO=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get-version.outputs.version }})
+          echo "id=$(echo $RELEASE_INFO | jq -r .id)" >> $GITHUB_OUTPUT
+          echo "upload_url=$(echo $RELEASE_INFO | jq -r .upload_url)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get-version.outputs.version }}
-          release_name: Release ${{ steps.get-version.outputs.version }}
-          body: ${{ steps.changelog.outputs.CHANGELOG }}
-          draft: false
-          prerelease: ${{ contains(steps.get-version.outputs.version, '-') }}
 
   # Build release binaries for multiple platforms
   build-release:
@@ -225,24 +238,20 @@ jobs:
           fi
 
       - name: Upload release binary
-        uses: actions/upload-release-asset@v1
+        run: |
+          gh release upload "${{ needs.create-release.outputs.version }}" \
+            "${{ matrix.archive_name }}" \
+            --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./${{ matrix.archive_name }}
-          asset_name: ${{ matrix.archive_name }}
-          asset_content_type: application/octet-stream
 
       - name: Upload checksum
-        uses: actions/upload-release-asset@v1
+        run: |
+          gh release upload "${{ needs.create-release.outputs.version }}" \
+            "${{ matrix.archive_name }}.sha256" \
+            --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./${{ matrix.archive_name }}.sha256
-          asset_name: ${{ matrix.archive_name }}.sha256
-          asset_content_type: text/plain
 
   # Publish to crates.io
   publish-crate:
@@ -311,14 +320,12 @@ jobs:
           sort -k2 checksums.txt -o checksums.txt
 
       - name: Upload checksums file
-        uses: actions/upload-release-asset@v1
+        run: |
+          gh release upload "${{ needs.create-release.outputs.version }}" \
+            "checksums.txt" \
+            --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./checksums.txt
-          asset_name: checksums.txt
-          asset_content_type: text/plain
 
   # Update documentation
   update-docs:
