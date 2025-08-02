@@ -118,21 +118,18 @@ jobs:
           # Check if release already exists
           if gh release view "${{ steps.get-version.outputs.version }}" >/dev/null 2>&1; then
             echo "Release ${{ steps.get-version.outputs.version }} already exists, skipping creation"
-            # Get existing release info
-            RELEASE_INFO=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get-version.outputs.version }})
           else
             # Create new release
             gh release create "${{ steps.get-version.outputs.version }}" \
               --title "Release ${{ steps.get-version.outputs.version }}" \
               --notes "${{ steps.changelog.outputs.CHANGELOG }}" \
               $PRERELEASE
-            
-            # Get release info for outputs
-            RELEASE_INFO=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get-version.outputs.version }})
           fi
           
-          echo "id=$(echo $RELEASE_INFO | jq -r .id)" >> $GITHUB_OUTPUT
-          echo "upload_url=$(echo $RELEASE_INFO | jq -r .upload_url)" >> $GITHUB_OUTPUT
+          # Get release info using gh release view
+          RELEASE_JSON=$(gh release view "${{ steps.get-version.outputs.version }}" --json id,uploadUrl)
+          echo "id=$(echo $RELEASE_JSON | jq -r .id)" >> $GITHUB_OUTPUT
+          echo "upload_url=$(echo $RELEASE_JSON | jq -r .uploadUrl)" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
