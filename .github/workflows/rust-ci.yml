@@ -11,6 +11,11 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
