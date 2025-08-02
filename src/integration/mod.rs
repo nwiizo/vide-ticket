@@ -43,9 +43,7 @@ impl IntegrationService {
     /// Create a new integration service
     pub fn new(_storage: Arc<FileStorage>) -> Self {
         let (event_sender, _) = broadcast::channel(100);
-        Self {
-            event_sender,
-        }
+        Self { event_sender }
     }
 
     /// Get an event receiver
