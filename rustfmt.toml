@@ -1,5 +1,6 @@
 # rustfmt configuration file
 # See: https://rust-lang.github.io/rustfmt/
+# This configuration uses only stable features
 
 # Basic formatting
 edition = "2021"
@@ -10,63 +11,52 @@ use_small_heuristics = "Default"
 max_width = 100
 
 # Imports
-imports_granularity = "Crate"
-imports_layout = "Vertical"
-group_imports = "StdExternalCrate"
 reorder_imports = true
 reorder_modules = true
 
-# Formatting options
-format_strings = false
-format_code_in_doc_comments = true
-normalize_comments = true
-normalize_doc_attributes = true
-wrap_comments = true
-comment_width = 80
-format_macro_matchers = true
-format_macro_bodies = true
-
 # Function and impl formatting
 fn_params_layout = "Tall"
-brace_style = "SameLineWhere"
-control_brace_style = "AlwaysSameLine"
-trailing_semicolon = true
-trailing_comma = "Vertical"
 match_block_trailing_comma = true
-
-# Spacing
-space_before_colon = false
-space_after_colon = true
-spaces_around_ranges = false
-blank_lines_upper_bound = 1
-blank_lines_lower_bound = 0
-
-# Alignment
-enum_discrim_align_threshold = 20
-struct_field_align_threshold = 20
 
 # Other options
 use_field_init_shorthand = true
 use_try_shorthand = true
 force_explicit_abi = true
-condense_wildcard_suffixes = true
-color = "Auto"
-unstable_features = false
 
-# Error handling
-error_on_line_overflow = false
-error_on_unformatted = false
-
-# Misc
-inline_attribute_width = 0
-empty_item_single_line = true
-struct_lit_single_line = true
-where_single_line = true
-report_todo = "Never"
-report_fixme = "Never"
-
-# Skip formatting for generated files
-ignore = [
-    "target/",
-    "vendor/",
-]
+# Note: The following features are only available in nightly and have been commented out
+# to avoid warnings when using stable rustfmt:
+#
+# imports_granularity = "Crate"
+# imports_layout = "Vertical"
+# group_imports = "StdExternalCrate"
+# format_strings = false
+# format_code_in_doc_comments = true
+# normalize_comments = true
+# normalize_doc_attributes = true
+# wrap_comments = true
+# comment_width = 80
+# format_macro_matchers = true
+# format_macro_bodies = true
+# brace_style = "SameLineWhere"
+# control_brace_style = "AlwaysSameLine"
+# trailing_semicolon = true
+# trailing_comma = "Vertical"
+# space_before_colon = false
+# space_after_colon = true
+# spaces_around_ranges = false
+# blank_lines_upper_bound = 1
+# blank_lines_lower_bound = 0
+# enum_discrim_align_threshold = 20
+# struct_field_align_threshold = 20
+# condense_wildcard_suffixes = true
+# color = "Auto"
+# unstable_features = false
+# error_on_line_overflow = false
+# error_on_unformatted = false
+# inline_attribute_width = 0
+# empty_item_single_line = true
+# struct_lit_single_line = true
+# where_single_line = true
+# report_todo = "Never"
+# report_fixme = "Never"
+# ignore = ["target/", "vendor/"]
