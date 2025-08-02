@@ -2,7 +2,7 @@
 # See: https://rust-lang.github.io/rust-clippy/master/index.html
 
 # Lint level settings
-msrv = "1.70.0"  # Minimum supported Rust version
+msrv = "1.85.0"  # Minimum supported Rust version
 avoid-breaking-exported-api = true
 allow-expect-in-tests = true
 allow-unwrap-in-tests = true
