@@ -298,14 +298,17 @@ jobs:
         run: cargo test --all-features
 
       - name: Publish to crates.io
-        if: ${{ secrets.CRATES_IO_TOKEN != '' }}
+        if: env.CRATES_IO_TOKEN != ''
         run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
       
       - name: Skip crates.io publish (no token)
-        if: ${{ secrets.CRATES_IO_TOKEN == '' }}
+        if: env.CRATES_IO_TOKEN == ''
         run: echo "Skipping crates.io publish - CRATES_IO_TOKEN not set"
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
 
   # Generate comprehensive checksums file
   generate-checksums:
@@ -394,7 +397,7 @@ jobs:
         continue-on-error: true
         run: |
           # Only verify if CRATES_IO_TOKEN was set
-          if [ -n "${{ secrets.CRATES_IO_TOKEN }}" ]; then
+          if [ -n "$CRATES_IO_TOKEN" ]; then
             # Wait for crates.io to index the package
             sleep 30
             
@@ -408,6 +411,8 @@ jobs:
           else
             echo "Skipping crates.io verification - CRATES_IO_TOKEN not set"
           fi
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
 
       - name: Summary
         run: |
@@ -426,9 +431,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Published to" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GitHub Releases" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ secrets.CRATES_IO_TOKEN }}" ]; then
+          if [ -n "$CRATES_IO_TOKEN" ]; then
             echo "- ✅ crates.io" >> $GITHUB_STEP_SUMMARY
           else
             echo "- ⏭️ crates.io (skipped - no token)" >> $GITHUB_STEP_SUMMARY
           fi
           echo "- ✅ Documentation updated" >> $GITHUB_STEP_SUMMARY
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
