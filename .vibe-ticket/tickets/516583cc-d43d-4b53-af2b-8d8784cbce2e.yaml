@@ -3,12 +3,12 @@ slug: 202508022023-fix-license-check
 title: Fix License Check CI failure
 description: The License Check is failing with exit code 1. Need to investigate license compatibility issues and ensure all dependencies have compatible licenses.
 priority: low
-status: todo
+status: doing
 tags:
 - ci
 - license
 created_at: 2025-08-02T11:23:45.560839Z
-started_at: null
+started_at: 2025-08-02T11:39:33.458056Z
 closed_at: null
 assignee: null
 tasks: []
