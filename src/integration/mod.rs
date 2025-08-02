@@ -41,10 +41,9 @@ impl std::fmt::Debug for IntegrationService {
 
 impl IntegrationService {
     /// Create a new integration service
-    pub fn new(storage: Arc<FileStorage>) -> Self {
+    pub fn new(_storage: Arc<FileStorage>) -> Self {
         let (event_sender, _) = broadcast::channel(100);
         Self {
-            storage,
             event_sender,
         }
     }

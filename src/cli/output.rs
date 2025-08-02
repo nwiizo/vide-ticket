@@ -8,8 +8,6 @@ use crate::error::Result;
 /// Output formatter for CLI commands
 pub struct OutputFormatter {
     json: bool,
-    #[allow(dead_code)]
-    no_color: bool,
 }
 
 impl OutputFormatter {
@@ -18,7 +16,7 @@ impl OutputFormatter {
         if no_color {
             colored::control::set_override(false);
         }
-        Self { json, no_color }
+        Self { json }
     }
 
     /// Check if JSON output is enabled

@@ -59,9 +59,3 @@
 //! ```
 
 // TODO: Add submodules as they are implemented
-// pub mod server;
-// pub mod routes;
-// pub mod handlers;
-// pub mod middleware;
-// pub mod auth;
-// pub mod error;

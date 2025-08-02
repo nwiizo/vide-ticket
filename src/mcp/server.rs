@@ -4,8 +4,7 @@ use crate::mcp::{config::McpConfig, error::McpResult, service::VibeTicketService
 use crate::storage::FileStorage;
 use rmcp::ServiceExt;
 use std::sync::Arc;
-use tokio::net::TcpListener;
-use tracing::{error, info};
+use tracing::info;
 
 /// MCP server for vibe-ticket
 pub struct McpServer {
@@ -13,7 +12,6 @@ pub struct McpServer {
     config: McpConfig,
 
     /// Storage backend
-    #[allow(dead_code)]
     storage: Arc<FileStorage>,
 }
 
@@ -67,27 +65,4 @@ impl McpServer {
         Ok(())
     }
 
-    /// Start server with TCP transport (future implementation)
-    #[allow(dead_code)]
-    pub async fn start_tcp(&self) -> McpResult<()> {
-        let addr = format!("{}:{}", self.config.server.host, self.config.server.port);
-        let listener = TcpListener::bind(&addr).await?;
-
-        info!("MCP server listening on {}", addr);
-
-        loop {
-            match listener.accept().await {
-                Ok((_stream, peer_addr)) => {
-                    info!("New connection from {}", peer_addr);
-
-                    // TODO: Implement TCP transport handling
-                    // This would involve creating a transport from the TCP stream
-                    // and serving the service on that transport
-                },
-                Err(e) => {
-                    error!("Failed to accept connection: {}", e);
-                },
-            }
-        }
-    }
 }

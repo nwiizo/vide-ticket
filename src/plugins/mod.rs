@@ -65,8 +65,3 @@
 //! - Resource limits (CPU, memory, execution time)
 
 // TODO: Add submodules as they are implemented
-// pub mod loader;
-// pub mod registry;
-// pub mod api;
-// pub mod builtin;
-// pub mod sandbox;

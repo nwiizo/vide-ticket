@@ -6,15 +6,12 @@ use crate::mcp::service::VibeTicketService;
 use std::sync::Arc;
 
 /// MCP event handler that processes CLI events
-pub struct McpEventHandler {
-    #[allow(dead_code)]
-    service: Arc<VibeTicketService>,
-}
+pub struct McpEventHandler {}
 
 impl McpEventHandler {
     /// Create a new MCP event handler
-    pub fn new(service: Arc<VibeTicketService>) -> Self {
-        Self { service }
+    pub fn new(_service: Arc<VibeTicketService>) -> Self {
+        Self {}
     }
 }
 
